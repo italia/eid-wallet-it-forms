@@ -1,0 +1,171 @@
+/* eid-wallet-it-forms – custom styles */
+
+:root {
+  --brand: #0066cc;
+  --brand-dark: #004a99;
+  --success: #198754;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --light-bg: #f8f9fa;
+  --border: #dee2e6;
+}
+
+/* ── Layout ──────────────────────────────────────────────── */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main { flex: 1; }
+
+/* ── Navbar ──────────────────────────────────────────────── */
+.navbar-brand img {
+  height: 32px;
+  width: auto;
+}
+
+/* ── Form cards on index page ────────────────────────────── */
+.form-card {
+  transition: box-shadow .15s;
+}
+.form-card:hover {
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
+}
+.form-card .card-footer {
+  background: transparent;
+  border-top: 1px solid var(--border);
+}
+.form-meta {
+  font-size: .8rem;
+  color: #6c757d;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6c757d;
+}
+.empty-state i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: .4;
+}
+
+/* ── Form editor page ────────────────────────────────────── */
+#editor-container {
+  min-height: 60vh;
+}
+
+/* json-editor overrides */
+.je-ready .card {
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+.je-ready .card-header {
+  background: var(--light-bg);
+  font-weight: 600;
+  cursor: pointer;
+}
+.je-ready .card-header:hover {
+  background: #e9ecef;
+}
+
+/* read-only fields */
+.je-ready input[readonly],
+.je-ready textarea[readonly] {
+  background: #f0f4f8;
+  color: #555;
+  font-style: italic;
+  border-color: #ced4da;
+}
+
+/* Make 'domanda' text look like a section label */
+.je-ready .je-object__container > .row > [data-schemapath$="domanda"] label,
+.je-ready .je-object__container > .row > [data-schemapath*="][domanda"] label {
+  display: none;
+}
+.je-ready input[readonly][id$="domanda"] {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  padding-left: 0;
+  font-style: normal;
+}
+.je-ready textarea[readonly][id$="domanda"] {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  padding-left: 0;
+  font-style: normal;
+}
+
+/* suggerimento looks like a muted hint */
+.je-ready input[readonly][id$="suggerimento"] {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  font-size: .85rem;
+  padding-left: 0;
+}
+.je-ready textarea[readonly][id$="suggerimento"] {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  font-size: .85rem;
+  padding-left: 0;
+}
+
+/* ── Validation panel ────────────────────────────────────── */
+#validation-panel {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.validation-ok  { color: var(--success); }
+.validation-err { color: var(--danger); }
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.toolbar .btn {
+  min-width: 110px;
+}
+
+/* ── Badges ──────────────────────────────────────────────── */
+.badge-form-type {
+  font-size: .7rem;
+  vertical-align: middle;
+}
+
+/* ── Toast notification ──────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1100;
+}
+
+/* ── Import/Export modal ─────────────────────────────────── */
+#json-preview {
+  max-height: 350px;
+  overflow: auto;
+  font-size: .8rem;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+  background: var(--light-bg);
+  border-top: 1px solid var(--border);
+  font-size: .8rem;
+  color: #6c757d;
+}
+footer a { color: inherit; }
+
+/* ── Responsive tweaks ───────────────────────────────────── */
+@media (max-width: 576px) {
+  .toolbar .btn span { display: none; }
+  .toolbar .btn i { margin-right: 0 !important; }
+}

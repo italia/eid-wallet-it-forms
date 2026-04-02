@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>eID Wallet – Form Utility</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- App styles -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="index.html">
+      <i class="bi bi-wallet2 me-2"></i>eID Wallet Forms
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navMenu" aria-controls="navMenu"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item">
+          <a class="nav-link active" href="index.html">
+            <i class="bi bi-house me-1"></i>Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-light btn-sm" href="form.html">
+            <i class="bi bi-plus-circle me-1"></i>Nuovo Form
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<div class="bg-primary text-white py-4">
+  <div class="container">
+    <h1 class="h4 fw-bold mb-1">
+      <i class="bi bi-file-earmark-text me-2"></i>Form di Onboarding Fonte Autentica
+    </h1>
+    <p class="mb-0 opacity-75">
+      Compila, salva e condividi il modulo di progettazione EAA per l'Italian eID Wallet.
+    </p>
+  </div>
+</div>
+
+<!-- ── Main ──────────────────────────────────────────────── -->
+<main class="container py-4">
+
+  <!-- Action bar -->
+  <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+    <a href="form.html" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Nuovo Form
+    </a>
+    <button id="btn-import-json" class="btn btn-outline-secondary">
+      <i class="bi bi-upload me-1"></i>Importa JSON
+    </button>
+    <button id="btn-import-csv" class="btn btn-outline-secondary">
+      <i class="bi bi-filetype-csv me-1"></i>Importa CSV
+    </button>
+    <div class="ms-auto">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input id="search-input" type="search" class="form-control border-start-0"
+               placeholder="Cerca form…" aria-label="Cerca form" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="row g-3 mb-4" id="stats-row"></div>
+
+  <!-- Form list -->
+  <div id="form-list"></div>
+
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────── -->
+<footer class="py-3 mt-auto">
+  <div class="container text-center">
+    Dati salvati localmente nel browser &middot;
+    <a href="https://github.com/italia/eid-wallet-it-forms" target="_blank" rel="noopener">
+      GitHub
+    </a>
+    &middot;
+    <a href="https://github.com/italia/eid-wallet-it-docs" target="_blank" rel="noopener">
+      Documentazione EAA
+    </a>
+  </div>
+</footer>
+
+<!-- ── Toast container ───────────────────────────────────── -->
+<div id="toast-container" class="toast-container p-3"></div>
+
+<!-- ── Delete confirm modal ──────────────────────────────── -->
+<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="delete-modal-label">Elimina Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        Sei sicuro di voler eliminare <strong id="delete-form-name"></strong>?
+        Questa operazione non è reversibile.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Elimina</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmO/yANMl/YkVVFIyF7eoUCjZKbN"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/csv-utils.js"></script>
+<script src="assets/js/form-utils.js"></script>
+
+<script>
+/* ── Page init ──────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderPage();
+
+  document.getElementById('search-input').addEventListener('input', renderPage);
+  document.getElementById('btn-import-json').addEventListener('click', importJson);
+  document.getElementById('btn-import-csv').addEventListener('click', importCsv);
+});
+
+/* ── Render ─────────────────────────────────────────────── */
+function renderPage() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+  const forms = getAllForms().filter(f =>
+    !query ||
+    f.name.toLowerCase().includes(query) ||
+    (f.data?.metadata?.nome_ente_titolare || '').toLowerCase().includes(query) ||
+    (f.data?.metadata?.nome_eaa || '').toLowerCase().includes(query)
+  );
+
+  renderStats(forms);
+  renderList(forms);
+}
+
+function renderStats(forms) {
+  const el = document.getElementById('stats-row');
+  const total = getAllForms().length;
+  el.innerHTML = `
+    <div class="col-6 col-md-3">
+      <div class="card border-0 bg-primary text-white text-center py-3">
+        <div class="fs-2 fw-bold">${total}</div>
+        <div class="small">Form salvati</div>
+      </div>
+    </div>`;
+}
+
+function renderList(forms) {
+  const el = document.getElementById('form-list');
+  if (!forms.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <i class="bi bi-inbox d-block"></i>
+        <h5>Nessun form trovato</h5>
+        <p class="text-muted mb-4">Crea un nuovo form oppure importa un file JSON o CSV.</p>
+        <a href="form.html" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i>Nuovo Form
+        </a>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="row g-3">
+      ${forms.map(f => formCard(f)).join('')}
+    </div>`;
+
+  // Wire up card buttons
+  el.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const { action, id } = e.currentTarget.dataset;
+      const form = loadForm(id);
+      if (!form) return;
+      if (action === 'open')     openForm(id);
+      if (action === 'export-json') exportJson(form);
+      if (action === 'export-csv')  exportCsv(form);
+      if (action === 'delete')      confirmDelete(form);
+    });
+  });
+}
+
+function formCard(f) {
+  const ente = f.data?.metadata?.nome_ente_titolare || '—';
+  const eaa  = f.data?.metadata?.nome_eaa           || '—';
+  return `
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card form-card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-truncate" title="${escHtml(f.name)}">
+            <i class="bi bi-file-earmark-text text-primary me-2"></i>${escHtml(f.name)}
+          </h5>
+          <p class="form-meta mb-1">
+            <i class="bi bi-building me-1"></i>${escHtml(ente)}
+          </p>
+          <p class="form-meta mb-1">
+            <i class="bi bi-card-text me-1"></i>${escHtml(eaa)}
+          </p>
+          <p class="form-meta text-muted">
+            <i class="bi bi-clock me-1"></i>
+            Modificato ${relativeTime(f.updated_at)} &middot;
+            Creato ${formatDateTime(f.created_at)}
+          </p>
+        </div>
+        <div class="card-footer d-flex flex-wrap gap-1">
+          <button class="btn btn-primary btn-sm flex-grow-1"
+                  data-action="open" data-id="${f.id}">
+            <i class="bi bi-pencil me-1"></i>Apri
+          </button>
+          <button class="btn btn-outline-success btn-sm"
+                  data-action="export-json" data-id="${f.id}"
+                  title="Esporta JSON">
+            <i class="bi bi-download"></i> JSON
+          </button>
+          <button class="btn btn-outline-success btn-sm"
+                  data-action="export-csv" data-id="${f.id}"
+                  title="Esporta CSV">
+            <i class="bi bi-filetype-csv"></i> CSV
+          </button>
+          <button class="btn btn-outline-danger btn-sm"
+                  data-action="delete" data-id="${f.id}"
+                  title="Elimina">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Actions ────────────────────────────────────────────── */
+function openForm(id) {
+  window.location.href = `form.html?id=${id}`;
+}
+
+function exportJson(form) {
+  const json = JSON.stringify(form.data, null, 2);
+  downloadText(sanitizeFilename(form.name) + '.json', json, 'application/json');
+  showToast('File JSON esportato.', 'success');
+}
+
+function exportCsv(form) {
+  const csv = jsonToCsv(form.data);
+  downloadText(sanitizeFilename(form.name) + '.csv', csv, 'text/csv');
+  showToast('File CSV esportato.', 'success');
+}
+
+let _deleteModal, _deleteId;
+function confirmDelete(form) {
+  document.getElementById('delete-form-name').textContent = form.name;
+  _deleteId = form.id;
+  _deleteModal = _deleteModal || new bootstrap.Modal(document.getElementById('delete-modal'));
+  _deleteModal.show();
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+  if (_deleteId) {
+    deleteForm(_deleteId);
+    _deleteModal.hide();
+    _deleteId = null;
+    renderPage();
+    showToast('Form eliminato.', 'info');
+  }
+});
+
+/* ── Import ─────────────────────────────────────────────── */
+async function importJson() {
+  try {
+    const { text, name } = await pickFile('.json,application/json');
+    const data = JSON.parse(text);
+    const formName = data?.metadata?.nome_eaa || name.replace(/\.json$/i, '');
+    const id = saveForm(null, formName, data);
+    showToast('Form importato con successo.', 'success');
+    renderPage();
+  } catch (e) {
+    if (e.message !== 'Annullato') showToast('Errore importazione JSON: ' + e.message, 'danger');
+  }
+}
+
+async function importCsv() {
+  try {
+    const { text, name } = await pickFile('.csv,text/csv');
+    const { data, errors } = csvToJson(text);
+    if (errors.length) {
+      showToast('Errori nel CSV: ' + errors.slice(0, 2).join('; '), 'danger', 0);
+      return;
+    }
+    const formName = data?.metadata?.nome_eaa || name.replace(/\.csv$/i, '');
+    saveForm(null, formName, data);
+    showToast('Form importato da CSV.', 'success');
+    renderPage();
+  } catch (e) {
+    if (e.message !== 'Annullato') showToast('Errore importazione CSV: ' + e.message, 'danger');
+  }
+}
+
+/* ── Utilities ──────────────────────────────────────────── */
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

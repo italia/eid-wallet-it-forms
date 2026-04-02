@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modifica Form – eID Wallet</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- App styles -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="index.html">
+      <i class="bi bi-wallet2 me-2"></i>eID Wallet Forms
+    </a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <!-- Save status indicator -->
+      <span id="save-status" class="text-white opacity-75 small d-none">
+        <i class="bi bi-check-circle me-1"></i><span id="save-status-text"></span>
+      </span>
+      <a href="index.html" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Torna alla lista
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Form name bar ──────────────────────────────────────── -->
+<div class="bg-light border-bottom py-2">
+  <div class="container-fluid d-flex align-items-center gap-2">
+    <i class="bi bi-pencil-square text-muted"></i>
+    <input id="form-name-input" type="text" class="form-control form-control-sm w-auto flex-grow-1"
+           placeholder="Nome del form…" maxlength="128" aria-label="Nome del form" />
+    <span class="badge text-bg-secondary" id="form-id-badge" title="ID del form"></span>
+  </div>
+</div>
+
+<!-- ── Toolbar ────────────────────────────────────────────── -->
+<div class="border-bottom py-2 bg-white shadow-sm sticky-top" style="z-index:100;">
+  <div class="container-fluid toolbar d-flex flex-wrap gap-1 align-items-center">
+
+    <button id="btn-save" class="btn btn-primary btn-sm">
+      <i class="bi bi-floppy me-1"></i><span>Salva</span>
+    </button>
+
+    <button id="btn-save-as" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-floppy2 me-1"></i><span>Salva come nuovo</span>
+    </button>
+
+    <div class="vr mx-1"></div>
+
+    <button id="btn-load-example" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-lightbulb me-1"></i><span>Carica esempio</span>
+    </button>
+
+    <div class="vr mx-1"></div>
+
+    <div class="dropdown">
+      <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-download me-1"></i><span>Esporta</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <button class="dropdown-item" id="btn-export-json">
+            <i class="bi bi-filetype-json me-2"></i>Esporta JSON
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" id="btn-export-csv">
+            <i class="bi bi-filetype-csv me-2"></i>Esporta CSV
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-upload me-1"></i><span>Importa</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <button class="dropdown-item" id="btn-import-json">
+            <i class="bi bi-filetype-json me-2"></i>Importa JSON
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" id="btn-import-csv">
+            <i class="bi bi-filetype-csv me-2"></i>Importa CSV
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ms-auto">
+      <button id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
+        <i class="bi bi-shield-check me-1"></i><span>Valida</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Validation panel ────────────────────────────────────── -->
+<div id="validation-panel-wrapper" class="d-none border-bottom bg-light">
+  <div class="container-fluid py-2">
+    <div id="validation-panel"></div>
+  </div>
+</div>
+
+<!-- ── Editor area ────────────────────────────────────────── -->
+<main class="container-fluid py-3">
+  <div id="loading-spinner" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Caricamento…</span>
+    </div>
+    <p class="mt-3 text-muted">Caricamento schema e dati…</p>
+  </div>
+  <div id="editor-container" class="je-ready d-none"></div>
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────── -->
+<footer class="py-3 mt-auto">
+  <div class="container-fluid text-center">
+    Schema:
+    <a href="https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources/json-schemas"
+       target="_blank" rel="noopener">eid-wallet-it-docs</a>
+    &middot; Dati salvati localmente nel browser
+  </div>
+</footer>
+
+<!-- ── Toast container ────────────────────────────────────── -->
+<div id="toast-container" class="toast-container p-3"></div>
+
+<!-- ── JSON preview modal ─────────────────────────────────── -->
+<div class="modal fade" id="json-modal" tabindex="-1" aria-labelledby="json-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="json-modal-label">
+          <i class="bi bi-code-slash me-2"></i>Anteprima JSON
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body p-0">
+        <pre id="json-preview" class="m-0 p-3 bg-dark text-light" style="font-size:.8rem;"></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-success" id="btn-download-json-modal">
+          <i class="bi bi-download me-1"></i>Scarica JSON
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmO/yANMl/YkVVFIyF7eoUCjZKbN"
+        crossorigin="anonymous"></script>
+<!-- json-editor (Bootstrap 5 theme) -->
+<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.15.1/dist/jsoneditor.min.js"></script>
+<!-- PapaParse for CSV -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<!-- AJV 8 for JSON Schema Draft 2020-12 validation -->
+<script src="https://cdn.jsdelivr.net/npm/ajv@8.17.1/dist/ajv2020.bundle.min.js"></script>
+<!-- ajv-formats (optional; loaded best-effort) -->
+<script>
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/ajv-formats@2.1.1/dist/ajv-formats.bundle.js';
+  s.onerror = function() {}; // gracefully ignore if unavailable
+  document.head.appendChild(s);
+}());
+</script>
+<!-- App scripts -->
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/csv-utils.js"></script>
+<script src="assets/js/form-utils.js"></script>
+
+<script>
+/* ── State ──────────────────────────────────────────────── */
+let _editor        = null;   // JSONEditor instance
+let _currentId     = null;   // localStorage id of open form (null = new)
+let _rawSchema     = null;   // Original schema (for AJV validation)
+let _exampleData   = null;   // Example data loaded from file
+let _dirty         = false;  // Unsaved changes flag
+let _jsonModal     = null;
+
+/* ── Paths ──────────────────────────────────────────────── */
+const SCHEMA_URL  = 'schemas/authentic-sources.schema.json';
+const EXAMPLE_URL = 'examples/progettazione-caratteristiche-eaa.json';
+
+/* ── Init ───────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Read ?id= query parameter
+  const params = new URLSearchParams(window.location.search);
+  _currentId = params.get('id') || null;
+
+  // Wire up buttons
+  document.getElementById('btn-save').addEventListener('click', saveCurrentForm);
+  document.getElementById('btn-save-as').addEventListener('click', saveAsNew);
+  document.getElementById('btn-load-example').addEventListener('click', loadExample);
+  document.getElementById('btn-export-json').addEventListener('click', exportJson);
+  document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
+  document.getElementById('btn-import-json').addEventListener('click', importJson);
+  document.getElementById('btn-import-csv').addEventListener('click', importCsv);
+  document.getElementById('btn-validate').addEventListener('click', runValidation);
+  document.getElementById('btn-download-json-modal').addEventListener('click', exportJson);
+
+  // Warn before leaving with unsaved changes
+  window.addEventListener('beforeunload', e => {
+    if (_dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  await initEditor();
+});
+
+/* ── Editor initialisation ───────────────────────────────── */
+async function initEditor() {
+  try {
+    // Load schema and example data in parallel
+    const [schema, example] = await Promise.all([
+      loadAndTransformSchema(SCHEMA_URL),
+      loadExampleData(EXAMPLE_URL)
+    ]);
+    _exampleData = example;
+
+    // Keep a copy of the raw schema for AJV
+    const rawResp = await fetch(SCHEMA_URL);
+    _rawSchema = await rawResp.json();
+
+    // Determine starting value
+    let startVal = example;
+    let formName = 'Nuovo Form';
+
+    if (_currentId) {
+      const saved = loadForm(_currentId);
+      if (saved) {
+        startVal = saved.data;
+        formName = saved.name;
+      } else {
+        showToast('Form non trovato, apertura vuota.', 'warning');
+        _currentId = null;
+      }
+    }
+
+    document.getElementById('form-name-input').value = formName;
+    if (_currentId) {
+      document.getElementById('form-id-badge').textContent = 'ID: ' + _currentId.slice(0, 8);
+    }
+
+    // Build json-editor
+    JSONEditor.defaults.options.theme    = 'bootstrap5';
+    JSONEditor.defaults.options.iconlib  = 'bootstrap';
+
+    _editor = new JSONEditor(document.getElementById('editor-container'), {
+      schema:                  schema,
+      startval:                startVal,
+      theme:                   'bootstrap5',
+      iconlib:                 'bootstrap',
+      object_layout:           'tabs',
+      show_errors:             'interaction',
+      disable_edit_json:       false,
+      disable_properties:      true,
+      disable_collapse:        false,
+      no_additional_properties: false,
+      required_by_default:     false,
+      prompt_before_delete:    true,
+      array_controls_top:      true,
+    });
+
+    _editor.on('ready', () => {
+      document.getElementById('loading-spinner').classList.add('d-none');
+      document.getElementById('editor-container').classList.remove('d-none');
+    });
+
+    _editor.on('change', () => {
+      markDirty();
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loading-spinner').innerHTML = `
+      <div class="alert alert-danger mx-auto" style="max-width:600px;">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Errore caricamento: ${escHtml(err.message)}
+      </div>`;
+  }
+}
+
+/* ── Dirty tracking ─────────────────────────────────────── */
+function markDirty() {
+  _dirty = true;
+  const el = document.getElementById('save-status');
+  el.classList.remove('d-none');
+  document.getElementById('save-status-text').textContent = 'Modifiche non salvate';
+  el.querySelector('i').className = 'bi bi-circle-fill text-warning me-1';
+}
+
+function markClean(id) {
+  _dirty = false;
+  _currentId = id;
+  document.getElementById('form-id-badge').textContent = 'ID: ' + id.slice(0, 8);
+  const el = document.getElementById('save-status');
+  el.classList.remove('d-none');
+  document.getElementById('save-status-text').textContent = 'Salvato';
+  el.querySelector('i').className = 'bi bi-check-circle-fill text-success me-1';
+  // Update URL without reload
+  const url = new URL(window.location);
+  url.searchParams.set('id', id);
+  history.replaceState(null, '', url);
+}
+
+/* ── Save ───────────────────────────────────────────────── */
+function saveCurrentForm() {
+  if (!_editor) return;
+  const data = _editor.getValue();
+  const name = document.getElementById('form-name-input').value.trim() || 'Form senza nome';
+  try {
+    const id = saveForm(_currentId, name, data);
+    markClean(id);
+    showToast('Form salvato con successo.', 'success');
+  } catch (e) {
+    showToast(e.message, 'danger');
+  }
+}
+
+function saveAsNew() {
+  if (!_editor) return;
+  const data = _editor.getValue();
+  const baseName = document.getElementById('form-name-input').value.trim() || 'Form senza nome';
+  const name = baseName + ' (copia)';
+  document.getElementById('form-name-input').value = name;
+  try {
+    const id = saveForm(null, name, data);
+    markClean(id);
+    showToast('Salvato come nuovo form.', 'success');
+  } catch (e) {
+    showToast(e.message, 'danger');
+  }
+}
+
+/* ── Load example ───────────────────────────────────────── */
+function loadExample() {
+  if (!_editor || !_exampleData) return;
+  if (_dirty && !confirm('Sovrascrivere le modifiche correnti con i dati di esempio?')) return;
+  _editor.setValue(_exampleData);
+  document.getElementById('form-name-input').value = 'Esempio ' +
+    (_exampleData?.metadata?.nome_eaa || '');
+  showToast('Dati di esempio caricati.', 'info');
+}
+
+/* ── Export ─────────────────────────────────────────────── */
+function getFormData() {
+  return _editor ? _editor.getValue() : {};
+}
+
+function getFormFilename() {
+  return sanitizeFilename(document.getElementById('form-name-input').value || 'form');
+}
+
+function exportJson() {
+  const json = JSON.stringify(getFormData(), null, 2);
+  downloadText(getFormFilename() + '.json', json, 'application/json');
+  showToast('File JSON esportato.', 'success');
+  // Close modal if open
+  if (_jsonModal) _jsonModal.hide();
+}
+
+function exportCsv() {
+  const csv = jsonToCsv(getFormData());
+  downloadText(getFormFilename() + '.csv', csv, 'text/csv');
+  showToast('File CSV esportato.', 'success');
+}
+
+/* ── Import ─────────────────────────────────────────────── */
+async function importJson() {
+  try {
+    const { text } = await pickFile('.json,application/json');
+    const data = JSON.parse(text);
+    if (!_editor) return;
+    if (_dirty && !confirm('Sovrascrivere i dati correnti?')) return;
+    _editor.setValue(data);
+    const name = data?.metadata?.nome_eaa || 'Form importato';
+    document.getElementById('form-name-input').value = name;
+    showToast('Dati JSON importati.', 'success');
+  } catch (e) {
+    if (e.message !== 'Annullato') showToast('Errore: ' + e.message, 'danger');
+  }
+}
+
+async function importCsv() {
+  try {
+    const { text } = await pickFile('.csv,text/csv');
+    const { data, errors } = csvToJson(text);
+    if (errors.length) {
+      showToast('Errori nel CSV: ' + errors.slice(0, 2).join('; '), 'danger', 0);
+      return;
+    }
+    if (!_editor) return;
+    if (_dirty && !confirm('Sovrascrivere i dati correnti?')) return;
+    _editor.setValue(data);
+    const name = data?.metadata?.nome_eaa || 'Form CSV importato';
+    document.getElementById('form-name-input').value = name;
+    showToast('Dati CSV importati.', 'success');
+  } catch (e) {
+    if (e.message !== 'Annullato') showToast('Errore: ' + e.message, 'danger');
+  }
+}
+
+/* ── Validation ─────────────────────────────────────────── */
+function runValidation() {
+  if (!_editor) return;
+  const data   = getFormData();
+  const panel  = document.getElementById('validation-panel');
+  const wrapper = document.getElementById('validation-panel-wrapper');
+
+  // json-editor built-in errors
+  const jeErrors = _editor.validate();
+  // AJV validation
+  const { valid, errors: ajvErrors } = _rawSchema
+    ? validateWithAjv(_rawSchema, data)
+    : { valid: jeErrors.length === 0, errors: [] };
+
+  const allErrors = [
+    ...jeErrors.map(e  => ({ path: e.path, msg: e.message })),
+    ...ajvErrors.map(e => ({ path: e.instancePath || '', msg: e.message }))
+  ];
+
+  wrapper.classList.remove('d-none');
+
+  if (allErrors.length === 0) {
+    panel.innerHTML = `
+      <span class="validation-ok fw-semibold">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        Il form è valido secondo lo schema JSON.
+      </span>`;
+    showToast('Validazione superata.', 'success');
+  } else {
+    const rows = allErrors.slice(0, 20).map(e => `
+      <li class="validation-err small">
+        <i class="bi bi-x-circle me-1"></i>
+        <code>${escHtml(e.path)}</code> – ${escHtml(e.msg)}
+      </li>`).join('');
+    panel.innerHTML = `
+      <p class="validation-err fw-semibold mb-1">
+        <i class="bi bi-x-circle-fill me-1"></i>
+        ${allErrors.length} error${allErrors.length === 1 ? 'e' : 'i'} riscontrat${allErrors.length === 1 ? 'o' : 'i'}:
+      </p>
+      <ul class="list-unstyled mb-0">${rows}</ul>`;
+    showToast(`${allErrors.length} errori di validazione.`, 'warning');
+  }
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ── Utility ────────────────────────────────────────────── */
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
