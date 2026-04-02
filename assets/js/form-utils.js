@@ -55,13 +55,13 @@ function findWebformEntry(manifest, webformId) {
 /**
  * Fetch the JSON schema and transform it so that @json-editor/json-editor
  * can consume it (Draft-07 compatible conventions).
+ * Usato per ogni webform: `schemaUrl` arriva dal manifest (schemi diversi per voce).
  *
  * Transformations applied:
  *  1. "$defs" → "definitions" (and "$ref": "#/$defs/X" → "#/definitions/X")
- *  2. Add "readOnly": true to 'domanda' and 'suggerimento' sub-fields of the
- *     campo_risposta and campo_booleano definitions so the form shows them
- *     as informational labels, not editable inputs.
- *  3. Add "format": "tabs" to the root object so top-level sections are tabs.
+ *  2. Se esistono, imposta "readOnly" su proprietà `domanda` / `suggerimento` nelle
+ *     definitions (tipico degli schemi onboarding EAA; su altri schemi non ha effetto).
+ *  3. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
  *
  * @param {string} schemaUrl
  * @returns {Promise<object>} transformed schema

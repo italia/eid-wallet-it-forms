@@ -1,16 +1,17 @@
 # eid-wallet-it-forms
 
-Web forms utility per l'Italian eID Wallet – form di onboarding per Fonti Autentiche.
+Web forms builder utility per IT Wallet.
 
 ## Funzionalità
 
-- **Catalogo webform** da `webforms-manifest.json`: per ogni voce, schema JSON e JSON di esempio sono caricati **solo da URL** (es. [`eid-wallet-it-docs` / authentic-sources](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources)), senza duplicati nel repo
-- **Form interattivo** basato sullo schema pubblicato in [`json-schemas`](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources/json-schemas)
-- **Salvataggio locale** nel browser (localStorage) con lista dei form salvati (nome e data)
-- **Validazione in-browser** secondo [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core.html) (via [AJV 8](https://github.com/ajv-validator/ajv))
-- **Esportazione** in JSON e CSV
+- **Catalogo webform** (`webforms-manifest.json`): ogni voce ha i **propri** `schemaUrl` e `dataUrl` (URL assoluti verso JSON Schema e JSON di esempio, su repository o percorsi qualsiasi). Non esiste un unico schema condiviso da tutti i webform.
+- **Editor interattivo**: aprendo una voce del catalogo, l’app scarica **solo** lo schema e il JSON associati a quella voce e costruisce il form di conseguenza. Le bozze salvate ricordano il `webform_id` così, alla riapertura, si ricaricano le stesse risorse remote.
+- **Esempio attuale “fonte autentica / EAA”**: la voce `authentic-sources-eaa` punta allo schema in [`eid-wallet-it-docs` … / json-schemas](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources/json-schemas) e al file di esempio nella [cartella authentic-sources](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources). **Altri webform** andranno aggiunti al manifest con **altri** `schemaUrl` / `dataUrl` (altri schemi e altri JSON).
+- **Salvataggio locale** nel browser (localStorage) con lista delle bozze (nome e data)
+- **Validazione in-browser** del dato rispetto allo **schema della voce selezionata**, secondo [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core.html) (via [AJV 8](https://github.com/ajv-validator/ajv))
+- **Esportazione** in JSON e CSV (struttura generica ad albero)
 - **Importazione** da JSON e CSV
-- **Caricamento esempio** con dati di esempio pre-compilati
+- **Carica esempio**: ricarica il JSON pubblicato in `dataUrl` per il webform corrente
 
 ## Utilizzo
 
@@ -40,10 +41,9 @@ Per usare un altro manifest (URL assoluto o path): `form.html?manifest=https://�
         └── form-utils.js   # Manifest, schema, validazione, toast
 ```
 
-## Schema di riferimento
+## Schema e JSON di riferimento
 
-Gli URL effettivi sono definiti in `webforms-manifest.json` e puntano alle risorse in
-[`italia/eid-wallet-it-docs` (authentic-sources)](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources) e altre eventuali.
+Non sono fissati nel codice: **per ogni webform** sono quelli indicati in `webforms-manifest.json`. Oggi è configurato solo il caso *authentic-sources / EAA*; nuove voci = nuove coppie schema+dati.
 
 ## Licenza
 

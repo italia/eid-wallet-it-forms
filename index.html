@@ -51,7 +51,7 @@
       <i class="bi bi-file-earmark-text me-2"></i>eID Wallet – Webform
     </h1>
     <p class="mb-0 opacity-75">
-      Scegli un webform dal catalogo (schema e JSON da eid-wallet-it-docs). Le bozze restano salvate nel browser.
+      Ogni webform ha schema e JSON di esempio propri (URL nel manifest). Scegli una voce dal catalogo; le bozze restano salvate nel browser.
     </p>
   </div>
 </div>
@@ -64,10 +64,10 @@
       <i class="bi bi-collection me-2"></i>Catalogo webform
     </h2>
     <p class="text-muted small mb-3">
-      Ogni voce punta a JSON Schema e JSON di esempio ospitati nel repository
+      Ogni voce definisce i propri <code>schemaUrl</code> e <code>dataUrl</code> in <code>webforms-manifest.json</code>
+      (repository e file qualsiasi). La voce “fonte autentica / EAA” usa
       <a href="https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources"
-         target="_blank" rel="noopener">eid-wallet-it-docs</a>
-      (configurazione in <code>webforms-manifest.json</code>).
+         target="_blank" rel="noopener">eid-wallet-it-docs</a>; altri webform potranno puntare altrove.
     </p>
     <div id="webforms-catalog">
       <div class="text-center py-4 text-muted">
