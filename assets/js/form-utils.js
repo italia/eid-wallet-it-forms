@@ -50,6 +50,67 @@ function findWebformEntry(manifest, webformId) {
   return w;
 }
 
+/**
+ * Informazioni di versione dichiarate **dentro** i file JSON Schema e JSON di istanza
+ * (non nel manifest). Usa campi comuni: schema `$version`, `$id`; dato `metadata.versione`, `$schema`.
+ *
+ * @param {object|null} rawSchema – schema così come restituito dal fetch (prima delle trasformazioni per l’editor)
+ * @param {object|null} data – JSON di esempio o bozza aperta nell’editor
+ * @returns {{ items: Array<{ section: 'schema'|'data', label: string, value: string, isUrl?: boolean }>, hasAny: boolean, hasSchemaVersion: boolean, hasDataVersion: boolean, missingDeclaredVersion: boolean }}
+ */
+function extractDocumentVersioning(rawSchema, data) {
+  const items = [];
+  let hasSchemaVersion = false;
+  let hasDataVersion = false;
+  if (rawSchema && typeof rawSchema === 'object') {
+    if (rawSchema.$version != null && String(rawSchema.$version).trim() !== '') {
+      hasSchemaVersion = true;
+      items.push({
+        section: 'schema',
+        label: '$version',
+        value: String(rawSchema.$version).trim()
+      });
+    }
+    if (rawSchema.$id != null && String(rawSchema.$id).trim() !== '') {
+      const id = String(rawSchema.$id).trim();
+      items.push({
+        section: 'schema',
+        label: '$id',
+        value: id,
+        isUrl: /^https?:\/\//i.test(id)
+      });
+    }
+  }
+  if (data && typeof data === 'object') {
+    const mv = data.metadata && data.metadata.versione != null
+      ? String(data.metadata.versione).trim()
+      : '';
+    if (mv) {
+      hasDataVersion = true;
+      items.push({
+        section: 'data',
+        label: 'metadata.versione',
+        value: mv
+      });
+    }
+    if (data.$schema != null && String(data.$schema).trim() !== '') {
+      items.push({
+        section: 'data',
+        label: '$schema',
+        value: String(data.$schema).trim()
+      });
+    }
+  }
+  const missingDeclaredVersion = !hasSchemaVersion && !hasDataVersion;
+  return {
+    items,
+    hasAny: items.length > 0,
+    hasSchemaVersion,
+    hasDataVersion,
+    missingDeclaredVersion
+  };
+}
+
 /* ── Schema loading & transformation ─────────────────────── */
 
 /**
@@ -112,7 +173,7 @@ async function loadExampleData(exampleUrl) {
 
 /**
  * Validate data against the original schema using AJV 8 (Draft 2020-12).
- * Supports both the `Ajv2020` global (from ajv2020.bundle) and `Ajv` (from other builds).
+ * Supports `Ajv2020`, `ajv2020` (ajv-dist UMD), or `Ajv` globals.
  * @param {object} schema – The raw schema (before transformation)
  * @param {object} data
  * @returns {{ valid: boolean, errors: Array<{instancePath:string,message:string}> }}
@@ -121,14 +182,15 @@ function validateWithAjv(schema, data) {
   // Prefer Draft 2020-12 class, fall back to generic Ajv
   const AjvClass =
     (typeof Ajv2020 !== 'undefined' && Ajv2020) ||
-    (typeof Ajv    !== 'undefined' && Ajv)      ||
+    (typeof ajv2020 !== 'undefined' && ajv2020) ||
+    (typeof Ajv !== 'undefined' && Ajv) ||
     null;
 
   if (!AjvClass) return { valid: true, errors: [] };
 
   try {
     const ajv = new AjvClass({ allErrors: true, strict: false });
-    // Apply formats plugin if available
+    /* addFormats (pacchetto ajv-formats) non è più caricato da CDN: opzionale se presente globalmente */
     if (typeof addFormats !== 'undefined') addFormats(ajv);
     const validate = ajv.compile(schema);
     const valid = validate(data);

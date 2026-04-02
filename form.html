@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modifica Form – eID Wallet</title>
+  <title>Modifica form – IT-Wallet Webforms</title>
 
   <!-- Bootstrap 5 -->
   <link rel="stylesheet"
@@ -19,16 +19,16 @@
 <!-- ── Navbar ──────────────────────────────────────────────── -->
 <nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="index.html">
-      <i class="bi bi-wallet2 me-2"></i>eID Wallet Forms
+    <a class="navbar-brand fw-bold" href="index.html#catalog">
+      <i class="bi bi-wallet2 me-2"></i>IT-Wallet Webforms
     </a>
     <div class="ms-auto d-flex align-items-center gap-2">
       <!-- Save status indicator -->
       <span id="save-status" class="text-white opacity-75 small d-none">
         <i class="bi bi-check-circle me-1"></i><span id="save-status-text"></span>
       </span>
-      <a href="index.html" class="btn btn-outline-light btn-sm">
-        <i class="bi bi-arrow-left me-1"></i>Torna alla lista
+      <a href="index.html#bozze" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Torna alle bozze
       </a>
     </div>
   </div>
@@ -102,7 +102,12 @@
       </ul>
     </div>
 
-    <div class="ms-auto">
+    <div class="ms-auto d-flex flex-wrap gap-1 align-items-center">
+      <button type="button" class="btn btn-outline-dark btn-sm d-none" id="btn-form-toc"
+              data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
+              aria-controls="form-toc-offcanvas" title="Vai a una sezione">
+        <i class="bi bi-list-nested me-1"></i><span>Sommario</span>
+      </button>
       <button id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
         <i class="bi bi-shield-check me-1"></i><span>Valida</span>
       </button>
@@ -117,16 +122,65 @@
   </div>
 </div>
 
-<!-- ── Editor area ────────────────────────────────────────── -->
-<main class="container-fluid py-3">
-  <div id="loading-spinner" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Caricamento…</span>
+<!-- ── Versioning (schema / esempio versionati in origine) ── -->
+<div id="versioning-banner" class="d-none border-bottom">
+  <div id="versioning-banner-box" class="container-fluid py-2 px-3 bg-primary bg-opacity-10">
+    <div class="d-flex flex-wrap align-items-start gap-2">
+      <i id="versioning-banner-icon" class="bi bi-git text-primary mt-1" aria-hidden="true"></i>
+      <div id="versioning-banner-body" class="small flex-grow-1"></div>
     </div>
-    <p class="mt-3 text-muted">Caricamento schema e dati…</p>
   </div>
-  <div id="editor-container" class="je-ready d-none"></div>
+</div>
+
+<!-- ── Editor + sommario a destra (da md in su) ─────────────── -->
+<main class="container-fluid py-3">
+  <div class="row g-3 align-items-start">
+    <div id="editor-main-column" class="col-12">
+      <div id="loading-spinner" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Caricamento…</span>
+        </div>
+        <p class="mt-3 text-muted">Caricamento schema e dati…</p>
+      </div>
+      <div id="editor-container" class="je-ready d-none"></div>
+    </div>
+    <aside id="form-toc-sidebar" class="form-toc-sidebar form-toc-sidebar--end d-none" aria-label="Sommario sezioni form">
+      <div class="form-toc-sidebar-panel border rounded bg-light shadow-sm">
+        <h2 class="h6 fw-semibold text-body-secondary px-3 pt-3 pb-2 mb-0 border-bottom">
+          <i class="bi bi-signpost-split me-2 text-primary"></i>Sezioni
+        </h2>
+        <nav class="form-toc-nav py-1" aria-label="Vai a una sezione del modulo">
+          <ul class="nav flex-column" id="form-toc-sidebar-items"></ul>
+        </nav>
+        <p class="small text-muted px-3 py-3 mb-0 d-none" id="form-toc-sidebar-empty">
+          Per questo schema non risultano schede raggruppate. Usa lo scroll nel modulo.
+        </p>
+      </div>
+    </aside>
+  </div>
 </main>
+
+<!-- ── Sommario sezioni (overlay laterale) ─────────────────── -->
+<div class="offcanvas offcanvas-end form-toc-offcanvas shadow-lg" tabindex="-1" id="form-toc-offcanvas"
+     aria-labelledby="form-toc-label">
+  <div class="offcanvas-header border-bottom bg-light">
+    <h5 class="offcanvas-title fw-semibold" id="form-toc-label">
+      <i class="bi bi-signpost-split me-2 text-primary"></i>Sezioni del form
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Chiudi sommario"></button>
+  </div>
+  <div class="offcanvas-body p-0 overflow-auto">
+    <p class="small text-muted px-3 py-2 mb-0 border-bottom d-none" id="form-toc-hint">
+      Tocca una voce per aprire la scheda corrispondente nel modulo.
+    </p>
+    <nav class="form-toc-nav" aria-label="Sommario sezioni">
+      <ul class="nav flex-column" id="form-toc-items"></ul>
+    </nav>
+    <p class="small text-muted px-3 py-3 mb-0 d-none" id="form-toc-empty">
+      Per questo schema non sono state trovate schede in cima al modulo. Usa lo scroll nel form.
+    </p>
+  </div>
+</div>
 
 <!-- ── Footer ────────────────────────────────────────────── -->
 <footer class="py-3 mt-auto">
@@ -162,23 +216,35 @@
   </div>
 </div>
 
+<!-- ── Errore caricamento risorse / eccezioni ──────────────── -->
+<div class="modal fade" id="app-error-modal" tabindex="-1" aria-labelledby="app-error-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="app-error-modal-title">Errore</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2" id="app-error-modal-lead"></p>
+        <pre class="small bg-light p-3 rounded text-break mb-0 border" id="app-error-modal-detail"
+             style="white-space:pre-wrap;max-height:240px;overflow:auto;font-size:.8rem;"></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Scripts ────────────────────────────────────────────── -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/resource-errors.js"></script>
 <!-- json-editor (Bootstrap 5 theme) -->
 <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.15.1/dist/jsoneditor.min.js"></script>
 <!-- PapaParse for CSV -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<!-- AJV 8 for JSON Schema Draft 2020-12 validation -->
-<script src="https://cdn.jsdelivr.net/npm/ajv@8.17.1/dist/ajv2020.bundle.min.js"></script>
-<!-- ajv-formats (optional; loaded best-effort) -->
-<script>
-(function() {
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/ajv-formats@2.1.1/dist/ajv-formats.bundle.js';
-  s.onerror = function() {}; // gracefully ignore if unavailable
-  document.head.appendChild(s);
-}());
-</script>
+<!-- AJV 8 Draft 2020-12 (ajv-dist browser build; vendored: npm no longer ships ajv2020.bundle in `ajv`) -->
+<script src="assets/vendor/ajv2020.min.js"></script>
 <!-- App scripts -->
 <script src="assets/js/storage.js"></script>
 <script src="assets/js/csv-utils.js"></script>
@@ -192,6 +258,8 @@ let _rawSchema     = null;   // Original schema (for AJV validation)
 let _exampleData   = null;   // Example / template JSON from dataUrl
 let _dirty         = false;  // Unsaved changes flag
 let _jsonModal     = null;
+/** Evita toast ripetuti se il banner versioni viene ridisegnato più volte con lo stesso stato. */
+let _versionMissingToastShown = false;
 let _webformId     = null;   // Manifest webform id
 let _schemaUrl     = null;
 let _dataUrl       = null;
@@ -219,8 +287,227 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (_dirty) { e.preventDefault(); e.returnValue = ''; }
   });
 
+  if (typeof bootstrap === 'undefined') {
+    window.alert('Bootstrap non è stato caricato dal CDN. Verifica connessione e DNS.');
+    return;
+  }
+  if (typeof JSONEditor === 'undefined') {
+    if (typeof showAppErrorModal === 'function') {
+      showAppErrorModal(
+        'Editor non disponibile',
+        'La libreria JSON Editor non è stata caricata (CDN non raggiungibile o script bloccato).',
+        'Atteso: jsoneditor da jsDelivr.'
+      );
+    }
+    return;
+  }
+  if (typeof Ajv2020 === 'undefined' && typeof ajv2020 === 'undefined' && typeof Ajv === 'undefined') {
+    if (typeof showAppErrorModal === 'function') {
+      showAppErrorModal(
+        'Validatore non disponibile',
+        'AJV non è stato caricato. Il form potrebbe aprirsi senza validazione schema completa.',
+        'Atteso: assets/vendor/ajv2020.min.js (build ajv-dist 8.17.1).'
+      );
+    }
+  }
+
   await initEditor();
 });
+
+/* ── Versioning da contenuto schema/JSON (non dal manifest) ─ */
+function renderDocumentVersioningBanner(rawSchema, data) {
+  const vBanner = document.getElementById('versioning-banner');
+  const vBody = document.getElementById('versioning-banner-body');
+  const vBox = document.getElementById('versioning-banner-box');
+  const vIcon = document.getElementById('versioning-banner-icon');
+  if (!vBanner || !vBody) return;
+  const { items, hasAny, missingDeclaredVersion } = extractDocumentVersioning(rawSchema, data);
+
+  if (vBox && vIcon) {
+    if (missingDeclaredVersion) {
+      vBox.className = 'container-fluid py-2 px-3 bg-warning bg-opacity-25 border-start border-warning border-4';
+      vIcon.className = 'bi bi-exclamation-triangle-fill text-warning mt-1';
+      vIcon.setAttribute('aria-hidden', 'true');
+    } else {
+      vBox.className = 'container-fluid py-2 px-3 bg-primary bg-opacity-10';
+      vIcon.className = 'bi bi-git text-primary mt-1';
+      _versionMissingToastShown = false;
+    }
+  }
+
+  const intro = `<p class="mb-2 text-body"><strong>Versioni nei file caricati</strong> <span class="text-muted fw-normal">(da JSON Schema e JSON, non dal catalogo)</span></p>`;
+
+  let warnBlock = '';
+  if (missingDeclaredVersion) {
+    warnBlock = `
+      <div class="alert alert-warning py-2 px-3 mb-2 mb-md-3 small" role="status">
+        <strong>Attenzione.</strong> Manca <code>$version</code> nello <strong>JSON Schema</strong> e <code>metadata.versione</code> nel <strong>JSON</strong> (esempio o bozza).
+        Non è possibile verificare da interfaccia quale revisione stai usando; puoi comunque <strong>compilare e salvare</strong> il form.
+      </div>`;
+    if (!_versionMissingToastShown && typeof showToast === 'function') {
+      console.warn('[it-wallet-webforms] Mancano $version (schema) e metadata.versione (JSON); compilazione consentita.');
+      showToast(
+        'Versione non dichiarata nello schema né nel JSON: compilazione consentita.',
+        'warning',
+        6000
+      );
+      _versionMissingToastShown = true;
+    }
+  }
+
+  if (!hasAny) {
+    vBody.innerHTML = intro + warnBlock +
+      '<p class="mb-0 text-muted small">Nessun altro campo noto (es. <code>$id</code>, <code>$schema</code>). Consulta i file alle URL in basso.</p>';
+    vBanner.classList.remove('d-none');
+    return;
+  }
+  const row = it => {
+    const lab = `<code>${escHtml(it.label)}</code>`;
+    const val = it.isUrl
+      ? `<a href="${escHtml(it.value)}" target="_blank" rel="noopener">${escHtml(it.value)}</a>`
+      : `<strong>${escHtml(it.value)}</strong>`;
+    return `<li class="mb-1">${lab}: ${val}</li>`;
+  };
+  const sch = items.filter(i => i.section === 'schema');
+  const dat = items.filter(i => i.section === 'data');
+  let blocks = '';
+  if (sch.length) {
+    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-1">JSON Schema</div><ul class="list-unstyled mb-0 small">${sch.map(row).join('')}</ul></div>`;
+  }
+  if (dat.length) {
+    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-1">JSON (esempio / bozza)</div><ul class="list-unstyled mb-0 small">${dat.map(row).join('')}</ul></div>`;
+  }
+  vBody.innerHTML = intro + warnBlock + `<div class="row g-2">${blocks}</div>`;
+  vBanner.classList.remove('d-none');
+}
+
+/* ── Sommario laterale: tab di primo livello (JSON Editor) ─── */
+/**
+ * Con `format: tabs` / object_layout tabs, il tema bootstrap5 usa `ul.nav-pills` in colonna.
+ * Con `format: categories` usa `ul.nav-tabs` nell'header della card.
+ */
+function depthFromAncestor(el, ancestor) {
+  let d = 0;
+  let n = el;
+  while (n && n !== ancestor) {
+    d++;
+    n = n.parentElement;
+  }
+  return n === ancestor ? d : Infinity;
+}
+
+/**
+ * Raccoglie i link delle tab di primo livello (nav-tabs o nav-pills).
+ * Se ce ne sono più d’uno annidati, preferisce l’`ul` meno profondo nel container.
+ */
+function collectRootTabLinks() {
+  const root = document.getElementById('editor-container');
+  if (!root) return [];
+  const uls = [...root.querySelectorAll('ul.nav-tabs, ul.nav-pills')];
+  const candidates = uls.filter(ul => {
+    const n = ul.querySelectorAll(':scope > li.nav-item > a.nav-link').length;
+    return n >= 1;
+  });
+  if (!candidates.length) return [];
+  candidates.sort((a, b) => depthFromAncestor(a, root) - depthFromAncestor(b, root));
+  const ul = candidates[0];
+  let links = [...ul.querySelectorAll(':scope > li.nav-item > a.nav-link')];
+  if (!links.length) {
+    links = [...ul.querySelectorAll(':scope > a.nav-link')];
+  }
+  return links;
+}
+
+function wireFormTocNavClick(tabAnchor) {
+  try {
+    tabAnchor.click();
+  } catch (e) {
+    console.warn(e);
+  }
+  const ocEl = document.getElementById('form-toc-offcanvas');
+  if (ocEl && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
+    const oc = bootstrap.Offcanvas.getInstance(ocEl);
+    if (oc) oc.hide();
+  }
+  requestAnimationFrame(() => {
+    const tabsBar = tabAnchor.closest('ul.nav-tabs, ul.nav-pills');
+    if (tabsBar) {
+      tabsBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    const root = document.getElementById('editor-container');
+    const activePane = root && root.querySelector('.tab-pane.active');
+    if (activePane) {
+      activePane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+}
+
+function buildFormToc() {
+  const itemsEl = document.getElementById('form-toc-items');
+  const sidebarItemsEl = document.getElementById('form-toc-sidebar-items');
+  const btnToc = document.getElementById('btn-form-toc');
+  const emptyEl = document.getElementById('form-toc-empty');
+  const hintEl = document.getElementById('form-toc-hint');
+  const sidebarAside = document.getElementById('form-toc-sidebar');
+  const sidebarEmptyEl = document.getElementById('form-toc-sidebar-empty');
+  const mainCol = document.getElementById('editor-main-column');
+  if (!itemsEl) return;
+
+  itemsEl.innerHTML = '';
+  if (sidebarItemsEl) sidebarItemsEl.innerHTML = '';
+
+  const tabLinks = collectRootTabLinks();
+
+  if (!tabLinks.length) {
+    if (btnToc) {
+      btnToc.classList.add('d-none');
+      btnToc.classList.remove('d-inline-block', 'd-md-none');
+    }
+    if (emptyEl) emptyEl.classList.remove('d-none');
+    if (hintEl) hintEl.classList.add('d-none');
+    if (sidebarEmptyEl) sidebarEmptyEl.classList.remove('d-none');
+    if (sidebarAside) {
+      sidebarAside.className = 'form-toc-sidebar form-toc-sidebar--end d-none';
+    }
+    if (mainCol) mainCol.className = 'col-12';
+    return;
+  }
+
+  if (btnToc) {
+    btnToc.classList.remove('d-none');
+    btnToc.classList.add('d-inline-block', 'd-md-none');
+  }
+  if (emptyEl) emptyEl.classList.add('d-none');
+  if (hintEl) hintEl.classList.remove('d-none');
+  if (sidebarEmptyEl) sidebarEmptyEl.classList.add('d-none');
+  if (sidebarAside) {
+    sidebarAside.className =
+      'form-toc-sidebar form-toc-sidebar--end col-md-4 col-lg-3 col-xl-3 d-none d-md-block';
+  }
+  if (mainCol) {
+    mainCol.className = 'col-12 col-md-8 col-lg-9 col-xl-9';
+  }
+
+  const appendRow = (listEl, a, compact) => {
+    const li = document.createElement('li');
+    li.className = 'nav-item';
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = compact
+      ? 'form-toc-link form-toc-link--sidebar w-100 text-start btn btn-sm btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom'
+      : 'form-toc-link w-100 text-start btn btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom';
+    const label = (a.textContent || '').replace(/\s+/g, ' ').trim();
+    b.textContent = label || 'Sezione';
+    b.addEventListener('click', () => wireFormTocNavClick(a));
+    li.appendChild(b);
+    listEl.appendChild(li);
+  };
+
+  tabLinks.forEach(a => {
+    appendRow(itemsEl, a, false);
+    if (sidebarItemsEl) appendRow(sidebarItemsEl, a, true);
+  });
+}
 
 /* ── Editor initialisation ───────────────────────────────── */
 async function initEditor() {
@@ -284,6 +571,8 @@ async function initEditor() {
       }
     }
 
+    renderDocumentVersioningBanner(_rawSchema, startVal);
+
     document.getElementById('form-name-input').value = formName;
     if (_currentId) {
       document.getElementById('form-id-badge').textContent = 'ID: ' + _currentId.slice(0, 8);
@@ -312,6 +601,16 @@ async function initEditor() {
     _editor.on('ready', () => {
       document.getElementById('loading-spinner').classList.add('d-none');
       document.getElementById('editor-container').classList.remove('d-none');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          buildFormToc();
+          if (!document.getElementById('form-toc-items').children.length) {
+            setTimeout(() => buildFormToc(), 120);
+            setTimeout(() => buildFormToc(), 400);
+            setTimeout(() => buildFormToc(), 900);
+          }
+        });
+      });
     });
 
     _editor.on('change', () => {
@@ -320,11 +619,21 @@ async function initEditor() {
 
   } catch (err) {
     console.error(err);
+    const vb = document.getElementById('versioning-banner');
+    if (vb) vb.classList.add('d-none');
+    const msg = err && err.message ? err.message : String(err);
     document.getElementById('loading-spinner').innerHTML = `
       <div class="alert alert-danger mx-auto" style="max-width:600px;">
         <i class="bi bi-exclamation-triangle me-2"></i>
-        Errore caricamento: ${escHtml(err.message)}
+        Errore caricamento: ${escHtml(msg)}
       </div>`;
+    if (typeof showAppErrorModal === 'function') {
+      showAppErrorModal(
+        'Impossibile aprire il form',
+        'Si è verificato un errore durante il caricamento del manifest, dello schema o dei dati.',
+        msg
+      );
+    }
   }
 }
 
@@ -391,6 +700,7 @@ function loadExample() {
   _editor.setValue(_exampleData);
   document.getElementById('form-name-input').value = 'Esempio ' +
     (_exampleData?.metadata?.nome_eaa || '');
+  if (_rawSchema) renderDocumentVersioningBanner(_rawSchema, _exampleData);
   showToast('Dati di esempio caricati.', 'info');
 }
 

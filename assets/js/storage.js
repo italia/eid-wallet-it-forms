@@ -1,5 +1,5 @@
 /**
- * storage.js – localStorage management for eid-wallet-it-forms
+ * storage.js – localStorage management (IT-Wallet Webforms)
  *
  * Each saved form is stored as an entry in the localStorage key
  * "eid-wallet-forms" (a JSON array).

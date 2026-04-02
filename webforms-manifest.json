@@ -5,7 +5,7 @@
       "id": "authentic-sources-eaa",
       "title": "Progettazione caratteristiche EAA (fonte autentica)",
       "description": "Modulo di onboarding per il titolare della fonte autentica. Schema e JSON di esempio sono pubblicati in eid-wallet-it-docs (branch versione-corrente).",
-      "docsUrl": "https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources",
+      "docsUrl": "https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources/manuale-titolare-fonte-autentica.md",
       "schemaUrl": "https://raw.githubusercontent.com/italia/eid-wallet-it-docs/versione-corrente/handbooks/it/authentic-sources/json-schemas/schema-validazione-form-onboarding-fonte-autentica.schema.json",
       "dataUrl": "https://raw.githubusercontent.com/italia/eid-wallet-it-docs/versione-corrente/handbooks/it/authentic-sources/progettazione-caratteristiche-eaa.json"
     }

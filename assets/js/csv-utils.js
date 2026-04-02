@@ -1,5 +1,5 @@
 /**
- * csv-utils.js – CSV import/export helpers for eid-wallet-it-forms
+ * csv-utils.js – CSV import/export helpers (IT-Wallet Webforms)
  *
  * Strategy:
  *  - Export: Recursively flatten the JSON to (path, value) rows.
