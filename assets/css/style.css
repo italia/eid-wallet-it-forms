@@ -337,6 +337,10 @@ footer {
   color: #6c757d;
 }
 footer a { color: inherit; }
+footer a.footer-github-link:hover,
+footer a.footer-github-link:focus-visible {
+  text-decoration: underline;
+}
 
 /* ── Responsive tweaks ───────────────────────────────────── */
 @media (max-width: 576px) {
