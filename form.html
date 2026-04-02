@@ -103,9 +103,9 @@
     </div>
 
     <div class="ms-auto d-flex flex-wrap gap-1 align-items-center">
-      <button type="button" class="btn btn-outline-dark btn-sm d-none" id="btn-form-toc"
+      <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
               data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
-              aria-controls="form-toc-offcanvas" title="Vai a una sezione">
+              aria-controls="form-toc-offcanvas" title="Sommario sezioni (schermi piccoli)">
         <i class="bi bi-list-nested me-1"></i><span>Sommario</span>
       </button>
       <button id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
@@ -264,6 +264,8 @@ let _webformId     = null;   // Manifest webform id
 let _schemaUrl     = null;
 let _dataUrl       = null;
 let _manifestPath  = null;
+/** Schema passato a JSONEditor (dopo loadAndTransformSchema): serve al sommario se non ci sono tab nel DOM. */
+let _tocEditorSchema = null;
 
 /* ── Init ───────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -418,6 +420,61 @@ function collectRootTabLinks() {
   return links;
 }
 
+/**
+ * Voci sommario da proprietà root dello schema (layout a griglia di json-editor con object_layout "tabs").
+ */
+function collectRootSectionsFromSchema(sch) {
+  if (!sch || sch.type !== 'object' || !sch.properties || typeof sch.properties !== 'object') return [];
+  const props = sch.properties;
+  const keys = Object.keys(props).filter(k => k !== '$schema');
+  keys.sort((a, b) => {
+    let oa = props[a] && typeof props[a].propertyOrder === 'number' ? props[a].propertyOrder : 1000;
+    let ob = props[b] && typeof props[b].propertyOrder === 'number' ? props[b].propertyOrder : 1000;
+    return oa - ob;
+  });
+  return keys.map(key => {
+    const t = props[key] && props[key].title;
+    const label = typeof t === 'string' && t.trim() ? t.trim() : key.replace(/_/g, ' ');
+    return { key, label };
+  });
+}
+
+function cssEscAttr(s) {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(s);
+  return String(s).replace(/["\\]/g, '\\$&');
+}
+
+/** Porta alla sezione del modulo (data-schemapath di json-editor). */
+function wireFormTocNavScroll(propertyKey, titleHint) {
+  const ocEl = document.getElementById('form-toc-offcanvas');
+  if (ocEl && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
+    const oc = bootstrap.Offcanvas.getInstance(ocEl);
+    if (oc) oc.hide();
+  }
+  requestAnimationFrame(() => {
+    const ec = document.getElementById('editor-container');
+    if (!ec) return;
+    const pk = cssEscAttr(propertyKey);
+    let el =
+      ec.querySelector(`[data-schemapath="root.${pk}"]`) ||
+      ec.querySelector(`[data-schemapath="${pk}"]`) ||
+      ec.querySelector(`[data-schemapath$=".${pk}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (titleHint && String(titleHint).trim()) {
+      const hint = String(titleHint).trim().toLowerCase();
+      const titled = [...ec.querySelectorAll('.je-object__title, .card-title, h3.card-title, span.h3.card-title')].find(
+        node => (node.textContent || '').trim().toLowerCase() === hint
+      );
+      if (titled) {
+        titled.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+}
+
 function wireFormTocNavClick(tabAnchor) {
   try {
     tabAnchor.click();
@@ -457,8 +514,10 @@ function buildFormToc() {
   if (sidebarItemsEl) sidebarItemsEl.innerHTML = '';
 
   const tabLinks = collectRootTabLinks();
+  const schemaSections = tabLinks.length ? [] : collectRootSectionsFromSchema(_tocEditorSchema);
+  const useTabs = tabLinks.length > 0;
 
-  if (!tabLinks.length) {
+  if (!useTabs && !schemaSections.length) {
     if (btnToc) {
       btnToc.classList.add('d-none');
       btnToc.classList.remove('d-inline-block', 'd-md-none');
@@ -478,7 +537,12 @@ function buildFormToc() {
     btnToc.classList.add('d-inline-block', 'd-md-none');
   }
   if (emptyEl) emptyEl.classList.add('d-none');
-  if (hintEl) hintEl.classList.remove('d-none');
+  if (hintEl) {
+    hintEl.classList.remove('d-none');
+    hintEl.textContent = useTabs
+      ? 'Tocca una voce per aprire la scheda corrispondente nel modulo.'
+      : 'Tocca una voce per scorrere alla sezione corrispondente nel modulo.';
+  }
   if (sidebarEmptyEl) sidebarEmptyEl.classList.add('d-none');
   if (sidebarAside) {
     sidebarAside.className =
@@ -488,7 +552,7 @@ function buildFormToc() {
     mainCol.className = 'col-12 col-md-8 col-lg-9 col-xl-9';
   }
 
-  const appendRow = (listEl, a, compact) => {
+  const appendRow = (listEl, label, onClick, compact) => {
     const li = document.createElement('li');
     li.className = 'nav-item';
     const b = document.createElement('button');
@@ -496,17 +560,24 @@ function buildFormToc() {
     b.className = compact
       ? 'form-toc-link form-toc-link--sidebar w-100 text-start btn btn-sm btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom'
       : 'form-toc-link w-100 text-start btn btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom';
-    const label = (a.textContent || '').replace(/\s+/g, ' ').trim();
-    b.textContent = label || 'Sezione';
-    b.addEventListener('click', () => wireFormTocNavClick(a));
+    b.textContent = (label || '').replace(/\s+/g, ' ').trim() || 'Sezione';
+    b.addEventListener('click', onClick);
     li.appendChild(b);
     listEl.appendChild(li);
   };
 
-  tabLinks.forEach(a => {
-    appendRow(itemsEl, a, false);
-    if (sidebarItemsEl) appendRow(sidebarItemsEl, a, true);
-  });
+  if (useTabs) {
+    tabLinks.forEach(a => {
+      const label = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      appendRow(itemsEl, label, () => wireFormTocNavClick(a), false);
+      if (sidebarItemsEl) appendRow(sidebarItemsEl, label, () => wireFormTocNavClick(a), true);
+    });
+  } else {
+    schemaSections.forEach(({ key, label }) => {
+      appendRow(itemsEl, label, () => wireFormTocNavScroll(key, label), false);
+      if (sidebarItemsEl) appendRow(sidebarItemsEl, label, () => wireFormTocNavScroll(key, label), true);
+    });
+  }
 }
 
 /* ── Editor initialisation ───────────────────────────────── */
@@ -555,6 +626,7 @@ async function initEditor() {
       loadExampleData(_dataUrl)
     ]);
     _exampleData = example;
+    _tocEditorSchema = schema;
 
     const rawResp = await fetch(_schemaUrl);
     if (!rawResp.ok) throw new Error('Schema: HTTP ' + rawResp.status);
