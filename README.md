@@ -1,17 +1,20 @@
 # IT-Wallet Webforms
 
-Repository: [`italia/eid-wallet-it-forms`](https://github.com/italia/eid-wallet-it-forms). Catalogo e editor di webform basati su JSON Schema e JSON di esempio remoti.
+Catalogo e editor di webform basati su JSON Schema e JSON di esempio dedicati al'ecosistema IT-Wallet.
 
 ## Funzionalità
 
-- **Catalogo webform** (`webforms-manifest.json`): ogni voce ha i **propri** `schemaUrl` e `dataUrl` (solo URL, senza duplicare numeri di versione). Non esiste un unico schema condiviso da tutti i webform. **Le versioni** che vedi in interfaccia provengono dai **file scaricati**: nel JSON Schema tipicamente `$version` e `$id`; nel JSON di esempio / bozza campi come `metadata.versione` e `$schema` (convenzioni effettive dipendono da ogni coppia di file).
-- **Editor interattivo**: aprendo una voce del catalogo, l’app scarica **solo** lo schema e il JSON associati a quella voce e costruisce il form di conseguenza. Le bozze salvate ricordano il `webform_id` così, alla riapertura, si ricaricano le stesse risorse remote.
-- **Esempio attuale “fonte autentica / EAA”**: la voce `authentic-sources-eaa` punta allo schema in [`eid-wallet-it-docs` … / json-schemas](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources/json-schemas) e al file di esempio nella [cartella authentic-sources](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources). **Altri webform** andranno aggiunti al manifest con **altri** `schemaUrl` / `dataUrl` (altri schemi e altri JSON).
-- **Salvataggio locale** nel browser (localStorage) con lista delle bozze (nome e data)
+- **Catalogo webform**: è possibile creare nuovi webform configurandoli in `webforms-manifest.json`, includendo `schemaUrl` e `dataUrl` corrispondenti al json schema and al json di esempio.
+- **Editor interattivo**: aprendo una voce del catalogo, l’app scarica lo schema e il JSON associati a quella voce e costruisce il form di conseguenza. 
+- **Salvataggio Bozze**: è possibile salvare i form compilati localmente al proprio web browser. Le bozze salvate riportano il `webform_id` così, alla riapertura, si ricaricano le stesse risorse remote (eventualmente aggiornate).
 - **Validazione in-browser** del dato rispetto allo **schema della voce selezionata**, secondo [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core.html) (via [AJV 8](https://github.com/ajv-validator/ajv))
 - **Esportazione** in JSON e CSV (struttura generica ad albero)
 - **Importazione** da JSON e CSV
 - **Carica esempio**: ricarica il JSON da `dataUrl`; la fascia versioni si aggiorna in base al contenuto di quel JSON e allo schema remoto
+
+## Esempio
+
+- **Esempio attuale “fonte autentica / EAA”**: la voce `authentic-sources-eaa` punta allo schema in [`eid-wallet-it-docs` … / json-schemas](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources/json-schemas) e al file di esempio nella [cartella authentic-sources](https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources). **Altri webform** andranno aggiunti al manifest con **altri** `schemaUrl` / `dataUrl` (altri schemi e altri JSON).
 
 ## Utilizzo
 
