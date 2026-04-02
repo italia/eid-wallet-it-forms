@@ -2,6 +2,54 @@
  * form-utils.js – helpers shared between index.html and form.html
  */
 
+const DEFAULT_WEBFORMS_MANIFEST = 'webforms-manifest.json';
+
+/* ── Webforms manifest (remote schema / data URLs per form) ── */
+
+/**
+ * @param {string} [manifestPath] – relative path or absolute URL
+ * @returns {Promise<object>}
+ */
+async function loadWebformsManifest(manifestPath) {
+  const path = manifestPath || DEFAULT_WEBFORMS_MANIFEST;
+  const resolved = path.startsWith('http://') || path.startsWith('https://')
+    ? path
+    : new URL(path, window.location.href).href;
+  const resp = await fetch(resolved);
+  if (!resp.ok) {
+    throw new Error(`Manifest non disponibile (${resp.status}): ${resolved}`);
+  }
+  const manifest = await resp.json();
+  if (!Array.isArray(manifest.webforms) || manifest.webforms.length === 0) {
+    throw new Error('Manifest non valido: elenco webforms mancante o vuoto');
+  }
+  return manifest;
+}
+
+function getDefaultWebformId(manifest) {
+  const { defaultWebform, webforms } = manifest;
+  if (defaultWebform && webforms.some(w => w.id === defaultWebform)) {
+    return defaultWebform;
+  }
+  return webforms[0].id;
+}
+
+/**
+ * @param {object} manifest
+ * @param {string} webformId
+ * @returns {object} entry with schemaUrl, dataUrl, …
+ */
+function findWebformEntry(manifest, webformId) {
+  const w = manifest.webforms.find(x => x.id === webformId);
+  if (!w) {
+    throw new Error('Webform non trovato nel manifest: ' + webformId);
+  }
+  if (!w.schemaUrl || !w.dataUrl) {
+    throw new Error('Voce manifest incompleta (servono schemaUrl e dataUrl): ' + webformId);
+  }
+  return w;
+}
+
 /* ── Schema loading & transformation ─────────────────────── */
 
 /**

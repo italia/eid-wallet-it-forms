@@ -22,12 +22,13 @@ function getAllForms() {
 
 /**
  * Save (create or update) a form entry.
- * @param {string} id       – UUID (pass null to create a new one)
- * @param {string} name     – Human-readable name given by the user
- * @param {object} data     – Form data object
+ * @param {string} id          – UUID (pass null to create a new one)
+ * @param {string} name        – Human-readable name given by the user
+ * @param {object} data        – Form data object
+ * @param {string} [webformId] – id from webforms-manifest.json (tipo di webform)
  * @returns {string} The id of the saved form
  */
-function saveForm(id, name, data) {
+function saveForm(id, name, data, webformId) {
   const forms = getAllForms();
   const now = new Date().toISOString();
 
@@ -36,11 +37,15 @@ function saveForm(id, name, data) {
     forms[idx].name = name;
     forms[idx].data = data;
     forms[idx].updated_at = now;
+    if (webformId) {
+      forms[idx].webform_id = webformId;
+    }
   } else {
     const newId = generateId();
     forms.push({
       id: newId,
       name: name || 'Form senza nome',
+      webform_id: webformId || null,
       created_at: now,
       updated_at: now,
       data: data

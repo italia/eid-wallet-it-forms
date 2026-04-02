@@ -7,9 +7,7 @@
 
   <!-- Bootstrap 5 -->
   <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous" />
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   <!-- Bootstrap Icons -->
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
@@ -37,8 +35,8 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="btn btn-light btn-sm" href="form.html">
-            <i class="bi bi-plus-circle me-1"></i>Nuovo Form
+          <a class="btn btn-light btn-sm" href="#catalog-webforms">
+            <i class="bi bi-plus-circle me-1"></i>Nuovo webform
           </a>
         </li>
       </ul>
@@ -50,10 +48,10 @@
 <div class="bg-primary text-white py-4">
   <div class="container">
     <h1 class="h4 fw-bold mb-1">
-      <i class="bi bi-file-earmark-text me-2"></i>Form di Onboarding Fonte Autentica
+      <i class="bi bi-file-earmark-text me-2"></i>eID Wallet – Webform
     </h1>
     <p class="mb-0 opacity-75">
-      Compila, salva e condividi il modulo di progettazione EAA per l'Italian eID Wallet.
+      Scegli un webform dal catalogo (schema e JSON da eid-wallet-it-docs). Le bozze restano salvate nel browser.
     </p>
   </div>
 </div>
@@ -61,10 +59,32 @@
 <!-- ── Main ──────────────────────────────────────────────── -->
 <main class="container py-4">
 
+  <section id="catalog-webforms" class="mb-5">
+    <h2 class="h5 fw-bold mb-2">
+      <i class="bi bi-collection me-2"></i>Catalogo webform
+    </h2>
+    <p class="text-muted small mb-3">
+      Ogni voce punta a JSON Schema e JSON di esempio ospitati nel repository
+      <a href="https://github.com/italia/eid-wallet-it-docs/tree/versione-corrente/handbooks/it/authentic-sources"
+         target="_blank" rel="noopener">eid-wallet-it-docs</a>
+      (configurazione in <code>webforms-manifest.json</code>).
+    </p>
+    <div id="webforms-catalog">
+      <div class="text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Caricamento…</span></div>
+        <span class="ms-2">Caricamento catalogo…</span>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="h5 fw-bold mb-3">
+    <i class="bi bi-folder2-open me-2"></i>Le tue bozze
+  </h2>
+
   <!-- Action bar -->
   <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
-    <a href="form.html" class="btn btn-primary">
-      <i class="bi bi-plus-circle me-1"></i>Nuovo Form
+    <a href="#catalog-webforms" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Nuovo webform
     </a>
     <button id="btn-import-json" class="btn btn-outline-secondary">
       <i class="bi bi-upload me-1"></i>Importa JSON
@@ -129,17 +149,63 @@
 </div>
 
 <!-- ── Scripts ────────────────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmO/yANMl/YkVVFIyF7eoUCjZKbN"
-        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="assets/js/storage.js"></script>
 <script src="assets/js/csv-utils.js"></script>
 <script src="assets/js/form-utils.js"></script>
 
 <script>
+/* ── Manifest cache (stesso file del catalogo) ─────────────── */
+let _manifestPromise = null;
+function ensureManifest() {
+  if (!_manifestPromise) {
+    _manifestPromise = loadWebformsManifest('webforms-manifest.json');
+  }
+  return _manifestPromise;
+}
+
+function renderCatalog(manifest) {
+  const el = document.getElementById('webforms-catalog');
+  el.innerHTML = `
+    <div class="row g-3">
+      ${manifest.webforms.map(w => `
+        <div class="col-12 col-md-6">
+          <div class="card h-100 border-primary border-opacity-25 shadow-sm">
+            <div class="card-body">
+              <h3 class="h6 card-title mb-2">${escHtml(w.title)}</h3>
+              <p class="card-text text-muted small mb-2">${escHtml(w.description || '')}</p>
+              <p class="small text-muted mb-0 font-monospace text-break">
+                schema: <a href="${escHtml(w.schemaUrl)}" target="_blank" rel="noopener">sorgente</a>
+                · json: <a href="${escHtml(w.dataUrl)}" target="_blank" rel="noopener">sorgente</a>
+              </p>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 pt-0">
+              <a class="btn btn-primary btn-sm" href="form.html?webform=${encodeURIComponent(w.id)}">
+                <i class="bi bi-pencil-square me-1"></i>Apri webform
+              </a>
+              ${w.docsUrl ? `<a class="btn btn-outline-secondary btn-sm ms-1" href="${escHtml(w.docsUrl)}" target="_blank" rel="noopener">
+                <i class="bi bi-book me-1"></i>Docs
+              </a>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
 /* ── Page init ──────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  ensureManifest()
+    .then(m => renderCatalog(m))
+    .catch(err => {
+      document.getElementById('webforms-catalog').innerHTML = `
+        <div class="alert alert-danger mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Impossibile caricare <code>webforms-manifest.json</code>: ${escHtml(err.message)}
+        </div>`;
+    });
+
   renderPage();
 
   document.getElementById('search-input').addEventListener('input', renderPage);
@@ -180,9 +246,9 @@ function renderList(forms) {
       <div class="empty-state">
         <i class="bi bi-inbox d-block"></i>
         <h5>Nessun form trovato</h5>
-        <p class="text-muted mb-4">Crea un nuovo form oppure importa un file JSON o CSV.</p>
-        <a href="form.html" class="btn btn-primary">
-          <i class="bi bi-plus-circle me-1"></i>Nuovo Form
+        <p class="text-muted mb-4">Scegli un webform nel catalogo sopra, oppure importa JSON o CSV.</p>
+        <a href="#catalog-webforms" class="btn btn-primary">
+          <i class="bi bi-collection me-1"></i>Catalogo webform
         </a>
       </div>`;
     return;
@@ -292,10 +358,11 @@ document.getElementById('confirm-delete-btn').addEventListener('click', () => {
 /* ── Import ─────────────────────────────────────────────── */
 async function importJson() {
   try {
+    const manifest = await ensureManifest();
     const { text, name } = await pickFile('.json,application/json');
     const data = JSON.parse(text);
     const formName = data?.metadata?.nome_eaa || name.replace(/\.json$/i, '');
-    const id = saveForm(null, formName, data);
+    const id = saveForm(null, formName, data, getDefaultWebformId(manifest));
     showToast('Form importato con successo.', 'success');
     renderPage();
   } catch (e) {
@@ -305,6 +372,7 @@ async function importJson() {
 
 async function importCsv() {
   try {
+    const manifest = await ensureManifest();
     const { text, name } = await pickFile('.csv,text/csv');
     const { data, errors } = csvToJson(text);
     if (errors.length) {
@@ -312,7 +380,7 @@ async function importCsv() {
       return;
     }
     const formName = data?.metadata?.nome_eaa || name.replace(/\.csv$/i, '');
-    saveForm(null, formName, data);
+    saveForm(null, formName, data, getDefaultWebformId(manifest));
     showToast('Form importato da CSV.', 'success');
     renderPage();
   } catch (e) {
