@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modifica form – IT-Wallet Webforms</title>
+  <title>Compila webform – IT-Wallet Webforms</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon" sizes="any" />
   <!-- Riferimento unico snippet: assets/partials/head-assets.html -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/css/bootstrap-italia.min.css" />
@@ -21,7 +21,7 @@
         <div class="row">
           <div class="col-12">
             <div class="it-header-center-content-wrapper">
-              <div class="it-brand-wrapper">
+              <div class="it-brand-wrapper d-none d-lg-block">
                 <a class="text-decoration-none app-brand-link" href="index.html#catalog" title="IT-Wallet Webforms">
                   <svg class="icon app-brand-form-icon" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
                     <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
@@ -33,15 +33,10 @@
                   </div>
                 </a>
               </div>
-              <div class="it-right-zone d-flex flex-wrap justify-content-end align-items-center gap-2">
-                <span id="save-status" class="save-status-header small d-none align-self-center me-md-2 text-white fw-medium" role="status">
+              <div class="it-right-zone it-right-zone--form d-flex flex-wrap justify-content-end align-items-center gap-2">
+                <span id="save-status" class="save-status-header small d-none align-self-center me-md-2 text-white fw-medium" role="status" aria-live="polite">
                   <i class="bi bi-check-circle me-1" aria-hidden="true"></i><span id="save-status-text"></span>
                 </span>
-                <div class="it-access-top-wrapper">
-                  <a href="index.html#bozze" class="btn btn-outline-light btn-sm fw-semibold app-header-back-btn">
-                    <span><i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Torna alle bozze</span>
-                  </a>
-                </div>
               </div>
             </div>
           </div>
@@ -53,14 +48,21 @@
       <div class="container-xxl">
         <div class="row">
           <div class="col-12">
-            <nav class="navbar navbar-expand-lg has-megamenu" aria-label="Navigazione principale">
-              <button class="custom-navbar-toggler" type="button" aria-controls="navMainForm"
+            <nav class="navbar navbar-expand-lg has-megamenu app-form-navbar" aria-label="Navigazione principale">
+              <button class="custom-navbar-toggler flex-shrink-0 me-2 me-lg-0 app-form-navbar-toggler-leading" type="button" aria-controls="navMainForm"
                       aria-expanded="false" aria-label="Mostra o nascondi la navigazione"
                       data-bs-toggle="navbarcollapsible" data-bs-target="#navMainForm">
-                <svg class="icon bg-override" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                <svg class="icon bg-override app-form-navbar-toggler-icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                   <path d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
                 </svg>
               </button>
+              <a class="app-form-navbar-mobile-brand d-lg-none" href="index.html#catalog" title="IT-Wallet Webforms">
+                <svg class="icon app-brand-form-icon app-brand-form-icon--navbar" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
+                  <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
+                  <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                </svg>
+                <span class="app-form-navbar-mobile-brand-title">IT-Wallet Webforms</span>
+              </a>
               <div class="navbar-collapsable" id="navMainForm" tabindex="-1">
                 <div class="close-div">
                   <button class="btn close-menu" type="button">
@@ -93,154 +95,200 @@
   </div>
 </header>
 
-<!-- ── Form name bar ──────────────────────────────────────── -->
-<div class="bg-light border-bottom">
-  <div class="container-xxl py-3">
-    <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 app-form-name-bar">
-      <label for="form-name-input" class="visually-hidden">Nome del form</label>
-      <span class="text-muted d-flex align-items-center flex-shrink-0" aria-hidden="true"><i class="bi bi-pencil-square fs-5"></i></span>
-      <input id="form-name-input" type="text" class="form-control flex-grow-1 app-form-name-input"
-             placeholder="Nome del form…" maxlength="128" />
-      <span class="badge rounded-pill text-bg-secondary flex-shrink-0" id="form-id-badge" title="ID del form"></span>
+<!-- ── Intestazione pagina (Bootstrap Italia, coerente con index) ── -->
+<section class="page-hero page-hero--form bg-light border-bottom" aria-labelledby="form-page-title">
+  <div class="container-xxl py-3 py-md-4">
+    <h1 class="h3 fw-bold page-hero-title mb-2" id="form-page-title">Compila webform</h1>
+    <p class="mb-0 lead text-secondary page-hero-lead">
+      Modifica i campi generati dallo schema, salva bozze nel browser ed esporta i dati. Torna al
+      <a href="index.html#catalog">catalogo</a> o alle <a href="index.html#bozze">bozze salvate</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ── Nome bozza e identificativo ───────────────────────── -->
+<section class="border-bottom bg-white" aria-labelledby="draft-fields-heading">
+  <div class="container-xxl py-3 py-md-4">
+    <h2 id="draft-fields-heading" class="h6 fw-bold text-uppercase text-secondary mb-3">
+      Dati della bozza
+    </h2>
+    <div class="card shadow-sm border app-form-draft-card">
+      <div class="card-body">
+        <div class="row g-3 align-items-start">
+          <div class="col-12 col-lg-8 app-form-name-bar">
+            <label for="form-name-input" class="form-label fw-semibold mb-2">Nome della bozza</label>
+            <input id="form-name-input" type="text" class="form-control app-form-name-input"
+                   placeholder="Es. Onboarding fonte autentica – bozza 1" maxlength="128"
+                   autocomplete="off"
+                   aria-describedby="form-id-help" />
+            <p id="form-id-help" class="form-text mb-0 mt-2">
+              <span id="form-id-hint" class="text-muted">Dopo il primo salvataggio viene mostrato un identificativo locale (browser).</span>
+              <span id="form-id-badge" class="badge rounded-pill text-bg-secondary d-none ms-1" title="Identificativo breve della bozza"></span>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ── Toolbar ────────────────────────────────────────────── -->
-<div class="border-bottom bg-white shadow-sm sticky-top app-toolbar-sticky">
-  <div class="container-xxl py-2 py-md-3 toolbar d-flex flex-wrap gap-2 align-items-center app-toolbar-inner">
+<!-- ── Azioni (toolbar sticky) ────────────────────────────── -->
+<nav class="border-bottom bg-white shadow-sm sticky-top app-toolbar-sticky" aria-label="Azioni sul modulo" id="form-actions-toolbar">
+  <div class="container-xxl py-2 py-md-3">
+    <div class="toolbar app-toolbar-inner d-flex flex-wrap align-items-center gap-2" role="toolbar" aria-label="Barra strumenti compilazione">
+      <div class="btn-group" role="group" aria-label="Salvataggio bozza">
+        <button type="button" id="btn-save" class="btn btn-primary btn-sm">
+          <i class="bi bi-floppy" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span>
+        </button>
+        <button type="button" id="btn-save-as" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span>
+        </button>
+      </div>
 
-    <button type="button" id="btn-save" class="btn btn-primary btn-sm">
-      <i class="bi bi-floppy" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span>
-    </button>
+      <div class="vr mx-1 d-none d-sm-block" aria-hidden="true"></div>
 
-    <button type="button" id="btn-save-as" class="btn btn-outline-primary btn-sm">
-      <i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span>
-    </button>
-
-    <div class="vr mx-1"></div>
-
-    <button type="button" id="btn-load-example" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span>
-    </button>
-
-    <div class="vr mx-1"></div>
-
-    <div class="dropdown">
-      <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-download" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span>
+      <button type="button" id="btn-load-example" class="btn btn-outline-secondary btn-sm"
+              title="Ripristina i dati dal JSON di esempio del manifest">
+        <i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span>
       </button>
-      <ul class="dropdown-menu">
-        <li>
-          <button type="button" class="dropdown-item" id="btn-export-json">
-            <i class="bi bi-filetype-json me-2"></i>Esporta JSON
-          </button>
-        </li>
-        <li>
-          <button type="button" class="dropdown-item" id="btn-export-csv">
-            <i class="bi bi-filetype-csv me-2"></i>Esporta CSV
-          </button>
-        </li>
-      </ul>
-    </div>
 
-    <div class="dropdown">
-      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-upload" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span>
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <button type="button" class="dropdown-item" id="btn-import-json">
-            <i class="bi bi-filetype-json me-2"></i>Importa JSON
-          </button>
-        </li>
-        <li>
-          <button type="button" class="dropdown-item" id="btn-import-csv">
-            <i class="bi bi-filetype-csv me-2"></i>Importa CSV
-          </button>
-        </li>
-      </ul>
-    </div>
+      <div class="vr mx-1 d-none d-sm-block" aria-hidden="true"></div>
 
-    <div class="ms-auto d-flex flex-wrap gap-1 align-items-center toolbar-actions-end">
-      <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
-              data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
-              aria-controls="form-toc-offcanvas" title="Sommario sezioni (schermi piccoli)">
-        <i class="bi bi-list-nested" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span>
-      </button>
-      <button type="button" id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
-        <i class="bi bi-shield-check" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span>
-      </button>
+      <div class="dropdown">
+        <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="form-export-dropdown"
+                data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"
+                aria-label="Menu esportazione">
+          <i class="bi bi-download" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="form-export-dropdown">
+          <li>
+            <button type="button" class="dropdown-item" id="btn-export-json">
+              <i class="bi bi-filetype-json me-2" aria-hidden="true"></i>Esporta JSON
+            </button>
+          </li>
+          <li>
+            <button type="button" class="dropdown-item" id="btn-export-csv">
+              <i class="bi bi-filetype-csv me-2" aria-hidden="true"></i>Esporta CSV
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="form-import-dropdown"
+                data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"
+                aria-label="Menu importazione">
+          <i class="bi bi-upload" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="form-import-dropdown">
+          <li>
+            <button type="button" class="dropdown-item" id="btn-import-json">
+              <i class="bi bi-filetype-json me-2" aria-hidden="true"></i>Importa JSON
+            </button>
+          </li>
+          <li>
+            <button type="button" class="dropdown-item" id="btn-import-csv">
+              <i class="bi bi-filetype-csv me-2" aria-hidden="true"></i>Importa CSV
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="ms-auto d-flex flex-wrap gap-2 align-items-center toolbar-actions-end">
+        <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
+                data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
+                aria-controls="form-toc-offcanvas"
+                title="Apri il sommario delle sezioni (mobile)">
+          <i class="bi bi-list-nested" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span>
+        </button>
+        <button type="button" id="btn-validate" class="btn btn-outline-primary btn-sm"
+                title="Controlla i dati rispetto allo JSON Schema">
+          <i class="bi bi-shield-check" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span>
+        </button>
+      </div>
     </div>
   </div>
-</div>
+</nav>
 
-<!-- ── Validation panel ────────────────────────────────────── -->
-<div id="validation-panel-wrapper" class="d-none border-bottom bg-light">
-  <div class="container-xxl py-3">
+<!-- ── Esito validazione ──────────────────────────────────── -->
+<section id="validation-panel-wrapper" class="d-none border-bottom bg-light" aria-labelledby="validation-panel-title" aria-live="polite">
+  <div class="container-xxl py-3 py-md-4">
+    <h2 class="visually-hidden" id="validation-panel-title">Esito della validazione</h2>
     <div id="validation-panel"></div>
   </div>
-</div>
+</section>
 
-<!-- ── Versioning (schema / esempio versionati in origine) ── -->
-<div id="versioning-banner" class="d-none border-bottom">
-  <div id="versioning-banner-box" class="container-xxl py-3 bg-primary bg-opacity-10">
-    <div class="d-flex flex-wrap align-items-start gap-2">
-      <i id="versioning-banner-icon" class="bi bi-git text-primary mt-1" aria-hidden="true"></i>
-      <div id="versioning-banner-body" class="small flex-grow-1"></div>
-    </div>
+<!-- ── Versioni dichiarate in schema / JSON ──────────────── -->
+<section id="versioning-banner" class="d-none border-bottom bg-light" aria-labelledby="versioning-banner-title">
+  <div class="container-xxl py-3 py-md-4">
+    <h2 class="visually-hidden" id="versioning-banner-title">Informazioni sulle versioni dei file caricati</h2>
+    <div id="versioning-banner-box" class="callout callout-highlight note mb-0"></div>
   </div>
-</div>
+</section>
 
-<!-- ── Editor + sommario a destra (da md in su) ─────────────── -->
-<main id="main-content" class="container-xxl py-4" tabindex="-1">
-  <!-- align-items-stretch (default): colonne stessa altezza così sticky sul pannello sommario funziona allo scroll -->
-  <div class="row g-4">
+<!-- ── Editor + sommario ─────────────────────────────────── -->
+<main id="main-content" class="container-xxl py-4 py-md-5" tabindex="-1">
+  <!-- Stretch: colonna sommario alta come il modulo; la card usa align-self:start in CSS (vedi style.css) -->
+  <div class="row g-4 align-items-stretch">
     <div id="editor-main-column" class="col-12">
-      <div id="loading-spinner" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Caricamento…</span>
+      <div id="loading-spinner" class="text-center py-5 px-3" role="status" aria-live="polite" aria-busy="true">
+        <div class="spinner-border text-primary mb-3" role="presentation">
+          <span class="visually-hidden">Caricamento in corso</span>
         </div>
-        <p class="mt-3 text-muted">Caricamento schema e dati…</p>
+        <p class="text-secondary mb-0">Caricamento schema e dati dal manifest…</p>
       </div>
-      <div id="editor-container" class="je-ready d-none"></div>
+      <div id="form-editor-shell" class="d-none">
+        <div class="card shadow-sm border">
+          <div class="card-header bg-light border-bottom py-3 px-3 px-md-4">
+            <h2 class="h5 mb-1 fw-bold">Modulo</h2>
+            <p class="small text-muted mb-0">Campi e sezioni sono definiti dallo JSON Schema del webform. Usa il sommario a destra su schermi medi e grandi per saltare tra le sezioni.</p>
+          </div>
+          <div class="card-body p-2 p-md-3">
+            <div id="editor-container" class="je-ready d-none"></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <aside id="form-toc-sidebar" class="form-toc-sidebar form-toc-sidebar--end d-none" aria-label="Sommario sezioni form">
-      <div class="form-toc-sidebar-panel border rounded bg-light shadow-sm">
-        <h2 class="h6 fw-semibold text-body-secondary px-3 pt-3 pb-2 mb-0 border-bottom">
-          <i class="bi bi-signpost-split me-2 text-primary"></i>Sezioni
-        </h2>
-        <nav class="form-toc-nav py-1" aria-label="Vai a una sezione del modulo">
-          <ul class="nav flex-column" id="form-toc-sidebar-items"></ul>
-        </nav>
-        <p class="small text-muted px-3 py-3 mb-0 d-none" id="form-toc-sidebar-empty">
-          Per questo schema non risultano schede raggruppate. Usa lo scroll nel modulo.
-        </p>
+    <aside id="form-toc-sidebar" class="form-toc-sidebar form-toc-sidebar--end d-none" aria-label="Sommario delle sezioni del modulo">
+      <div class="card app-form-toc-card shadow-sm border">
+        <div class="card-header bg-light border-bottom py-3">
+          <h2 class="h6 mb-0 fw-bold d-flex align-items-center gap-2">
+            <i class="bi bi-signpost-split text-primary" aria-hidden="true"></i>
+            Sezioni
+          </h2>
+        </div>
+        <div class="card-body p-0">
+          <nav class="form-toc-nav" aria-label="Sommario sezioni, vista affiancata">
+            <ul class="nav flex-column" id="form-toc-sidebar-items"></ul>
+          </nav>
+          <p class="small text-muted px-3 py-3 mb-0 d-none border-top" id="form-toc-sidebar-empty">
+            Per questo schema non risultano schede raggruppate. Scorri il modulo per compilare i campi.
+          </p>
+        </div>
       </div>
     </aside>
   </div>
 </main>
 
-<!-- ── Sommario sezioni (overlay laterale) ─────────────────── -->
-<div class="offcanvas offcanvas-end form-toc-offcanvas shadow-lg" tabindex="-1" id="form-toc-offcanvas"
+<!-- ── Sommario sezioni (offcanvas, schermi piccoli) ─────── -->
+<div class="offcanvas offcanvas-end form-toc-offcanvas shadow" tabindex="-1" id="form-toc-offcanvas"
      aria-labelledby="form-toc-label">
   <div class="offcanvas-header border-bottom bg-light">
-    <h5 class="offcanvas-title fw-semibold" id="form-toc-label">
-      <i class="bi bi-signpost-split me-2 text-primary"></i>Sezioni del form
-    </h5>
+    <h2 class="offcanvas-title h5 fw-bold mb-0" id="form-toc-label">
+      <span class="d-flex align-items-center gap-2">
+        <i class="bi bi-signpost-split text-primary" aria-hidden="true"></i>
+        Sommario sezioni
+      </span>
+    </h2>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Chiudi sommario"></button>
   </div>
   <div class="offcanvas-body p-0 overflow-auto">
-    <p class="small text-muted px-3 py-2 mb-0 border-bottom d-none" id="form-toc-hint">
-      Tocca una voce per aprire la scheda corrispondente nel modulo.
-    </p>
-    <nav class="form-toc-nav" aria-label="Sommario sezioni">
+    <p class="small text-muted px-3 py-3 mb-0 border-bottom bg-white d-none" id="form-toc-hint"></p>
+    <nav class="form-toc-nav" aria-label="Sommario sezioni, pannello mobile">
       <ul class="nav flex-column" id="form-toc-items"></ul>
     </nav>
     <p class="small text-muted px-3 py-3 mb-0 d-none" id="form-toc-empty">
-      Per questo schema non sono state trovate schede in cima al modulo. Usa lo scroll nel form.
+      Per questo schema non risultano sezioni raggruppate. Scorri il modulo per compilare i campi.
     </p>
   </div>
 </div>
@@ -263,21 +311,24 @@
 
 <!-- ── JSON preview modal ─────────────────────────────────── -->
 <div class="modal fade" id="json-modal" tabindex="-1" aria-labelledby="json-modal-label" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="json-modal-label">
-          <i class="bi bi-code-slash me-2"></i>Anteprima JSON
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      <div class="modal-header border-bottom">
+        <h2 class="modal-title h5 mb-0" id="json-modal-label">
+          <span class="d-flex align-items-center gap-2">
+            <i class="bi bi-code-slash" aria-hidden="true"></i>
+            Anteprima JSON
+          </span>
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi finestra"></button>
       </div>
       <div class="modal-body p-0">
-        <pre id="json-preview" class="app-json-preview-pre m-0 p-3 bg-dark text-light"></pre>
+        <pre id="json-preview" class="app-json-preview-pre m-0 p-3 bg-dark text-light" tabindex="0"></pre>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-        <button type="button" class="btn btn-success" id="btn-download-json-modal">
-          <i class="bi bi-download me-1"></i>Scarica JSON
+      <div class="modal-footer border-top">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" id="btn-download-json-modal">
+          <i class="bi bi-download me-1" aria-hidden="true"></i>Scarica JSON
         </button>
       </div>
     </div>
@@ -290,6 +341,30 @@
 <script>
   SiteChrome.injectSharedOverlays(document.getElementById('site-shared-overlays'));
   SiteChrome.injectSiteFooter(document.getElementById('site-footer'), { variant: 'form' });
+</script>
+<script>
+(function () {
+  function clearToolbarHiddenIfDesktop() {
+    if (window.matchMedia('(min-width: 992px)').matches) {
+      document.body.classList.remove('app-form-nav-menu-open');
+    }
+  }
+  function isFormNavEvent(e) {
+    var nav = document.getElementById('navMainForm');
+    if (!nav || !document.getElementById('form-actions-toolbar')) return false;
+    var t = e.target;
+    return t === nav || (t && typeof t.closest === 'function' && t.closest('#navMainForm') === nav);
+  }
+  document.addEventListener('shown.bs.navbarcollapsible', function (e) {
+    if (isFormNavEvent(e)) document.body.classList.add('app-form-nav-menu-open');
+  });
+  document.addEventListener('hidden.bs.navbarcollapsible', function (e) {
+    if (isFormNavEvent(e)) document.body.classList.remove('app-form-nav-menu-open');
+  });
+  document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('resize', clearToolbarHiddenIfDesktop);
+  });
+})();
 </script>
 <script src="assets/js/resource-errors.js"></script>
 <!-- json-editor (tema bootstrap5; compatibile con Bootstrap Italia) -->
@@ -369,36 +444,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initEditor();
 });
 
+function setFormIdBadgeDisplay(savedId) {
+  const badge = document.getElementById('form-id-badge');
+  const hint = document.getElementById('form-id-hint');
+  if (!badge) return;
+  if (savedId) {
+    badge.textContent = 'ID: ' + savedId.slice(0, 8);
+    badge.classList.remove('d-none');
+    if (hint) hint.classList.add('d-none');
+  } else {
+    badge.textContent = '';
+    badge.classList.add('d-none');
+    if (hint) hint.classList.remove('d-none');
+  }
+}
+
 /* ── Versioning da contenuto schema/JSON (non dal manifest) ─ */
 function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
   const vBanner = document.getElementById('versioning-banner');
-  const vBody = document.getElementById('versioning-banner-body');
   const vBox = document.getElementById('versioning-banner-box');
-  const vIcon = document.getElementById('versioning-banner-icon');
-  if (!vBanner || !vBody) return;
+  if (!vBanner || !vBox) return;
   const { items, hasAny, missingDeclaredVersion } = extractDocumentVersioning(rawSchema, data, urlHints);
 
-  if (vBox && vIcon) {
-    if (missingDeclaredVersion) {
-      vBox.className = 'container-xxl py-3 bg-warning bg-opacity-25 border-start border-warning border-4';
-      vIcon.className = 'bi bi-exclamation-triangle-fill text-warning mt-1';
-      vIcon.setAttribute('aria-hidden', 'true');
-    } else {
-      vBox.className = 'container-xxl py-3 bg-primary bg-opacity-10';
-      vIcon.className = 'bi bi-git text-primary mt-1';
-      _versionMissingToastShown = false;
-    }
-  }
-
-  const intro = `<p class="mb-2 text-body"><strong>Versioni nei file caricati</strong></p>`;
-
-  let warnBlock = '';
   if (missingDeclaredVersion) {
-    warnBlock = `
-      <div class="alert alert-warning py-2 px-3 mb-2 mb-md-3 small" role="status">
-        <strong>Attenzione.</strong> Manca <code>$version</code> nello <strong>JSON Schema</strong> e <code>metadata.versione</code> nel <strong>JSON</strong> (esempio o bozza).
-        Non è possibile verificare da interfaccia quale revisione stai usando; puoi comunque <strong>compilare e salvare</strong> il form.
-      </div>`;
+    vBox.className = 'callout callout-highlight warning mb-0';
     if (!_versionMissingToastShown && typeof showToast === 'function') {
       console.warn('[it-wallet-webforms] Mancano $version (schema) e metadata.versione (JSON); compilazione consentita.');
       showToast(
@@ -408,11 +477,36 @@ function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
       );
       _versionMissingToastShown = true;
     }
+  } else {
+    vBox.className = 'callout callout-highlight note mb-0';
+    _versionMissingToastShown = false;
   }
 
+  const titleIcon = missingDeclaredVersion
+    ? '<i class="bi bi-exclamation-triangle-fill text-warning" aria-hidden="true"></i>'
+    : '<i class="bi bi-git text-primary" aria-hidden="true"></i>';
+  const titleText = missingDeclaredVersion
+    ? 'Versioni: attenzione'
+    : 'Versioni nei file caricati';
+
+  let warnBlock = '';
+  if (missingDeclaredVersion) {
+    warnBlock = `
+      <div class="alert alert-warning py-2 px-3 mb-3 small" role="status">
+        <strong>Attenzione.</strong> Manca <code>$version</code> nello <strong>JSON Schema</strong> e <code>metadata.versione</code> nel <strong>JSON</strong> (esempio o bozza).
+        Non è possibile verificare da interfaccia quale revisione stai usando; puoi comunque <strong>compilare e salvare</strong> il modulo.
+      </div>`;
+  }
+
+  const titleRow = `
+    <div class="callout-title">
+      ${titleIcon}
+      <span>${titleText}</span>
+    </div>`;
+
   if (!hasAny) {
-    vBody.innerHTML = intro + warnBlock +
-      '<p class="mb-0 text-muted small">Nessun altro campo noto (es. <code>$id</code>, <code>$schema</code>). Consulta i file alle URL in basso.</p>';
+    vBox.innerHTML = titleRow + warnBlock +
+      '<p class="mb-0 small text-secondary">Nessun altro campo noto (ad esempio <code>$id</code>, <code>$schema</code>). Consulta i file sorgente tramite i link nel piè di pagina.</p>';
     vBanner.classList.remove('d-none');
     return;
   }
@@ -427,12 +521,12 @@ function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
   const dat = items.filter(i => i.section === 'data');
   let blocks = '';
   if (sch.length) {
-    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-1">JSON Schema</div><ul class="list-unstyled mb-0 small">${sch.map(row).join('')}</ul></div>`;
+    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-2 small text-uppercase">JSON Schema</div><ul class="list-unstyled mb-0 small">${sch.map(row).join('')}</ul></div>`;
   }
   if (dat.length) {
-    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-1">JSON (esempio / bozza)</div><ul class="list-unstyled mb-0 small">${dat.map(row).join('')}</ul></div>`;
+    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-2 small text-uppercase">JSON (esempio / bozza)</div><ul class="list-unstyled mb-0 small">${dat.map(row).join('')}</ul></div>`;
   }
-  vBody.innerHTML = intro + warnBlock + `<div class="row g-2">${blocks}</div>`;
+  vBox.innerHTML = titleRow + warnBlock + `<div class="row g-3">${blocks}</div>`;
   vBanner.classList.remove('d-none');
 }
 
@@ -470,7 +564,13 @@ function collectRootTabLinks() {
   if (!links.length) {
     links = [...ul.querySelectorAll(':scope > a.nav-link')];
   }
-  return links;
+  /* Esclude tab senza etichetta (json-editor a volte aggiunge placeholder / righe vuote) */
+  return links.filter(a => {
+    const t = (a.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!t) return false;
+    if (a.classList.contains('disabled')) return false;
+    return true;
+  });
 }
 
 /**
@@ -621,13 +721,16 @@ function buildFormToc() {
   if (useTabs) {
     tabLinks.forEach(a => {
       const label = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!label) return;
       appendRow(itemsEl, label, () => wireFormTocNavClick(a), false);
       if (sidebarItemsEl) appendRow(sidebarItemsEl, label, () => wireFormTocNavClick(a), true);
     });
   } else {
     schemaSections.forEach(({ key, label }) => {
-      appendRow(itemsEl, label, () => wireFormTocNavScroll(key, label), false);
-      if (sidebarItemsEl) appendRow(sidebarItemsEl, label, () => wireFormTocNavScroll(key, label), true);
+      const lab = (label || '').replace(/\s+/g, ' ').trim();
+      if (!lab) return;
+      appendRow(itemsEl, lab, () => wireFormTocNavScroll(key, lab), false);
+      if (sidebarItemsEl) appendRow(sidebarItemsEl, lab, () => wireFormTocNavScroll(key, lab), true);
     });
   }
 }
@@ -698,9 +801,7 @@ async function initEditor() {
     renderDocumentVersioningBanner(_rawSchema, startVal, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
 
     document.getElementById('form-name-input').value = formName;
-    if (_currentId) {
-      document.getElementById('form-id-badge').textContent = 'ID: ' + _currentId.slice(0, 8);
-    }
+    setFormIdBadgeDisplay(_currentId);
 
     // Build json-editor
     JSONEditor.defaults.options.theme    = 'bootstrap5';
@@ -723,7 +824,13 @@ async function initEditor() {
     });
 
     _editor.on('ready', () => {
-      document.getElementById('loading-spinner').classList.add('d-none');
+      const spin = document.getElementById('loading-spinner');
+      if (spin) {
+        spin.classList.add('d-none');
+        spin.setAttribute('aria-busy', 'false');
+      }
+      const shell = document.getElementById('form-editor-shell');
+      if (shell) shell.classList.remove('d-none');
       document.getElementById('editor-container').classList.remove('d-none');
       if (typeof initJeLongtextFit === 'function') {
         initJeLongtextFit(document.getElementById('editor-container'));
@@ -774,7 +881,7 @@ function markDirty() {
 function markClean(id) {
   _dirty = false;
   _currentId = id;
-  document.getElementById('form-id-badge').textContent = 'ID: ' + id.slice(0, 8);
+  setFormIdBadgeDisplay(id);
   const el = document.getElementById('save-status');
   el.classList.remove('d-none');
   document.getElementById('save-status-text').textContent = 'Salvato';
@@ -910,24 +1017,34 @@ function runValidation() {
 
   if (allErrors.length === 0) {
     panel.innerHTML = `
-      <span class="validation-ok fw-semibold">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        Il form è valido secondo lo schema JSON.
-      </span>`;
+      <div class="callout callout-highlight success mb-0">
+        <div class="callout-title">
+          <i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i>
+          <span>Validazione superata</span>
+        </div>
+        <p class="mb-0 small validation-ok fw-semibold">I dati del modulo sono coerenti con lo JSON Schema caricato.</p>
+      </div>`;
     showToast('Validazione superata.', 'success');
   } else {
+    const n = allErrors.length;
+    const errLabel = n === 1 ? '1 errore riscontrato' : `${n} errori riscontrati`;
     const rows = allErrors.slice(0, 20).map(e => `
-      <li class="validation-err small">
-        <i class="bi bi-x-circle me-1"></i>
-        <code>${escHtml(e.path)}</code> – ${escHtml(e.msg)}
+      <li class="validation-err small mb-1">
+        <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+        <code class="text-break">${escHtml(e.path)}</code> – ${escHtml(e.msg)}
       </li>`).join('');
     panel.innerHTML = `
-      <p class="validation-err fw-semibold mb-1">
-        <i class="bi bi-x-circle-fill me-1"></i>
-        ${allErrors.length} error${allErrors.length === 1 ? 'e' : 'i'} riscontrat${allErrors.length === 1 ? 'o' : 'i'}:
-      </p>
-      <ul class="list-unstyled mb-0">${rows}</ul>`;
-    showToast(`${allErrors.length} errori di validazione.`, 'warning');
+      <div class="callout callout-highlight danger mb-0">
+        <div class="callout-title">
+          <i class="bi bi-x-circle-fill text-danger" aria-hidden="true"></i>
+          <span>${escHtml(errLabel)}</span>
+        </div>
+        <p class="small text-secondary mb-2">Correggi i campi indicati e ripeti la validazione.</p>
+        <div class="app-validation-scroll border rounded bg-white px-3 py-2">
+          <ul class="list-unstyled mb-0">${rows}</ul>
+        </div>
+      </div>`;
+    showToast(`${n} errori di validazione.`, 'warning');
   }
 
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
