@@ -167,10 +167,9 @@ main { flex: 1; }
   filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.25));
 }
 
-/* Toolbar form: sopra il contenuto che scorre sotto (sticky); la riga interna ha z-index così i click non finiscono sul blocco sotto */
+/* Toolbar sticky: sopra il contenuto che scorre; 1052 > backdrop menu BI (1050), < modali (1055) */
 .app-toolbar-sticky {
-  z-index: 1048;
-  isolation: isolate;
+  z-index: 1052;
   overflow: visible;
 }
 
@@ -196,7 +195,7 @@ main { flex: 1; }
  * Mobile / viewport stretti: toolbar senza sovrapposizioni.
  * — niente fila orizzontale con overflow-x (taglierebbe i dropdown Esporta/Importa).
  * — ms-auto su un gruppo dedicato → riga propria così non comprime gli altri pulsanti.
- * — min-width dei btn su viewport stretti: vedi blocco .toolbar .btn sotto (dopo la regola desktop).
+ * — layout toolbar su viewport stretti (pulsanti senza override dimensioni: solo Bootstrap Italia).
  */
 @media (max-width: 991.98px) {
   .app-toolbar-sticky .toolbar {
@@ -501,6 +500,91 @@ footer.it-footer-service {
   margin: 0 !important;
 }
 
+/*
+ * Canvas form (#editor-container): il tema json-editor usa btn-secondary pieno.
+ * Allineamento a toolbar / BI → outline secondario; elimina riga → outline danger.
+ * (I modal interni .je-modal restano fuori da questi selettori.)
+ */
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.btn-secondary:not(.json-editor-btntype-delete):not(.json-editor-btn-delete),
+.je-ready #editor-container .je-object__controls.btn-group > .btn.btn-secondary,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-toggle,
+.je-ready #editor-container button.btn.btn-secondary.je-array-control-btn,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-add,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deletelast,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deleteall {
+  color: var(--bs-secondary);
+  background-color: transparent;
+  border-color: var(--bs-secondary);
+}
+
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.btn-secondary:not(.json-editor-btntype-delete):not(.json-editor-btn-delete):hover,
+.je-ready #editor-container .je-object__controls.btn-group > .btn.btn-secondary:hover,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-toggle:hover,
+.je-ready #editor-container button.btn.btn-secondary.je-array-control-btn:hover,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-add:hover,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deletelast:hover,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deleteall:hover {
+  color: #fff;
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.btn-secondary:not(.json-editor-btntype-delete):not(.json-editor-btn-delete):focus-visible,
+.je-ready #editor-container .je-object__controls.btn-group > .btn.btn-secondary:focus-visible,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-toggle:focus-visible,
+.je-ready #editor-container button.btn.btn-secondary.je-array-control-btn:focus-visible,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-add:focus-visible,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deletelast:focus-visible,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deleteall:focus-visible {
+  color: #fff;
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-secondary-rgb, 108, 117, 125), 0.35);
+}
+
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.json-editor-btntype-delete,
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.json-editor-btn-delete {
+  color: var(--bs-danger);
+  background-color: transparent;
+  border-color: var(--bs-danger);
+}
+
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.json-editor-btntype-delete:hover,
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.json-editor-btn-delete:hover,
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.json-editor-btntype-delete:focus-visible,
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))
+  > .btn.json-editor-btn-delete:focus-visible {
+  color: #fff;
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb, 220, 53, 69), 0.35);
+}
+
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deleteall,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deletelast {
+  color: var(--bs-danger);
+  background-color: transparent;
+  border-color: var(--bs-danger);
+}
+
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deleteall:hover,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deletelast:hover,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deleteall:focus-visible,
+.je-ready #editor-container button.btn.btn-secondary.json-editor-btntype-deletelast:focus-visible {
+  color: #fff;
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb, 220, 53, 69), 0.35);
+}
+
 .je-ready .btn-group {
   gap: 0.35rem;
   flex-wrap: wrap;
@@ -508,54 +592,82 @@ footer.it-footer-service {
 }
 
 /*
- * Righe array (delete/move): il tema può usare span o div .btn-group; classi json-editor-btn-delete / json-editor-btntype-delete.
- * — Stesso layout flex per tutti i .btn-group che contengono delete di riga (non solo figlio diretto del card-title).
- * — Contenitore item: cornice + spazio netto tra un item e il successivo (bordo superiore + padding).
- * — order: -1 sul .btn-group diretto dell’item (controlli in cima al blocco).
+ * Righe array: NON applicare column layout a .je-array-item-header-row — ha .je-array-control-card
+ * come figlio diretto e il selettore *:has(> .je-array-control-card) lo matcherebbe, mandando
+ * titolo / controlli / JSON in colonna per errore.
  */
-.je-ready .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
-  display: inline-flex !important;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  vertical-align: middle;
-}
-
-.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))) {
+.je-ready *:has(> .je-array-control-card > .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))):not(.je-array-item-header-row) {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   min-width: 0;
-  padding: 1rem 1.1rem 1.15rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--bs-border-radius, 0.375rem);
-  background-color: var(--light-bg, var(--bs-gray-100));
 }
 
-/* Spaziatore visibile tra item consecutivi (il margine inferiore da solo può “collassare” in layout a blocchi) */
-.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)))
-  + *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))) {
-  margin-top: 0;
-  padding-top: 1.35rem;
-  border-top: 2px solid var(--border);
+.je-ready *:has(> .je-array-control-card > .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))):not(.je-array-item-header-row)
+  > .je-array-control-card {
+  box-sizing: border-box;
 }
 
-.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)))
-  > .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
-  order: -1;
-  align-self: flex-start;
-  flex-shrink: 0;
+/*
+ * Header item array (es. assistenza.referenti): griglia 3 colonne = sempre una riga
+ * (heading | controlli riga | JSON). Flex-only falliva per width:100% su .card / wrap ereditati.
+ */
+.je-ready #editor-container .je-object__container.je-object--array-row-controls > .je-array-item-header-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) max-content max-content;
+  gap: 0.35rem 0.5rem;
+  align-items: center;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
 }
 
-.je-ready .card {
+/*
+ * La card è solo un marker DOM per il JS: con display:contents i tre «slot» griglia
+ * diventano titolo | btn-group sposta/cancella | btn-group JSON (stessa riga, niente a capo da .card).
+ */
+.je-ready #editor-container .je-array-item-header-row > .je-array-control-card {
+  display: contents;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Dopo display:contents il gruppo cancella/sposta è figlio diretto della griglia */
+.je-ready #editor-container .je-array-item-header-row > .btn-group {
+  flex-wrap: nowrap !important;
+  width: max-content !important;
+  max-width: 100%;
+  min-width: 0;
+  justify-self: end;
+  align-self: center;
+}
+
+.je-ready #editor-container .je-array-item-header-row > .je-object__title {
+  min-width: 0 !important;
+  max-width: 100%;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.je-ready #editor-container .je-array-item-header-row > .je-object__controls.btn-group {
+  margin: 0 !important;
+  max-width: none !important;
+}
+
+.je-ready .card:not(.je-array-control-card) {
   border: 1px solid var(--border);
   margin-bottom: 1rem;
 }
@@ -598,11 +710,40 @@ footer.it-footer-service {
   margin-top: 0 !important;
 }
 
-.je-ready .je-object__container > :not(.je-object__title):not(.je-object__controls) {
+.je-ready .je-object__container > :not(.je-object__title):not(.je-object__controls):not(.je-array-control-card):not(.je-array-item-header-row) {
   flex: 1 0 100%;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+/*
+ * Item array come oggetto: colonna solo sul container; la riga heading è .je-array-item-header-row (sopra).
+ */
+.je-ready #editor-container .je-object__container.je-object--array-row-controls {
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+}
+
+.je-ready #editor-container .je-object__container.je-object--array-row-controls > .je-array-item-header-row {
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+
+/* Controlli riga array: flex, pulsanti su una riga */
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.35rem;
+  box-sizing: border-box;
+}
+
+.je-ready #editor-container .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) > .btn {
+  border-radius: var(--bs-border-radius, 0.25rem) !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 /* Titolo sezione + btn-group interno (es. add item): più aria tra heading e pulsanti */
@@ -668,30 +809,10 @@ footer.it-footer-service {
 .validation-err { color: var(--danger); }
 
 /* ── Toolbar ─────────────────────────────────────────────── */
-/*
- * Icona + etichetta sono figli diretti del <button> (niente span wrapper): hit area = tutto il bottone, incluso padding.
- */
+/* Aspetto dei .btn: solo Bootstrap Italia (niente override su padding/altezza/larghezza). */
 .app-toolbar-sticky .toolbar .dropdown {
   display: flex;
   align-items: center;
-}
-
-.app-toolbar-sticky .toolbar.app-toolbar-inner .btn {
-  display: inline-flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: nowrap;
-  gap: 0.35rem;
-  white-space: nowrap;
-  min-width: 110px;
-  min-height: 2.75rem;
-  padding: 0.45rem 0.85rem !important;
-  line-height: 1.25 !important;
-  box-sizing: border-box;
-  touch-action: manipulation;
-  overflow: visible;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .app-toolbar-sticky .toolbar .dropdown-toggle::after {
@@ -702,12 +823,6 @@ footer.it-footer-service {
   margin-bottom: 0;
 }
 
-@media (max-width: 991.98px) {
-  .app-toolbar-sticky .toolbar.app-toolbar-inner .btn {
-    min-width: 2.75rem;
-  }
-}
-
 /* ── Badges ──────────────────────────────────────────────── */
 .badge-form-type {
   font-size: .7rem;
@@ -715,7 +830,7 @@ footer.it-footer-service {
 }
 
 /*
- * Torna su (form.html): z-index sopra editor/sticky toolbar, sotto modali e toast.
+ * Torna su (form.html): z-index sopra editor/contenuto, sotto toolbar sticky e modali.
  * BI posiziona .icon con top/scale per il font glyph :before; con SVG inline serve flex + reset.
  */
 a.back-to-top.app-form-scrolltop {

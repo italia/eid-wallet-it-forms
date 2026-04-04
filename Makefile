@@ -22,7 +22,7 @@ build:
 	@test -f index.html && test -f form.html
 	@test -f assets/css/style.css
 	@test -f assets/favicon.ico
-	@test -f assets/js/storage.js && test -f assets/js/csv-utils.js && test -f assets/js/form-utils.js && test -f assets/js/je-longtext-fit.js
+	@test -f assets/js/storage.js && test -f assets/js/csv-utils.js && test -f assets/js/form-utils.js && test -f assets/js/je-longtext-fit.js && test -f assets/js/je-array-control-card.js
 	@test -f assets/js/resource-errors.js
 	@test -f assets/js/site-chrome.js
 	@test -f assets/vendor/ajv2020.min.js

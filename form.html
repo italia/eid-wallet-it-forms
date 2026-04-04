@@ -111,17 +111,17 @@
   <div class="container-xxl py-2 py-md-3 toolbar d-flex flex-wrap gap-2 align-items-center app-toolbar-inner">
 
     <button type="button" id="btn-save" class="btn btn-primary btn-sm">
-      <i class="bi bi-floppy" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span>
+      <i class="bi bi-floppy me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span>
     </button>
 
     <button type="button" id="btn-save-as" class="btn btn-outline-primary btn-sm">
-      <i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span>
+      <i class="bi bi-floppy2 me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span>
     </button>
 
     <div class="vr mx-1"></div>
 
     <button type="button" id="btn-load-example" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span>
+      <i class="bi bi-lightbulb me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span>
     </button>
 
     <div class="vr mx-1"></div>
@@ -129,7 +129,7 @@
     <div class="dropdown">
       <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-download" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span>
+        <i class="bi bi-download me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span>
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -148,7 +148,7 @@
     <div class="dropdown">
       <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-upload" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span>
+        <i class="bi bi-upload me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span>
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -168,10 +168,10 @@
       <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
               data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
               aria-controls="form-toc-offcanvas" title="Sommario sezioni (schermi piccoli)">
-        <i class="bi bi-list-nested" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span>
+        <i class="bi bi-list-nested me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span>
       </button>
       <button type="button" id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
-        <i class="bi bi-shield-check" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span>
+        <i class="bi bi-shield-check me-2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span>
       </button>
     </div>
   </div>
@@ -303,6 +303,7 @@
 <script src="assets/js/csv-utils.js"></script>
 <script src="assets/js/form-utils.js"></script>
 <script src="assets/js/je-longtext-fit.js"></script>
+<script src="assets/js/je-array-control-card.js"></script>
 
 <script>
 /* ── State ──────────────────────────────────────────────── */
@@ -336,6 +337,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-import-csv').addEventListener('click', importCsv);
   document.getElementById('btn-validate').addEventListener('click', runValidation);
   document.getElementById('btn-download-json-modal').addEventListener('click', exportJson);
+
+  /* Toolbar: se un layer sopra la pagina intercetta il pointer ma le coordinate cadono ancora sul rettangolo di un bottone, reinvia il click (non altera lo stile). */
+  document.addEventListener(
+    'pointerdown',
+    (e) => {
+      if (e.button !== 0) return;
+      if (document.body.classList.contains('navbar-open') || document.body.classList.contains('modal-open')) return;
+      const bar = document.querySelector('.app-toolbar-inner');
+      if (!bar) return;
+      const hit = document.elementFromPoint(e.clientX, e.clientY);
+      if (hit && bar.contains(hit)) return;
+      const outer = bar.getBoundingClientRect();
+      if (e.clientX < outer.left || e.clientX > outer.right || e.clientY < outer.top || e.clientY > outer.bottom) return;
+      for (const btn of bar.querySelectorAll('button.btn')) {
+        const r = btn.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) continue;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        queueMicrotask(() => {
+          btn.click();
+        });
+        return;
+      }
+    },
+    true
+  );
 
   // Warn before leaving with unsaved changes
   window.addEventListener('beforeunload', e => {
@@ -728,8 +755,17 @@ async function initEditor() {
       if (typeof initJeLongtextFit === 'function') {
         initJeLongtextFit(document.getElementById('editor-container'));
       }
+      if (typeof initJeArrayControlCard === 'function') {
+        initJeArrayControlCard(document.getElementById('editor-container'));
+      }
+      if (typeof setupJeArrayControlObserver === 'function') {
+        setupJeArrayControlObserver();
+      }
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          if (typeof initJeArrayControlCard === 'function') {
+            initJeArrayControlCard(document.getElementById('editor-container'));
+          }
           buildFormToc();
           if (!document.getElementById('form-toc-items').children.length) {
             setTimeout(() => buildFormToc(), 400);
@@ -740,6 +776,11 @@ async function initEditor() {
 
     _editor.on('change', () => {
       markDirty();
+      requestAnimationFrame(() => {
+        if (typeof initJeArrayControlCard === 'function') {
+          initJeArrayControlCard(document.getElementById('editor-container'));
+        }
+      });
     });
 
   } catch (err) {
