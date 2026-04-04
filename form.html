@@ -6,56 +6,122 @@
   <title>Modifica form – IT-Wallet Webforms</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon" sizes="any" />
   <!-- Riferimento unico snippet: assets/partials/head-assets.html -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/css/bootstrap-italia.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+<a class="visually-hidden-focusable position-absolute top-0 start-0 m-2 btn btn-sm btn-primary" href="#main-content">Vai al contenuto principale</a>
 
-<!-- ── Navbar ──────────────────────────────────────────────── -->
-<nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="index.html#catalog">
-      <i class="bi bi-wallet2 me-2"></i>IT-Wallet Webforms
-    </a>
-    <div class="ms-auto d-flex align-items-center gap-2">
-      <!-- Save status indicator -->
-      <span id="save-status" class="text-white opacity-75 small d-none">
-        <i class="bi bi-check-circle me-1"></i><span id="save-status-text"></span>
-      </span>
-      <a href="index.html#bozze" class="btn btn-outline-light btn-sm">
-        <i class="bi bi-arrow-left me-1"></i>Torna alle bozze
-      </a>
+<!-- ── Header (Bootstrap Italia) ───────────────────────────── -->
+<header class="it-header-wrapper">
+  <div class="it-nav-wrapper">
+    <div class="it-header-center-wrapper it-small-header">
+      <div class="container-xxl">
+        <div class="row">
+          <div class="col-12">
+            <div class="it-header-center-content-wrapper">
+              <div class="it-brand-wrapper">
+                <a class="text-decoration-none app-brand-link" href="index.html#catalog" title="IT-Wallet Webforms">
+                  <svg class="icon app-brand-form-icon" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
+                    <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
+                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                  </svg>
+                  <div class="it-brand-text">
+                    <div class="it-brand-title">IT-Wallet Webforms</div>
+                    <div class="it-brand-tagline d-none d-md-block">Modifica webform</div>
+                  </div>
+                </a>
+              </div>
+              <div class="it-right-zone d-flex flex-wrap justify-content-end align-items-center gap-2">
+                <span id="save-status" class="save-status-header small d-none align-self-center me-md-2 text-white fw-medium" role="status">
+                  <i class="bi bi-check-circle me-1" aria-hidden="true"></i><span id="save-status-text"></span>
+                </span>
+                <div class="it-access-top-wrapper">
+                  <a href="index.html#bozze" class="btn btn-outline-light btn-sm fw-semibold app-header-back-btn">
+                    <span><i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Torna alle bozze</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Navbar collassabile (stesso pattern di index.html): su mobile compare l’icona menu -->
+    <div class="it-header-navbar-wrapper">
+      <div class="container-xxl">
+        <div class="row">
+          <div class="col-12">
+            <nav class="navbar navbar-expand-lg has-megamenu" aria-label="Navigazione principale">
+              <button class="custom-navbar-toggler" type="button" aria-controls="navMainForm"
+                      aria-expanded="false" aria-label="Mostra o nascondi la navigazione"
+                      data-bs-toggle="navbarcollapsible" data-bs-target="#navMainForm">
+                <svg class="icon bg-override" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                  <path d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
+                </svg>
+              </button>
+              <div class="navbar-collapsable" id="navMainForm" tabindex="-1">
+                <div class="close-div">
+                  <button class="btn close-menu" type="button">
+                    <span class="visually-hidden">Nascondi la navigazione</span>
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                      <path d="m12.7 12 6.7 6.6-.8.8-6.6-6.7-6.6 6.7-.8-.8 6.7-6.6-6.7-6.6.8-.8 6.6 6.7 6.6-6.7.8.8-6.7 6.6z"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="menu-wrapper">
+                  <ul class="navbar-nav">
+                    <li class="nav-item">
+                      <a class="nav-link" href="index.html#catalog">
+                        <span><i class="bi bi-collection me-2" aria-hidden="true"></i>Catalogo webform</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="index.html#bozze">
+                        <span><i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Bozze webform salvate</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</nav>
+</header>
 
 <!-- ── Form name bar ──────────────────────────────────────── -->
-<div class="bg-light border-bottom py-2">
-  <div class="container-fluid d-flex align-items-center gap-2">
-    <i class="bi bi-pencil-square text-muted"></i>
-    <input id="form-name-input" type="text" class="form-control form-control-sm w-auto flex-grow-1"
-           placeholder="Nome del form…" maxlength="128" aria-label="Nome del form" />
-    <span class="badge text-bg-secondary" id="form-id-badge" title="ID del form"></span>
+<div class="bg-light border-bottom">
+  <div class="container-xxl py-3">
+    <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 app-form-name-bar">
+      <label for="form-name-input" class="visually-hidden">Nome del form</label>
+      <span class="text-muted d-flex align-items-center flex-shrink-0" aria-hidden="true"><i class="bi bi-pencil-square fs-5"></i></span>
+      <input id="form-name-input" type="text" class="form-control flex-grow-1 app-form-name-input" style="max-width: 32rem;"
+             placeholder="Nome del form…" maxlength="128" aria-label="Nome del form" />
+      <span class="badge rounded-pill text-bg-secondary flex-shrink-0" id="form-id-badge" title="ID del form"></span>
+    </div>
   </div>
 </div>
 
 <!-- ── Toolbar ────────────────────────────────────────────── -->
-<div class="border-bottom py-2 bg-white shadow-sm sticky-top" style="z-index:100;">
-  <div class="container-fluid toolbar d-flex flex-wrap gap-1 align-items-center">
+<div class="border-bottom bg-white shadow-sm sticky-top app-toolbar-sticky">
+  <div class="container-xxl py-2 py-md-3 toolbar d-flex flex-wrap gap-2 align-items-center app-toolbar-inner">
 
-    <button id="btn-save" class="btn btn-primary btn-sm">
-      <i class="bi bi-floppy me-1"></i><span>Salva</span>
+    <button type="button" id="btn-save" class="btn btn-primary btn-sm">
+      <span class="app-toolbar-btn-fill"><i class="bi bi-floppy" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span></span>
     </button>
 
-    <button id="btn-save-as" class="btn btn-outline-primary btn-sm">
-      <i class="bi bi-floppy2 me-1"></i><span>Salva come nuovo</span>
+    <button type="button" id="btn-save-as" class="btn btn-outline-primary btn-sm">
+      <span class="app-toolbar-btn-fill"><i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span></span>
     </button>
 
     <div class="vr mx-1"></div>
 
-    <button id="btn-load-example" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-lightbulb me-1"></i><span>Carica esempio</span>
+    <button type="button" id="btn-load-example" class="btn btn-outline-secondary btn-sm">
+      <span class="app-toolbar-btn-fill"><i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span></span>
     </button>
 
     <div class="vr mx-1"></div>
@@ -63,16 +129,16 @@
     <div class="dropdown">
       <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-download me-1"></i><span>Esporta</span>
+        <span class="app-toolbar-btn-fill"><i class="bi bi-download" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span></span>
       </button>
       <ul class="dropdown-menu">
         <li>
-          <button class="dropdown-item" id="btn-export-json">
+          <button type="button" class="dropdown-item" id="btn-export-json">
             <i class="bi bi-filetype-json me-2"></i>Esporta JSON
           </button>
         </li>
         <li>
-          <button class="dropdown-item" id="btn-export-csv">
+          <button type="button" class="dropdown-item" id="btn-export-csv">
             <i class="bi bi-filetype-csv me-2"></i>Esporta CSV
           </button>
         </li>
@@ -82,30 +148,30 @@
     <div class="dropdown">
       <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-upload me-1"></i><span>Importa</span>
+        <span class="app-toolbar-btn-fill"><i class="bi bi-upload" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span></span>
       </button>
       <ul class="dropdown-menu">
         <li>
-          <button class="dropdown-item" id="btn-import-json">
+          <button type="button" class="dropdown-item" id="btn-import-json">
             <i class="bi bi-filetype-json me-2"></i>Importa JSON
           </button>
         </li>
         <li>
-          <button class="dropdown-item" id="btn-import-csv">
+          <button type="button" class="dropdown-item" id="btn-import-csv">
             <i class="bi bi-filetype-csv me-2"></i>Importa CSV
           </button>
         </li>
       </ul>
     </div>
 
-    <div class="ms-auto d-flex flex-wrap gap-1 align-items-center">
+    <div class="ms-auto d-flex flex-wrap gap-1 align-items-center toolbar-actions-end">
       <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
               data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
               aria-controls="form-toc-offcanvas" title="Sommario sezioni (schermi piccoli)">
-        <i class="bi bi-list-nested me-1"></i><span>Sommario</span>
+        <span class="app-toolbar-btn-fill"><i class="bi bi-list-nested" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span></span>
       </button>
-      <button id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
-        <i class="bi bi-shield-check me-1"></i><span>Valida</span>
+      <button type="button" id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
+        <span class="app-toolbar-btn-fill"><i class="bi bi-shield-check" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span></span>
       </button>
     </div>
   </div>
@@ -113,14 +179,14 @@
 
 <!-- ── Validation panel ────────────────────────────────────── -->
 <div id="validation-panel-wrapper" class="d-none border-bottom bg-light">
-  <div class="container-fluid py-2">
+  <div class="container-xxl py-3">
     <div id="validation-panel"></div>
   </div>
 </div>
 
 <!-- ── Versioning (schema / esempio versionati in origine) ── -->
 <div id="versioning-banner" class="d-none border-bottom">
-  <div id="versioning-banner-box" class="container-fluid py-2 px-3 bg-primary bg-opacity-10">
+  <div id="versioning-banner-box" class="container-xxl py-3 bg-primary bg-opacity-10">
     <div class="d-flex flex-wrap align-items-start gap-2">
       <i id="versioning-banner-icon" class="bi bi-git text-primary mt-1" aria-hidden="true"></i>
       <div id="versioning-banner-body" class="small flex-grow-1"></div>
@@ -129,9 +195,9 @@
 </div>
 
 <!-- ── Editor + sommario a destra (da md in su) ─────────────── -->
-<main class="container-fluid py-3">
+<main id="main-content" class="container-xxl py-4" tabindex="-1">
   <!-- align-items-stretch (default): colonne stessa altezza così sticky sul pannello sommario funziona allo scroll -->
-  <div class="row g-3">
+  <div class="row g-4">
     <div id="editor-main-column" class="col-12">
       <div id="loading-spinner" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
@@ -180,8 +246,20 @@
 </div>
 
 <!-- ── Footer + overlay condivisi (assets/js/site-chrome.js) ─ -->
-<footer id="site-footer" class="py-3 mt-auto"></footer>
+<footer id="site-footer" class="it-footer-service py-4 mt-auto"></footer>
 <div id="site-shared-overlays"></div>
+
+<!-- Torna su (Bootstrap Italia: data-bs-toggle="backtotop", bundle gestisce scroll e classe .back-to-top-show) -->
+<a href="#main-content"
+   class="back-to-top shadow app-form-scrolltop"
+   aria-label="Torna su"
+   title="Torna su"
+   data-bs-toggle="backtotop"
+   data-bs-scroll-limit="200">
+  <svg class="icon text-white" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M12 7.41 5.71 13.7l1.41 1.42L12 10.24l4.88 4.88 1.41-1.42L12 7.41z"/>
+  </svg>
+</a>
 
 <!-- ── JSON preview modal ─────────────────────────────────── -->
 <div class="modal fade" id="json-modal" tabindex="-1" aria-labelledby="json-modal-label" aria-hidden="true">
@@ -207,14 +285,14 @@
 </div>
 
 <!-- ── Scripts ────────────────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/js/bootstrap-italia.bundle.min.js"></script>
 <script src="assets/js/site-chrome.js"></script>
 <script>
   SiteChrome.injectSharedOverlays(document.getElementById('site-shared-overlays'));
   SiteChrome.injectSiteFooter(document.getElementById('site-footer'), { variant: 'form' });
 </script>
 <script src="assets/js/resource-errors.js"></script>
-<!-- json-editor (Bootstrap 5 theme) -->
+<!-- json-editor (tema bootstrap5; compatibile con Bootstrap Italia) -->
 <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.15.1/dist/jsoneditor.min.js"></script>
 <!-- PapaParse for CSV -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -224,6 +302,7 @@
 <script src="assets/js/storage.js"></script>
 <script src="assets/js/csv-utils.js"></script>
 <script src="assets/js/form-utils.js"></script>
+<script src="assets/js/je-longtext-fit.js"></script>
 
 <script>
 /* ── State ──────────────────────────────────────────────── */
@@ -302,17 +381,17 @@ function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
 
   if (vBox && vIcon) {
     if (missingDeclaredVersion) {
-      vBox.className = 'container-fluid py-2 px-3 bg-warning bg-opacity-25 border-start border-warning border-4';
+      vBox.className = 'container-xxl py-3 bg-warning bg-opacity-25 border-start border-warning border-4';
       vIcon.className = 'bi bi-exclamation-triangle-fill text-warning mt-1';
       vIcon.setAttribute('aria-hidden', 'true');
     } else {
-      vBox.className = 'container-fluid py-2 px-3 bg-primary bg-opacity-10';
+      vBox.className = 'container-xxl py-3 bg-primary bg-opacity-10';
       vIcon.className = 'bi bi-git text-primary mt-1';
       _versionMissingToastShown = false;
     }
   }
 
-  const intro = `<p class="mb-2 text-body"><strong>Versioni nei file caricati</strong> <span class="text-muted fw-normal">(da JSON Schema e JSON; per il dato compare anche l’URL HTTPS di caricamento, non dal catalogo)</span></p>`;
+  const intro = `<p class="mb-2 text-body"><strong>Versioni nei file caricati</strong></p>`;
 
   let warnBlock = '';
   if (missingDeclaredVersion) {
@@ -648,6 +727,9 @@ async function initEditor() {
     _editor.on('ready', () => {
       document.getElementById('loading-spinner').classList.add('d-none');
       document.getElementById('editor-container').classList.remove('d-none');
+      if (typeof initJeLongtextFit === 'function') {
+        initJeLongtextFit(document.getElementById('editor-container'));
+      }
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           buildFormToc();
@@ -690,7 +772,7 @@ function markDirty() {
   const el = document.getElementById('save-status');
   el.classList.remove('d-none');
   document.getElementById('save-status-text').textContent = 'Modifiche non salvate';
-  el.querySelector('i').className = 'bi bi-circle-fill text-warning me-1';
+  el.querySelector('i').className = 'bi bi-circle-fill save-status-icon-dirty me-1';
 }
 
 function markClean(id) {
@@ -700,7 +782,7 @@ function markClean(id) {
   const el = document.getElementById('save-status');
   el.classList.remove('d-none');
   document.getElementById('save-status-text').textContent = 'Salvato';
-  el.querySelector('i').className = 'bi bi-check-circle-fill text-success me-1';
+  el.querySelector('i').className = 'bi bi-check-circle-fill save-status-icon-clean me-1';
   // Update URL without reload
   const url = new URL(window.location);
   url.searchParams.set('id', id);

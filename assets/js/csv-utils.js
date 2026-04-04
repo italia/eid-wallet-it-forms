@@ -14,10 +14,10 @@
  * Each row has two columns: "path" and "value".
  *
  * @param {object} data   – The form data object
- * @param {string} [sep]  – Column separator (default ,)
+ * @param {string} [sep]  – Column separator (default `;`, adatto a Excel con impostazioni regionali IT/EU)
  * @returns {string}      – CSV text
  */
-function jsonToCsv(data, sep = ',') {
+function jsonToCsv(data, sep = ';') {
   const rows = [['path', 'value']];
   flattenObject(data, '', rows);
   return rows.map(r => r.map(cell => csvCell(String(cell ?? ''), sep)).join(sep)).join('\r\n');
@@ -63,6 +63,22 @@ function csvCell(value, sep) {
 /* ── Import ──────────────────────────────────────────────── */
 
 /**
+ * Delimitatore colonne: export attuale usa `;`; file vecchi con `,` restano leggibili.
+ * @param {string} csvText
+ * @returns {string}
+ */
+function sniffCsvFieldDelimiter(csvText) {
+  const line = csvText.split(/\r?\n/).find(l => l.trim());
+  if (!line) return ';';
+  const t = line.trim().toLowerCase();
+  if (t.startsWith('path;')) return ';';
+  if (t.startsWith('path,')) return ',';
+  const semi = (line.match(/;/g) || []).length;
+  const comma = (line.match(/,/g) || []).length;
+  return semi >= comma ? ';' : ',';
+}
+
+/**
  * Parse a flat (path, value) CSV string back to a nested object.
  * Requires PapaParse to be loaded.
  *
@@ -74,7 +90,8 @@ function csvToJson(csvText) {
     return { data: null, errors: ['PapaParse non è disponibile.'] };
   }
 
-  const result = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+  const delimiter = sniffCsvFieldDelimiter(csvText);
+  const result = Papa.parse(csvText, { header: true, skipEmptyLines: true, delimiter });
   if (result.errors.length) {
     return { data: null, errors: result.errors.map(e => e.message) };
   }

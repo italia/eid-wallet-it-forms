@@ -1,6 +1,6 @@
 /**
  * Componenti di chrome condivisi tra le pagine (footer, toast, modale errori app).
- * Versioni CDN allineate a index.html / form.html (Bootstrap 5.3.3, Icons 1.11.3).
+ * Versioni CDN allineate a index.html / form.html (Bootstrap Italia 2.18.0, Bootstrap Icons 1.11.3).
  */
 (function (global) {
   'use strict';

@@ -130,6 +130,81 @@ function extractDocumentVersioning(rawSchema, data, urlHints) {
 
 /* ── Schema loading & transformation ─────────────────────── */
 
+const RESERVED_STRING_FORMATS = new Set([
+  'textarea',
+  'date',
+  'time',
+  'datetime',
+  'datetime-local',
+  'email',
+  'uri',
+  'url',
+  'uuid',
+  'color',
+  'range',
+  'radio',
+  'checkbox',
+  'select',
+  'hidden'
+]);
+
+/**
+ * Visita tutti i sotto-schemi (properties, items, combinators, definitions…).
+ * @param {object} schema
+ * @param {(node: object) => void} visitor
+ */
+function walkJsonSchema(schema, visitor) {
+  if (!schema || typeof schema !== 'object') return;
+  visitor(schema);
+  if (schema.properties && typeof schema.properties === 'object') {
+    Object.values(schema.properties).forEach(s => walkJsonSchema(s, visitor));
+  }
+  if (schema.patternProperties && typeof schema.patternProperties === 'object') {
+    Object.values(schema.patternProperties).forEach(s => walkJsonSchema(s, visitor));
+  }
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    walkJsonSchema(schema.additionalProperties, visitor);
+  }
+  if (schema.items) {
+    if (Array.isArray(schema.items)) schema.items.forEach(s => walkJsonSchema(s, visitor));
+    else walkJsonSchema(schema.items, visitor);
+  }
+  if (schema.definitions && typeof schema.definitions === 'object') {
+    Object.values(schema.definitions).forEach(s => walkJsonSchema(s, visitor));
+  }
+  for (const k of ['allOf', 'anyOf', 'oneOf']) {
+    if (Array.isArray(schema[k])) schema[k].forEach(s => walkJsonSchema(s, visitor));
+  }
+  if (schema.if) walkJsonSchema(schema.if, visitor);
+  if (schema.then) walkJsonSchema(schema.then, visitor);
+  if (schema.else) walkJsonSchema(schema.else, visitor);
+  if (schema.not) walkJsonSchema(schema.not, visitor);
+}
+
+/**
+ * `format: "longtext"` e `x-longtext: true` (JSON Schema estensione) → `format: "textarea"`
+ * così json-editor usa un campo multilinea invece di input su una riga.
+ * @param {object} schema
+ */
+function normalizeLongtextFormatsInSchema(schema) {
+  walkJsonSchema(schema, node => {
+    const types = node.type;
+    const isString = types === 'string' || (Array.isArray(types) && types.includes('string'));
+    if (!isString || node.enum) return;
+    const fmt = node.format;
+    if (fmt === 'longtext') {
+      node.format = 'textarea';
+      return;
+    }
+    if (node['x-longtext'] === true) {
+      if (!fmt || !RESERVED_STRING_FORMATS.has(fmt)) {
+        node.format = 'textarea';
+      }
+      delete node['x-longtext'];
+    }
+  });
+}
+
 /**
  * Fetch the JSON schema and transform it so that @json-editor/json-editor
  * can consume it (Draft-07 compatible conventions).
@@ -140,6 +215,7 @@ function extractDocumentVersioning(rawSchema, data, urlHints) {
  *  2. Se esistono, imposta "readOnly" su proprietà `domanda` / `suggerimento` nelle
  *     definitions (tipico degli schemi onboarding EAA; su altri schemi non ha effetto).
  *  3. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
+ *  4. Normalizza `longtext` / `x-longtext` in `format: "textarea"` per testi lunghi.
  *
  * @param {string} schemaUrl
  * @returns {Promise<object>} transformed schema
@@ -171,6 +247,9 @@ async function loadAndTransformSchema(schemaUrl) {
 
   // 3. Tabs layout for the root object
   schema.format = 'tabs';
+
+  // 4. longtext (schema) → textarea (json-editor)
+  normalizeLongtextFormatsInSchema(schema);
 
   return schema;
 }

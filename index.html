@@ -6,75 +6,112 @@
   <title>IT-Wallet Webforms</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon" sizes="any" />
   <!-- Riferimento unico snippet: assets/partials/head-assets.html -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/css/bootstrap-italia.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+<a class="visually-hidden-focusable position-absolute top-0 start-0 m-2 btn btn-sm btn-primary" href="#main-content">Vai al contenuto principale</a>
 
-<!-- ── Navbar ──────────────────────────────────────────── -->
-<nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm navbar-app">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="index.html#catalog" id="nav-brand">
-      <i class="bi bi-wallet2 me-2"></i>IT-Wallet Webforms
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navMenu" aria-controls="navMenu"
-            aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav ms-auto align-items-md-center gap-md-1">
-        <li class="nav-item nav-search-item w-100 w-md-auto py-1 py-md-0 me-md-2">
-          <label for="nav-search-input" class="visually-hidden">Cerca form</label>
-          <div class="input-group nav-search-group">
-            <span class="input-group-text" aria-hidden="true">
-              <i class="bi bi-search"></i>
-            </span>
-            <input type="search" id="nav-search-input" class="form-control nav-search-field"
-                   autocomplete="off" placeholder="Cerca nel catalogo…" aria-label="Cerca form" />
+<!-- ── Header (Bootstrap Italia: it-header-wrapper / navbar collassabile) ── -->
+<header class="it-header-wrapper">
+  <div class="it-nav-wrapper">
+    <div class="it-header-center-wrapper it-small-header">
+      <div class="container-xxl">
+        <div class="row">
+          <div class="col-12">
+            <div class="it-header-center-content-wrapper">
+              <div class="it-brand-wrapper">
+                <a class="text-decoration-none app-brand-link" href="index.html#catalog" id="nav-brand" title="IT-Wallet Webforms">
+                  <!-- Modulo / documento (non logo PA): glyph allineato a Bootstrap Icons file-earmark-text -->
+                  <svg class="icon app-brand-form-icon" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
+                    <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
+                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                  </svg>
+                  <div class="it-brand-text">
+                    <div class="it-brand-title">IT-Wallet Webforms</div>
+                    <div class="it-brand-tagline d-none d-md-block">Catalogo e bozze webform</div>
+                  </div>
+                </a>
+              </div>
+            </div>
           </div>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-app-view py-md-1 active" href="#catalog" id="nav-catalog" data-app-view="catalog">
-            <i class="bi bi-collection me-1"></i>Catalogo webform
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-app-view py-md-1" href="#bozze" id="nav-bozze" data-app-view="bozze">
-            <i class="bi bi-folder2-open me-1"></i>Bozze webform salvate
-          </a>
-        </li>
-        <li class="nav-item ms-md-1">
-          <a class="btn btn-light btn-sm nav-app-cta" href="#catalog" id="nav-new-webform">
-            <i class="bi bi-plus-circle me-1"></i>Nuovo webform
-          </a>
-        </li>
-      </ul>
+        </div>
+      </div>
+    </div>
+    <div class="it-header-navbar-wrapper">
+      <div class="container-xxl">
+        <div class="row">
+          <div class="col-12">
+            <nav class="navbar navbar-expand-lg has-megamenu" aria-label="Navigazione principale">
+              <button class="custom-navbar-toggler" type="button" aria-controls="navMain"
+                      aria-expanded="false" aria-label="Mostra o nascondi la navigazione"
+                      data-bs-toggle="navbarcollapsible" data-bs-target="#navMain">
+                <svg class="icon bg-override" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                  <path d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
+                </svg>
+              </button>
+              <div class="navbar-collapsable" id="navMain" tabindex="-1">
+                <div class="close-div">
+                  <button class="btn close-menu" type="button">
+                    <span class="visually-hidden">Nascondi la navigazione</span>
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                      <path d="m12.7 12 6.7 6.6-.8.8-6.6-6.7-6.6 6.7-.8-.8 6.7-6.6-6.7-6.6.8-.8 6.6 6.7 6.6-6.7.8.8-6.7 6.6z"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="menu-wrapper">
+                  <ul class="navbar-nav">
+                    <li class="nav-item active">
+                      <a class="nav-link active nav-app-view" href="#catalog" id="nav-catalog" data-app-view="catalog" aria-current="page">
+                        <span><i class="bi bi-collection me-2" aria-hidden="true"></i>Catalogo webform</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-app-view" href="#bozze" id="nav-bozze" data-app-view="bozze">
+                        <span><i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Bozze webform salvate</span>
+                      </a>
+                    </li>
+                  </ul>
+                  <ul class="navbar-nav app-navbar-search-nav" role="search">
+                    <li class="nav-item py-2 py-lg-0 w-100 w-lg-auto">
+                      <label for="nav-search-input" class="visually-hidden">Cerca form o bozze</label>
+                      <div class="input-group input-group-sm app-navbar-search">
+                        <span class="input-group-text" id="nav-search-addon" aria-hidden="true">
+                          <i class="bi bi-search app-navbar-search-icon" aria-hidden="true"></i>
+                        </span>
+                        <input type="search" id="nav-search-input" class="form-control" autocomplete="off"
+                               placeholder="Cerca…" aria-label="Cerca form"
+                               aria-describedby="nav-search-addon" />
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</nav>
+</header>
 
 <!-- ── Main (due viste: catalogo = landing, bozze) ───────── -->
-<main class="flex-grow-1 d-flex flex-column">
+<main id="main-content" class="flex-grow-1 d-flex flex-column" tabindex="-1">
 
   <div id="view-catalog" class="app-view flex-grow-1 d-flex flex-column">
     <!-- Hero landing -->
-    <div class="page-hero page-hero--catalog bg-primary text-white">
-      <div class="container">
-        <h1 class="h4 fw-bold page-hero-title">
-          <i class="bi bi-file-earmark-text me-2"></i>Catalogo webform
+    <section class="page-hero page-hero--catalog bg-light border-bottom" aria-labelledby="page-hero-catalog-title">
+      <div class="container-xxl py-4 py-md-5">
+        <h1 class="h3 fw-bold page-hero-title mb-3" id="page-hero-catalog-title">
+          <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i>Catalogo webform
         </h1>
-        <p class="mb-0 opacity-75">
-          Scegli un webform: schema e JSON di esempio sono caricati dagli URL del manifest. Le bozze sono in <a href="#bozze">Bozze webform salvate</a>.
-        </p>
-        <p class="mb-0 opacity-75">
-          Ogni webform definisce i propri <i>schemaUrl</i> e <i>dataUrl</i> in <i>webforms-manifest.json</i>.
-          Le versioni dei webform sono visibili al loro interno.
+        <p class="mb-0 lead text-secondary page-hero-lead">
+          Scegli un webform: schema e JSON di esempio sono caricati dagli URL del <a class="fw-semibold" href="https://github.com/italia/eid-wallet-it-forms/blob/main/webforms-manifest.json" target="_blank" rel="noopener noreferrer" title="webforms-manifest.json nel repository GitHub">manifest</a>. Le bozze sono in <a class="fw-semibold" href="#bozze">Bozze webform salvate</a>.
         </p>
       </div>
-    </div>
-    <div class="container py-4 flex-grow-1">
+    </section>
+    <div class="container-xxl py-4 py-md-5 flex-grow-1">
       <section id="catalog-webforms" class="mb-0" aria-labelledby="catalog-heading">
         <h2 id="catalog-heading" class="h5 fw-bold mb-2 visually-hidden">Catalogo webform</h2>
 
@@ -90,19 +127,19 @@
   </div>
 
   <div id="view-bozze" class="app-view flex-grow-1 d-flex flex-column d-none">
-    <div class="page-hero page-hero--bozze bg-light border-bottom">
-      <div class="container">
-        <h1 class="h4 fw-bold page-hero-title">
-          <i class="bi bi-folder2-open me-2"></i>Bozze webform salvate
+    <section class="page-hero page-hero--bozze bg-light border-bottom" aria-labelledby="page-hero-bozze-title">
+      <div class="container-xxl py-4 py-md-5">
+        <h1 class="h3 fw-bold page-hero-title mb-3" id="page-hero-bozze-title">
+          <i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Bozze webform salvate
         </h1>
-        <p class="page-hero-lead">
-          Bozze nel browser (localStorage). Torna al <a class="link-primary text-decoration-underline" href="#catalog">catalogo</a> per aprire un nuovo webform.
+        <p class="mb-0 lead text-secondary page-hero-lead">
+          Bozze nel browser (localStorage). Torna al <a class="fw-semibold" href="#catalog">catalogo</a> per aprire un nuovo webform.
         </p>
       </div>
-    </div>
-    <div class="container py-4 flex-grow-1">
+    </section>
+    <div class="container-xxl py-4 py-md-5 flex-grow-1">
   <!-- Action bar -->
-  <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+  <div class="d-flex flex-wrap gap-3 mb-4 align-items-center">
     <button id="btn-import-json" class="btn btn-outline-secondary">
       <i class="bi bi-upload me-1"></i>Importa JSON
     </button>
@@ -119,7 +156,7 @@
 </main>
 
 <!-- ── Footer + overlay condivisi (assets/js/site-chrome.js) ─ -->
-<footer id="site-footer" class="py-3 mt-auto"></footer>
+<footer id="site-footer" class="it-footer-service py-4 mt-auto"></footer>
 <div id="site-shared-overlays"></div>
 
 <!-- ── Delete confirm modal ──────────────────────────────── -->
@@ -143,7 +180,7 @@
 </div>
 
 <!-- ── Scripts ────────────────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/js/bootstrap-italia.bundle.min.js"></script>
 <script src="assets/js/site-chrome.js"></script>
 <script>
   SiteChrome.injectSharedOverlays(document.getElementById('site-shared-overlays'));
@@ -215,7 +252,7 @@ function renderCatalog(manifest) {
     return;
   }
   el.innerHTML = `
-    <div class="row g-3">
+    <div class="row g-4">
       ${list.map(w => {
         const last = getLatestSavedDraftForWebform(w.id);
         const lastBtn = last
@@ -223,7 +260,7 @@ function renderCatalog(manifest) {
                 title="${escHtml(last.name)} · ${escHtml(relativeTime(last.updated_at))}">
                <i class="bi bi-clock-history me-1"></i>Ultima bozza
              </a>`
-          : `<span class="d-inline-block small text-muted align-middle py-1" title="Nessuna bozza salvata per questo webform">
+          : `<span class="app-card-meta align-self-center px-1" title="Nessuna bozza salvata per questo webform">
                <i class="bi bi-clock-history me-1"></i>Nessuna bozza
              </span>`;
         const docsBtn = w.docsUrl
@@ -232,17 +269,22 @@ function renderCatalog(manifest) {
              </a>`
           : '';
         return `
-        <div class="col-12 col-md-6">
-          <div class="card h-100 border-primary border-opacity-25 shadow-sm">
-            <div class="card-body">
-              <h3 class="h6 card-title mb-2">${escHtml(w.title)}</h3>
-              <p class="card-text text-muted small mb-2">${escHtml(w.description || '')}</p>
-              <p class="small text-muted mb-0 font-monospace text-break">
-                schema: <a href="${escHtml(w.schemaUrl)}" target="_blank" rel="noopener">sorgente</a>
-                · json: <a href="${escHtml(w.dataUrl)}" target="_blank" rel="noopener">sorgente</a>
+        <div class="col-12 col-lg-6">
+          <div class="card webform-catalog-card h-100 shadow-sm border">
+            <div class="card-body app-card-body pb-2">
+              <h3 class="h5 card-title text-dark mb-2 text-truncate" title="${escHtml(w.title)}">
+                <i class="bi bi-file-earmark-text text-primary me-2" aria-hidden="true"></i>${escHtml(w.title)}
+              </h3>
+              <p class="app-card-meta mb-2">${escHtml(w.description || '')}</p>
+              <p class="app-card-meta mb-0 text-break">
+                <span class="fw-semibold text-body">Schema</span>
+                · <a href="${escHtml(w.schemaUrl)}" target="_blank" rel="noopener">Apri sorgente</a>
+                <span class="text-body-secondary mx-1">·</span>
+                <span class="fw-semibold text-body">JSON</span>
+                · <a href="${escHtml(w.dataUrl)}" target="_blank" rel="noopener">Apri sorgente</a>
               </p>
             </div>
-            <div class="card-footer bg-transparent border-top-0 pt-0 d-flex flex-wrap gap-1 align-items-center">
+            <div class="card-footer card-footer-actions bg-light border-top">
               <a class="btn btn-primary btn-sm" href="form.html?webform=${encodeURIComponent(w.id)}">
                 <i class="bi bi-pencil-square me-1"></i>Compila webform
               </a>
@@ -264,17 +306,26 @@ function showAppView(view) {
   const nc = document.getElementById('nav-catalog');
   const nb = document.getElementById('nav-bozze');
   if (!vc || !vb) return;
+  function setAppNavActive(anchor, on) {
+    if (!anchor) return;
+    const li = anchor.closest('.nav-item');
+    anchor.classList.toggle('active', on);
+    if (li) li.classList.toggle('active', on);
+    if (on) anchor.setAttribute('aria-current', 'page');
+    else anchor.removeAttribute('aria-current');
+  }
+
   if (view === 'bozze') {
     vc.classList.add('d-none');
     vb.classList.remove('d-none');
-    if (nc) nc.classList.remove('active');
-    if (nb) nb.classList.add('active');
+    setAppNavActive(nc, false);
+    setAppNavActive(nb, true);
     renderPage();
   } else {
     vb.classList.add('d-none');
     vc.classList.remove('d-none');
-    if (nb) nb.classList.remove('active');
-    if (nc) nc.classList.add('active');
+    setAppNavActive(nb, false);
+    setAppNavActive(nc, true);
     if (_manifestData) renderCatalog(_manifestData);
     window.scrollTo(0, 0);
   }
@@ -358,7 +409,7 @@ function renderList(forms) {
   }
 
   el.innerHTML = `
-    <div class="row g-3">
+    <div class="row g-4">
       ${forms.map(f => formCard(f)).join('')}
     </div>`;
 
@@ -380,43 +431,43 @@ function formCard(f) {
   const ente = f.data?.metadata?.nome_ente_titolare || '—';
   const eaa  = f.data?.metadata?.nome_eaa           || '—';
   return `
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card form-card h-100 shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title text-truncate" title="${escHtml(f.name)}">
-            <i class="bi bi-file-earmark-text text-primary me-2"></i>${escHtml(f.name)}
-          </h5>
-          <p class="form-meta mb-1">
-            <i class="bi bi-building me-1"></i>${escHtml(ente)}
+    <div class="col-12 col-lg-6">
+      <div class="card form-card bozza-card h-100 shadow-sm border">
+        <div class="card-body app-card-body pb-2">
+          <h3 class="h5 card-title text-dark text-truncate mb-2" title="${escHtml(f.name)}">
+            <i class="bi bi-file-earmark-text text-primary me-2" aria-hidden="true"></i>${escHtml(f.name)}
+          </h3>
+          <p class="app-card-meta mb-1">
+            <i class="bi bi-building me-1" aria-hidden="true"></i>${escHtml(ente)}
           </p>
-          <p class="form-meta mb-1">
-            <i class="bi bi-card-text me-1"></i>${escHtml(eaa)}
+          <p class="app-card-meta mb-1">
+            <i class="bi bi-card-text me-1" aria-hidden="true"></i>${escHtml(eaa)}
           </p>
-          <p class="form-meta text-muted">
-            <i class="bi bi-clock me-1"></i>
+          <p class="app-card-meta mb-0">
+            <i class="bi bi-clock me-1" aria-hidden="true"></i>
             Modificato ${relativeTime(f.updated_at)} &middot;
             Creato ${formatDateTime(f.created_at)}
           </p>
         </div>
-        <div class="card-footer d-flex flex-wrap gap-1">
-          <button class="btn btn-primary btn-sm flex-grow-1"
+        <div class="card-footer card-footer-actions bg-light border-top">
+          <button class="btn btn-primary btn-sm"
                   data-action="open" data-id="${f.id}">
             <i class="bi bi-pencil me-1"></i>Apri
           </button>
           <button class="btn btn-outline-success btn-sm"
                   data-action="export-json" data-id="${f.id}"
                   title="Esporta JSON">
-            <i class="bi bi-download"></i> JSON
+            <i class="bi bi-download me-1"></i>JSON
           </button>
           <button class="btn btn-outline-success btn-sm"
                   data-action="export-csv" data-id="${f.id}"
                   title="Esporta CSV">
-            <i class="bi bi-filetype-csv"></i> CSV
+            <i class="bi bi-filetype-csv me-1"></i>CSV
           </button>
           <button class="btn btn-outline-danger btn-sm"
                   data-action="delete" data-id="${f.id}"
                   title="Elimina">
-            <i class="bi bi-trash"></i>
+            <i class="bi bi-trash me-1"></i>Elimina
           </button>
         </div>
       </div>

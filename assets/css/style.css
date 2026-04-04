@@ -1,62 +1,53 @@
-/* IT-Wallet Webforms – custom styles */
+/* IT-Wallet Webforms – custom styles (su Bootstrap Italia / token Bootstrap) */
 
 :root {
-  --brand: #0066cc;
-  --brand-dark: #004a99;
-  --success: #198754;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light-bg: #f8f9fa;
-  --border: #dee2e6;
+  --brand: var(--bs-primary);
+  --brand-dark: var(--bs-link-hover-color, #004a99);
+  --success: var(--bs-success);
+  --warning: var(--bs-warning);
+  --danger: var(--bs-danger);
+  --light-bg: var(--bs-light);
+  --border: var(--bs-border-color);
 }
 
 /* ── Layout ──────────────────────────────────────────────── */
+/* Allinea al font stack Bootstrap Italia (Titillium Web + fallback) */
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: var(--bs-body-font-family);
+}
+
+/* Evita mixin di font: tutto il testo UI in sans del kit (monospace solo per pre/code del tema) */
+input,
+textarea,
+select,
+button,
+.form-control {
+  font-family: inherit;
 }
 
 main { flex: 1; }
 
-/* ── Index: intestazioni catalogo / bozze (stessa altezza e testo) ─ */
-.page-hero {
-  --page-hero-py: 1.5rem;
-  --page-hero-min-h: 12.5rem;
-  min-height: var(--page-hero-min-h);
-  padding-top: var(--page-hero-py);
-  padding-bottom: var(--page-hero-py);
-  display: flex;
-  align-items: center;
-}
-.page-hero .container {
-  width: 100%;
-}
+/* ── Index: intestazioni catalogo / bozze (ritmo verticale allineato al kit) ─ */
 .page-hero-title {
-  margin-bottom: 0.5rem;
+  line-height: 1.25;
 }
-.page-hero-lead {
-  font-size: 1rem;
-  line-height: 1.55;
-  max-width: 65ch;
-  margin-bottom: 0;
-}
-.page-hero-lead + .page-hero-lead {
-  margin-top: 0.5rem;
-}
-.page-hero--catalog .page-hero-lead {
-  opacity: 0.92;
-}
-.page-hero--catalog .page-hero-lead a {
-  color: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-}
+.page-hero--catalog .page-hero-lead,
 .page-hero--bozze .page-hero-lead {
-  color: var(--bs-secondary-color);
+  max-width: 65ch;
 }
+.page-hero--catalog .page-hero-lead a,
 .page-hero--bozze .page-hero-lead a {
-  font-weight: 600;
+  color: var(--bs-primary);
+  text-decoration: none;
+}
+.page-hero--catalog .page-hero-lead a:hover,
+.page-hero--catalog .page-hero-lead a:focus-visible,
+.page-hero--bozze .page-hero-lead a:hover,
+.page-hero--bozze .page-hero-lead a:focus-visible {
+  text-decoration: underline;
 }
 
 /* ── Sommario sezioni (form.html offcanvas) ──────────────── */
@@ -75,9 +66,9 @@ main { flex: 1; }
 /* Sommario a destra: resta visibile allo scroll (sticky nel viewport) */
 .form-toc-sidebar--end .form-toc-sidebar-panel {
   position: sticky;
-  /* Sotto toolbar sticky (~48px) + margine; navbar di solito è già fuori viewport in scroll lunghi */
-  top: 3.75rem;
-  max-height: calc(100vh - 4.25rem);
+  /* Sotto toolbar sticky (py-3 + pulsanti, può andare a capo): margine extra così il titolo «Sezioni» non resta tagliato */
+  top: 6.25rem;
+  max-height: calc(100vh - 7rem);
   overflow-y: auto;
   z-index: 5;
   background-color: var(--light-bg);
@@ -86,140 +77,205 @@ main { flex: 1; }
   font-size: 0.875rem;
 }
 
-/* ── Navbar ──────────────────────────────────────────────── */
-.navbar-brand img {
-  height: 32px;
-  width: auto;
+/* ── Header / navigazione Bootstrap Italia (integrazioni minime) ─ */
+/* Il kit aggiunge padding orizzontale al centro header: con container-xxl interno si crea doppio rientro. */
+.it-header-wrapper .it-header-center-wrapper {
+  padding-left: 0;
+  padding-right: 0;
 }
 
-/* Index: barra compatta, link leggeri */
-.navbar-app {
-  --bs-navbar-padding-y: 0.375rem;
-}
-.navbar-app .navbar-brand {
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-.navbar-app .nav-link {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.25;
-  padding: 0.4rem 0.5rem;
-}
-.navbar-app .nav-link.nav-app-view {
-  white-space: nowrap;
-}
-/* Link vista catalogo/bozze: sempre leggibili su barra primaria */
-.navbar-app.navbar-dark .nav-link.nav-app-view {
-  color: #fff !important;
-  text-decoration: underline;
-  text-underline-offset: 0.12em;
-  text-decoration-thickness: 1px;
-}
-.navbar-app.navbar-dark .nav-link.nav-app-view:hover,
-.navbar-app.navbar-dark .nav-link.nav-app-view:focus-visible {
-  color: #fff !important;
-  text-decoration: underline;
-}
-.navbar-app.navbar-dark .nav-link.nav-app-view.active {
-  color: #fff !important;
-  font-weight: 600;
-  text-decoration: underline;
-}
-@media (min-width: 768px) {
-  .navbar-app .navbar-nav {
-    flex-wrap: nowrap;
-  }
-  .navbar-app .nav-link.nav-app-view {
-    padding-top: 0.3rem;
-    padding-bottom: 0.3rem;
-  }
-}
-.navbar-app .nav-link i {
-  font-size: 0.95em;
-  vertical-align: -0.06em;
-  opacity: 0.92;
-}
-.navbar-app .nav-app-cta {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  padding: 0.28rem 0.55rem;
-  line-height: 1.3;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: none;
-  white-space: nowrap;
-}
-.navbar-app .nav-app-cta:hover {
-  border-color: rgba(255, 255, 255, 0.65);
+.it-brand-wrapper a:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
-/* Search integrata sulla barra primaria (angoli retti, coerente col resto UI) */
-.navbar-app .nav-search-group {
-  border-radius: 0;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+/* Brand: icona modulo + testo con spazio costante (anche su mobile) */
+.app-brand-link {
+  display: inline-flex;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
 }
-.navbar-app .nav-search-group > .input-group-text,
-.navbar-app .nav-search-group > .form-control {
-  border-radius: 0;
+.app-brand-form-icon {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  flex-shrink: 0;
 }
-.navbar-app .nav-search-item .input-group-text {
-  background: rgba(255, 255, 255, 0.18);
-  border: none;
-  color: rgba(255, 255, 255, 0.95);
-  padding: 0.2rem 0.45rem;
-  font-size: 0.8rem;
+.app-brand-form-icon path {
+  fill: currentColor;
 }
-.navbar-app .nav-search-item .nav-search-field {
+
+/* Mobile: respiro tra fascia titolo e riga con hamburger */
+@media (max-width: 991.98px) {
+  .it-header-center-wrapper.it-small-header .it-header-center-content-wrapper {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .app-brand-link {
+    column-gap: 1rem;
+  }
+  .it-header-navbar-wrapper {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+  .it-header-navbar-wrapper .navbar {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    align-items: center;
+    min-height: 3rem;
+  }
+  .it-header-navbar-wrapper .custom-navbar-toggler {
+    margin-left: auto;
+    margin-right: 0;
+    padding: 0.55rem 0.75rem;
+  }
+}
+
+/* Ricerca in navbar: solo layout (larghezza). Aspetto = input-group / form-control Bootstrap Italia senza override. */
+.app-navbar-search-nav {
+  flex-shrink: 0;
+  align-self: center;
+}
+.app-navbar-search {
+  width: 100%;
+  max-width: 18rem;
+}
+
+/* Pulsante «Torna alle bozze» su fascia blu: outline-primary è illeggibile → outline-light */
+.it-header-center-wrapper .app-header-back-btn {
+  border-width: 2px;
+  color: #fff;
+}
+.it-header-center-wrapper .app-header-back-btn:hover,
+.it-header-center-wrapper .app-header-back-btn:focus-visible {
+  color: var(--bs-primary);
+  background-color: #fff;
+  border-color: #fff;
+}
+
+/* Stato salvataggio in header blu: niente text-muted (illeggibile su #06c) */
+.save-status-header {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+.save-status-icon-dirty {
+  color: #ffeb99;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.35));
+}
+.save-status-icon-clean {
+  color: #b8f5d0;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.25));
+}
+
+/* Toolbar form: sopra il contenuto che scorre sotto (sticky); overflow visibile per hit box dei bottoni */
+.app-toolbar-sticky {
+  z-index: 1048;
+  isolation: isolate;
+  overflow: visible;
+}
+
+/* Barra nome form: evita overflow orizzontale su flex (min-width:0 sul campo) */
+.app-form-name-bar {
   min-width: 0;
-  border: none;
-  background: rgba(255, 255, 255, 0.97);
-  font-size: 0.8125rem;
-  padding: 0.25rem 0.5rem;
-  line-height: 1.35;
-  border-radius: 0;
 }
-.navbar-app .nav-search-item .nav-search-field::placeholder {
-  color: rgba(33, 37, 41, 0.45);
+.app-form-name-input {
+  min-width: 0;
 }
-.navbar-app .nav-search-item .nav-search-field:focus {
-  box-shadow: none;
-  background: #fff;
-}
-.navbar-app .nav-search-group:focus-within {
-  border-color: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
-}
-@media (min-width: 768px) {
-  .nav-search-item {
-    max-width: 220px;
-    min-width: 180px;
+
+/*
+ * Mobile / viewport stretti: toolbar senza sovrapposizioni.
+ * — niente fila orizzontale con overflow-x (taglierebbe i dropdown Esporta/Importa).
+ * — ms-auto su un gruppo dedicato → riga propria così non comprime gli altri pulsanti.
+ * — min-width dei btn su viewport stretti: vedi blocco .toolbar .btn sotto (dopo la regola desktop).
+ */
+@media (max-width: 991.98px) {
+  .app-toolbar-sticky .toolbar {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 0.5rem;
+  }
+
+  .app-toolbar-sticky .toolbar .toolbar-actions-end {
+    margin-left: 0 !important;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .app-toolbar-sticky .toolbar .vr {
+    align-self: stretch;
+    min-height: 2.25rem;
   }
 }
 
-/* ── Form cards on index page ────────────────────────────── */
-.form-card {
-  transition: box-shadow .15s;
+/* Footer coerente con area servizio */
+footer.it-footer-service {
+  border-top: 1px solid var(--border);
+  background-color: var(--bs-gray-100, var(--light-bg));
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
 }
-.form-card:hover {
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
+
+/* ── Card catalogo / bozze (azioni visibili senza scroll: wrap + card abbastanza larghe) ─ */
+.webform-catalog-card,
+.bozza-card {
+  transition: box-shadow 0.15s ease;
+  min-width: 0; /* evita overflow nella griglia flex */
 }
+.webform-catalog-card:hover,
+.bozza-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  row-gap: 0.5rem;
+}
+.card-footer-actions .btn,
+.card-footer-actions > a {
+  white-space: nowrap;
+}
+
 .form-card .card-footer {
-  background: transparent;
   border-top: 1px solid var(--border);
 }
-.form-meta {
-  font-size: .8rem;
-  color: #6c757d;
+
+/* Tipografia unificata corpo card (catalogo + bozze) */
+.app-card-body {
+  font-size: var(--bs-body-font-size);
+  line-height: var(--bs-body-line-height);
+}
+.app-card-body .card-title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+.app-card-meta {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--bs-secondary-color);
+  margin-bottom: 0;
+}
+.app-card-meta a {
+  color: var(--bs-link-color);
+  font-weight: 500;
+  text-decoration: none;
+}
+.app-card-meta a:hover,
+.app-card-meta a:focus-visible {
+  color: var(--bs-link-hover-color);
+  text-decoration: underline;
 }
 
 /* ── Empty state ─────────────────────────────────────────── */
 .empty-state {
   padding: 4rem 2rem;
   text-align: center;
-  color: #6c757d;
+  color: var(--bs-secondary-color);
 }
 .empty-state i {
   font-size: 4rem;
@@ -233,6 +289,232 @@ main { flex: 1; }
 }
 
 /* json-editor overrides */
+/*
+ * Bootstrap Italia (.form-group label) usa label flottante position:absolute sopra l’input.
+ * json-editor (tema bootstrap5) usa invece label.form-label *sopra* il campo: senza override
+ * etichetta e placeholder/valore risultano illeggibili (sovrapposti).
+ */
+.je-ready .form-group label.form-label {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+  line-height: var(--bs-body-line-height, 1.5);
+  padding: 0;
+  margin-bottom: 0.35rem;
+  cursor: default;
+  z-index: auto;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+  max-width: none;
+  width: 100%;
+  background-color: transparent;
+}
+.je-ready .form-group label.form-label.active {
+  transform: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+/* Spaziatura verticale da BI (3rem) pensata per floating label; con label normale basta meno respiro */
+.je-ready .form-group {
+  margin-bottom: 1.25rem;
+}
+
+/*
+ * json-editor: enum / oneOf mettono titolo e select.je-switcher come fratelli in flusso inline.
+ * Il tema (.je-switcher: inline-block + margin-left) affianca il toggle al titolo → freccia form-select sul testo.
+ */
+.je-ready select.form-select.je-switcher {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-left: 0 !important;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  /* Il tema je azzera il padding: serve spazio per l’icona del select */
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  padding-left: 0.75rem;
+  padding-right: 2.5rem;
+}
+
+.je-ready label:has(+ select.je-switcher) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 0;
+  padding-right: 0;
+}
+
+.je-ready b:has(+ label + select.je-switcher) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+/* Testi lunghi nell’editor: niente troncamento con ellissi; font ridotta dinamicamente (je-longtext-fit.js) */
+.je-ready input.form-control.je-longtext-fit,
+.je-ready textarea.form-control.je-longtext-fit {
+  box-sizing: border-box;
+  max-width: 100%;
+  text-overflow: clip;
+}
+.je-ready input.form-control.je-longtext-fit {
+  overflow-x: auto;
+}
+.je-ready textarea.form-control.je-longtext-fit {
+  overflow: auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/*
+ * Griglia json-editor (.row + .col-md-*): niente margini orizzontali sulla row (niente gutter negativo BI).
+ * Padding orizzontale sulla row = respiro minimo del contenuto dai bordi; column-gap = spazio tra colonne affiancate.
+ */
+.je-ready .row {
+  --bs-gutter-x: 0;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  column-gap: 0.75rem;
+  box-sizing: border-box;
+}
+
+/* $schema: colonna stretta + URL lungo → label e input si sovrappongono; forza riga intera e testo a capo */
+.je-ready [data-schemapath*=".$schema"] {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  min-width: 0;
+}
+.je-ready [data-schemapath*=".$schema"] .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  row-gap: 0.35rem;
+}
+.je-ready [data-schemapath*=".$schema"] .form-label {
+  width: 100%;
+  margin-bottom: 0 !important;
+  position: relative;
+  z-index: 1;
+}
+.je-ready [data-schemapath*=".$schema"] .form-control,
+.je-ready [data-schemapath*=".$schema"] textarea.form-control {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  position: relative;
+  z-index: 0;
+}
+
+/* Stesso problema se il path non contiene il suffisso atteso: colonna grid che contiene id root[$schema] */
+.je-ready .row > div:has(input[id*="[$schema]"], textarea[id*="[$schema]"]) {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  min-width: 0;
+}
+.je-ready .form-group:has(input[id*="[$schema]"], textarea[id*="[$schema]"]) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  row-gap: 0.35rem;
+}
+.je-ready .form-group:has(input[id*="[$schema]"]) .form-label,
+.je-ready .form-group:has(textarea[id*="[$schema]"]) .form-label {
+  width: 100%;
+  margin-bottom: 0 !important;
+}
+.je-ready input[id*="[$schema]"].form-control,
+.je-ready textarea[id*="[$schema]"].form-control {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Pannello «modifica JSON» (json-editor .je-modal): larghezza e griglia così Salva / Copia / Annulla restano sulla stessa riga */
+.je-ready .je-modal {
+  box-sizing: border-box;
+  width: min(32rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1rem);
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  align-items: center;
+  border-radius: var(--bs-border-radius, 0.25rem);
+}
+
+.je-ready .je-modal > label.visually-hidden {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.je-ready .je-modal > .je-edit-json--textarea {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  min-height: 12rem;
+  font-family: var(--bs-font-monospace, ui-monospace, monospace);
+  font-size: 0.8125rem;
+}
+
+.je-ready .je-modal > .json-editor-btntype-save,
+.je-ready .je-modal > .json-editor-btntype-copy,
+.je-ready .je-modal > .json-editor-btntype-cancel {
+  float: none;
+  white-space: nowrap;
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+}
+
+/*
+ * json-editor inietta padding/margin diversi per tipo (collapse 10px a destra, add/delete colorati, ecc.).
+ * Unifica dimensioni di: JSON, collapse, proprietà, add/delete/move, ecc. (!important vince sul foglio iniettato dopo).
+ */
+.je-ready button.btn[class*="json-editor-btntype-"] {
+  padding: 0.3rem 0.55rem !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.3 !important;
+  font-weight: 600;
+  border-radius: var(--bs-border-radius, 0.25rem) !important;
+  margin: 0 !important;
+}
+
+.je-ready .btn-group {
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/*
+ * Righe array (item senza title_controls): json-editor appende lo span.btn-group in fondo al contenitore.
+ * Flex + order riportano delete/move in cima all’item (come un’intestazione azioni), senza toccare il JS del tema.
+ */
+.je-ready *:has(> span.btn-group:has(button.json-editor-btntype-delete)) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.je-ready *:has(> span.btn-group:has(button.json-editor-btntype-delete)) > span.btn-group {
+  order: -1;
+  align-self: flex-start;
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
+}
+
 .je-ready .card {
   border: 1px solid var(--border);
   margin-bottom: 1rem;
@@ -244,6 +526,48 @@ main { flex: 1; }
 }
 .je-ready .card-header:hover {
   background: #e9ecef;
+}
+
+/*
+ * Oggetto: prima riga = titolo (collapse + heading + btn interni) + controlli (JSON, proprietà…).
+ * Flex allinea verticalmente collapse, testo e pulsanti; il tema usa inline-block sul titolo → senza questo il tasto JSON risulta sfalsato in basso.
+ */
+.je-ready .je-object__container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.35rem;
+}
+
+.je-ready .je-object__container > .je-object__title {
+  display: inline-flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.je-ready .je-object__container > .je-object__controls.btn-group {
+  flex: 0 0 auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem !important;
+  margin-top: 0 !important;
+}
+
+.je-ready .je-object__container > :not(.je-object__title):not(.je-object__controls) {
+  flex: 1 0 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Titolo sezione + btn-group interno (es. add item): più aria tra heading e pulsanti */
+.je-ready span.card-title > .btn-group {
+  margin-left: 1.35rem;
 }
 
 /* read-only fields */
@@ -304,14 +628,101 @@ main { flex: 1; }
 .validation-err { color: var(--danger); }
 
 /* ── Toolbar ─────────────────────────────────────────────── */
-.toolbar .btn {
+/*
+ * Toolbar: align-items-center nel markup (stile Bootstrap). Dropdown in flex solo per allineamento.
+ * Cliccabilità: .app-toolbar-btn-fill ha pointer-events: none così il hit test colpisce il <button>
+ * (padding incluso), non uno span che non copre tutta l’area flex.
+ */
+.app-toolbar-sticky .toolbar .dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.app-toolbar-sticky .toolbar .btn {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   min-width: 110px;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.85rem !important;
+  line-height: 1.25 !important;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-toolbar-sticky .toolbar .btn > .app-toolbar-btn-fill {
+  pointer-events: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.app-toolbar-sticky .toolbar .btn:not(.dropdown-toggle) > .app-toolbar-btn-fill {
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+.app-toolbar-sticky .toolbar .btn.dropdown-toggle > .app-toolbar-btn-fill {
+  flex: 1 1 auto;
+  justify-content: center;
+  padding-inline-end: 0.15rem;
+}
+
+.app-toolbar-sticky .toolbar .dropdown-toggle::after {
+  pointer-events: none;
+  align-self: center;
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  .app-toolbar-sticky .toolbar .btn {
+    min-width: 2.75rem;
+  }
 }
 
 /* ── Badges ──────────────────────────────────────────────── */
 .badge-form-type {
   font-size: .7rem;
   vertical-align: middle;
+}
+
+/*
+ * Torna su (form.html): z-index sopra editor/sticky toolbar, sotto modali e toast.
+ * BI posiziona .icon con top/scale per il font glyph :before; con SVG inline serve flex + reset.
+ */
+a.back-to-top.app-form-scrolltop {
+  z-index: 1040;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+a.back-to-top.app-form-scrolltop .icon {
+  display: block;
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
+  /* Leggero aggiustamento ottico (punta della freccia); sostituisce lo scale/top del tema BI */
+  transform: translateY(-1px) !important;
 }
 
 /* ── Toast notification ──────────────────────────────────── */
@@ -330,20 +741,20 @@ main { flex: 1; }
 }
 
 /* ── Footer ──────────────────────────────────────────────── */
-footer {
-  background: var(--light-bg);
-  border-top: 1px solid var(--border);
-  font-size: .8rem;
-  color: #6c757d;
+footer.it-footer-service a {
+  color: inherit;
 }
-footer a { color: inherit; }
-footer a.footer-github-link:hover,
-footer a.footer-github-link:focus-visible {
+footer.it-footer-service a.footer-github-link:hover,
+footer.it-footer-service a.footer-github-link:focus-visible {
   text-decoration: underline;
 }
 
 /* ── Responsive tweaks ───────────────────────────────────── */
 @media (max-width: 576px) {
-  .toolbar .btn span { display: none; }
-  .toolbar .btn i { margin-right: 0 !important; }
+  .toolbar .btn .app-toolbar-btn-label {
+    display: none;
+  }
+  .toolbar .btn i {
+    margin-right: 0 !important;
+  }
 }
