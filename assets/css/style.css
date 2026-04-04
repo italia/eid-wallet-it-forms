@@ -167,11 +167,16 @@ main { flex: 1; }
   filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.25));
 }
 
-/* Toolbar form: sopra il contenuto che scorre sotto (sticky); overflow visibile per hit box dei bottoni */
+/* Toolbar form: sopra il contenuto che scorre sotto (sticky); la riga interna ha z-index così i click non finiscono sul blocco sotto */
 .app-toolbar-sticky {
   z-index: 1048;
   isolation: isolate;
   overflow: visible;
+}
+
+.app-toolbar-sticky .toolbar.app-toolbar-inner {
+  position: relative;
+  z-index: 2;
 }
 
 /* Barra nome form: evita overflow orizzontale su flex (min-width:0 sul campo) */
@@ -180,6 +185,11 @@ main { flex: 1; }
 }
 .app-form-name-input {
   min-width: 0;
+  max-width: 32rem;
+}
+
+.app-json-preview-pre {
+  font-size: 0.8rem;
 }
 
 /*
@@ -358,7 +368,7 @@ footer.it-footer-service {
   margin-bottom: 0.25rem;
 }
 
-/* Testi lunghi nell’editor: niente troncamento con ellissi; font ridotta dinamicamente (je-longtext-fit.js) */
+/* Testi lunghi nell’editor: niente ellissi; textarea con più righe via JS (je-longtext-fit.js), input con scroll orizzontale */
 .je-ready input.form-control.je-longtext-fit,
 .je-ready textarea.form-control.je-longtext-fit {
   box-sizing: border-box;
@@ -498,21 +508,51 @@ footer.it-footer-service {
 }
 
 /*
- * Righe array (item senza title_controls): json-editor appende lo span.btn-group in fondo al contenitore.
- * Flex + order riportano delete/move in cima all’item (come un’intestazione azioni), senza toccare il JS del tema.
+ * Righe array (delete/move): il tema può usare span o div .btn-group; classi json-editor-btn-delete / json-editor-btntype-delete.
+ * — Stesso layout flex per tutti i .btn-group che contengono delete di riga (non solo figlio diretto del card-title).
+ * — Contenitore item: cornice + spazio netto tra un item e il successivo (bordo superiore + padding).
+ * — order: -1 sul .btn-group diretto dell’item (controlli in cima al blocco).
  */
-.je-ready *:has(> span.btn-group:has(button.json-editor-btntype-delete)) {
+.je-ready .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
+  display: inline-flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  vertical-align: middle;
+}
+
+.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))) {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   min-width: 0;
+  padding: 1rem 1.1rem 1.15rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--bs-border-radius, 0.375rem);
+  background-color: var(--light-bg, var(--bs-gray-100));
 }
 
-.je-ready *:has(> span.btn-group:has(button.json-editor-btntype-delete)) > span.btn-group {
+/* Spaziatore visibile tra item consecutivi (il margine inferiore da solo può “collassare” in layout a blocchi) */
+.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)))
+  + *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))) {
+  margin-top: 0;
+  padding-top: 1.35rem;
+  border-top: 2px solid var(--border);
+}
+
+.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)))
+  > .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
   order: -1;
   align-self: flex-start;
   flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .je-ready .card {
@@ -629,23 +669,20 @@ footer.it-footer-service {
 
 /* ── Toolbar ─────────────────────────────────────────────── */
 /*
- * Toolbar: align-items-center nel markup (stile Bootstrap). Dropdown in flex solo per allineamento.
- * Cliccabilità: .app-toolbar-btn-fill ha pointer-events: none così il hit test colpisce il <button>
- * (padding incluso), non uno span che non copre tutta l’area flex.
+ * Icona + etichetta sono figli diretti del <button> (niente span wrapper): hit area = tutto il bottone, incluso padding.
  */
 .app-toolbar-sticky .toolbar .dropdown {
   display: flex;
   align-items: center;
 }
 
-.app-toolbar-sticky .toolbar .btn {
-  position: relative;
-  z-index: 2;
+.app-toolbar-sticky .toolbar.app-toolbar-inner .btn {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   flex-wrap: nowrap;
+  gap: 0.35rem;
   white-space: nowrap;
   min-width: 110px;
   min-height: 2.75rem;
@@ -657,29 +694,6 @@ footer.it-footer-service {
   -webkit-tap-highlight-color: transparent;
 }
 
-.app-toolbar-sticky .toolbar .btn > .app-toolbar-btn-fill {
-  pointer-events: none;
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-}
-
-.app-toolbar-sticky .toolbar .btn:not(.dropdown-toggle) > .app-toolbar-btn-fill {
-  flex: 1 1 100%;
-  width: 100%;
-}
-
-.app-toolbar-sticky .toolbar .btn.dropdown-toggle > .app-toolbar-btn-fill {
-  flex: 1 1 auto;
-  justify-content: center;
-  padding-inline-end: 0.15rem;
-}
-
 .app-toolbar-sticky .toolbar .dropdown-toggle::after {
   pointer-events: none;
   align-self: center;
@@ -689,7 +703,7 @@ footer.it-footer-service {
 }
 
 @media (max-width: 991.98px) {
-  .app-toolbar-sticky .toolbar .btn {
+  .app-toolbar-sticky .toolbar.app-toolbar-inner .btn {
     min-width: 2.75rem;
   }
 }

@@ -1,13 +1,13 @@
 /**
- * Riduce dinamicamente la font-size di input/textarea json-editor così il testo
- * resta leggibile senza ellissi (scroll orizzontale solo se serve, sotto una soglia minima).
- * Da inizializzare sul contenitore #editor-container dopo je-ready.
+ * json-editor: niente riduzione font-size.
+ * — textarea: aumenta `rows` finché il testo entra (con minimo da schema/tema e tetto massimo).
+ * — input: solo overflow orizzontale (CSS); font sempre quello del tema.
+ * Inizializzare su #editor-container dopo je-ready.
  */
 (function () {
   const FIT_CLASS = 'je-longtext-fit';
-  const MIN_PX = 10;
-  const STEP = 0.5;
   const DEBOUNCE_MS = 64;
+  const TEXTAREA_MAX_ROWS = 100;
 
   const INPUT_SELECTOR =
     'input.form-control:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="button"]):not([type="submit"])';
@@ -19,45 +19,58 @@
     );
   }
 
-  function captureMaxFontPx(el) {
-    el.style.fontSize = '';
-    const px = parseFloat(window.getComputedStyle(el).fontSize);
-    if (Number.isFinite(px) && px > 0) {
-      el.dataset.jeFitMaxPx = String(px);
-    } else {
-      el.dataset.jeFitMaxPx = '16';
-    }
+  function textareaMinRows(el) {
+    const fromData = parseInt(el.dataset.jeMinRows, 10);
+    if (Number.isFinite(fromData) && fromData >= 1) return fromData;
+    const fromAttr = parseInt(el.getAttribute('rows'), 10);
+    let n = Number.isFinite(fromAttr) && fromAttr >= 1 ? fromAttr : 2;
+    // json-editor usa spesso rows alti sulle textarea: a campo vuoto resta compatto (cresce con il testo)
+    if (!el.value && n > 3) n = 2;
+    el.dataset.jeMinRows = String(n);
+    return n;
   }
 
-  function fitFont(el) {
-    if (!el.isConnected || isExcluded(el)) return;
-    const maxPx = parseFloat(el.dataset.jeFitMaxPx);
-    if (!Number.isFinite(maxPx) || maxPx <= 0) captureMaxFontPx(el);
-    const cap = parseFloat(el.dataset.jeFitMaxPx);
+  function fitTextareaRows(el) {
+    el.style.removeProperty('font-size');
+    const minRows = textareaMinRows(el);
 
-    if (!el.value || el.value.length === 0) {
-      el.style.removeProperty('font-size');
+    if (!el.value) {
+      el.rows = minRows;
+      el.style.removeProperty('overflow-y');
       return;
     }
 
-    el.style.fontSize = cap + 'px';
-
-    if (el.tagName === 'TEXTAREA') {
-      let px = cap;
-      while (
-        px >= MIN_PX &&
-        (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1)
-      ) {
-        px -= STEP;
-        el.style.fontSize = px + 'px';
-      }
-    } else {
-      let px = cap;
-      while (px >= MIN_PX && el.scrollWidth > el.clientWidth + 1) {
-        px -= STEP;
-        el.style.fontSize = px + 'px';
-      }
+    let r = minRows;
+    el.rows = r;
+    while (r < TEXTAREA_MAX_ROWS && el.scrollHeight > el.clientHeight + 1) {
+      r += 1;
+      el.rows = r;
     }
+
+    while (r > minRows) {
+      el.rows = r - 1;
+      if (el.scrollHeight > el.clientHeight + 1) {
+        el.rows = r;
+        break;
+      }
+      r -= 1;
+    }
+
+    if (r >= TEXTAREA_MAX_ROWS && el.scrollHeight > el.clientHeight + 1) {
+      el.style.overflowY = 'auto';
+    } else {
+      el.style.removeProperty('overflow-y');
+    }
+  }
+
+  function fitInput(el) {
+    el.style.removeProperty('font-size');
+  }
+
+  function runFit(el) {
+    if (!el.isConnected || isExcluded(el)) return;
+    if (el.tagName === 'TEXTAREA') fitTextareaRows(el);
+    else fitInput(el);
   }
 
   function bindEl(el) {
@@ -67,9 +80,9 @@
 
     el.dataset.jeLongtextFitBound = '1';
     el.classList.add(FIT_CLASS);
-    captureMaxFontPx(el);
+    if (el.tagName === 'TEXTAREA') textareaMinRows(el);
 
-    const run = () => fitFont(el);
+    const run = () => runFit(el);
     el.addEventListener('input', run);
     el.addEventListener('change', run);
     if (typeof ResizeObserver !== 'undefined') {

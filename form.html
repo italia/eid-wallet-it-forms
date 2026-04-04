@@ -99,8 +99,8 @@
     <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 app-form-name-bar">
       <label for="form-name-input" class="visually-hidden">Nome del form</label>
       <span class="text-muted d-flex align-items-center flex-shrink-0" aria-hidden="true"><i class="bi bi-pencil-square fs-5"></i></span>
-      <input id="form-name-input" type="text" class="form-control flex-grow-1 app-form-name-input" style="max-width: 32rem;"
-             placeholder="Nome del form…" maxlength="128" aria-label="Nome del form" />
+      <input id="form-name-input" type="text" class="form-control flex-grow-1 app-form-name-input"
+             placeholder="Nome del form…" maxlength="128" />
       <span class="badge rounded-pill text-bg-secondary flex-shrink-0" id="form-id-badge" title="ID del form"></span>
     </div>
   </div>
@@ -111,17 +111,17 @@
   <div class="container-xxl py-2 py-md-3 toolbar d-flex flex-wrap gap-2 align-items-center app-toolbar-inner">
 
     <button type="button" id="btn-save" class="btn btn-primary btn-sm">
-      <span class="app-toolbar-btn-fill"><i class="bi bi-floppy" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span></span>
+      <i class="bi bi-floppy" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva</span>
     </button>
 
     <button type="button" id="btn-save-as" class="btn btn-outline-primary btn-sm">
-      <span class="app-toolbar-btn-fill"><i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span></span>
+      <i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span>
     </button>
 
     <div class="vr mx-1"></div>
 
     <button type="button" id="btn-load-example" class="btn btn-outline-secondary btn-sm">
-      <span class="app-toolbar-btn-fill"><i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span></span>
+      <i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span>
     </button>
 
     <div class="vr mx-1"></div>
@@ -129,7 +129,7 @@
     <div class="dropdown">
       <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="app-toolbar-btn-fill"><i class="bi bi-download" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span></span>
+        <i class="bi bi-download" aria-hidden="true"></i><span class="app-toolbar-btn-label">Esporta</span>
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -148,7 +148,7 @@
     <div class="dropdown">
       <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="app-toolbar-btn-fill"><i class="bi bi-upload" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span></span>
+        <i class="bi bi-upload" aria-hidden="true"></i><span class="app-toolbar-btn-label">Importa</span>
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -168,10 +168,10 @@
       <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
               data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
               aria-controls="form-toc-offcanvas" title="Sommario sezioni (schermi piccoli)">
-        <span class="app-toolbar-btn-fill"><i class="bi bi-list-nested" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span></span>
+        <i class="bi bi-list-nested" aria-hidden="true"></i><span class="app-toolbar-btn-label">Sommario</span>
       </button>
       <button type="button" id="btn-validate" class="btn btn-outline-info btn-sm" title="Valida il form">
-        <span class="app-toolbar-btn-fill"><i class="bi bi-shield-check" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span></span>
+        <i class="bi bi-shield-check" aria-hidden="true"></i><span class="app-toolbar-btn-label">Valida</span>
       </button>
     </div>
   </div>
@@ -272,7 +272,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
       </div>
       <div class="modal-body p-0">
-        <pre id="json-preview" class="m-0 p-3 bg-dark text-light" style="font-size:.8rem;"></pre>
+        <pre id="json-preview" class="app-json-preview-pre m-0 p-3 bg-dark text-light"></pre>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
@@ -311,7 +311,6 @@ let _currentId     = null;   // localStorage id of open form (null = new)
 let _rawSchema     = null;   // Original schema (for AJV validation)
 let _exampleData   = null;   // Example / template JSON from dataUrl
 let _dirty         = false;  // Unsaved changes flag
-let _jsonModal     = null;
 /** Evita toast ripetuti se il banner versioni viene ridisegnato più volte con lo stesso stato. */
 let _versionMissingToastShown = false;
 let _webformId     = null;   // Manifest webform id
@@ -498,13 +497,16 @@ function cssEscAttr(s) {
   return String(s).replace(/["\\]/g, '\\$&');
 }
 
+function closeFormTocOffcanvas() {
+  const ocEl = document.getElementById('form-toc-offcanvas');
+  if (!ocEl || typeof bootstrap === 'undefined' || !bootstrap.Offcanvas) return;
+  const oc = bootstrap.Offcanvas.getInstance(ocEl);
+  if (oc) oc.hide();
+}
+
 /** Porta alla sezione del modulo (data-schemapath di json-editor). */
 function wireFormTocNavScroll(propertyKey, titleHint) {
-  const ocEl = document.getElementById('form-toc-offcanvas');
-  if (ocEl && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
-    const oc = bootstrap.Offcanvas.getInstance(ocEl);
-    if (oc) oc.hide();
-  }
+  closeFormTocOffcanvas();
   requestAnimationFrame(() => {
     const ec = document.getElementById('editor-container');
     if (!ec) return;
@@ -535,11 +537,7 @@ function wireFormTocNavClick(tabAnchor) {
   } catch (e) {
     console.warn(e);
   }
-  const ocEl = document.getElementById('form-toc-offcanvas');
-  if (ocEl && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
-    const oc = bootstrap.Offcanvas.getInstance(ocEl);
-    if (oc) oc.hide();
-  }
+  closeFormTocOffcanvas();
   requestAnimationFrame(() => {
     const tabsBar = tabAnchor.closest('ul.nav-tabs, ul.nav-pills');
     if (tabsBar) {
@@ -734,9 +732,7 @@ async function initEditor() {
         requestAnimationFrame(() => {
           buildFormToc();
           if (!document.getElementById('form-toc-items').children.length) {
-            setTimeout(() => buildFormToc(), 120);
             setTimeout(() => buildFormToc(), 400);
-            setTimeout(() => buildFormToc(), 900);
           }
         });
       });
@@ -848,8 +844,6 @@ function exportJson() {
   const json = JSON.stringify(getFormData(), null, 2);
   downloadText(getFormFilename() + '.json', json, 'application/json');
   showToast('File JSON esportato.', 'success');
-  // Close modal if open
-  if (_jsonModal) _jsonModal.hide();
 }
 
 function exportCsv() {
@@ -939,12 +933,6 @@ function runValidation() {
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-/* ── Utility ────────────────────────────────────────────── */
-function escHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 </script>
 </body>
 </html>

@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "env": { "browser": true, "es2022": true },
+  "ignorePatterns": ["assets/vendor/**"],
+  "globals": {
+    "bootstrap": "readonly",
+    "JSONEditor": "readonly",
+    "Ajv2020": "readonly",
+    "ajv2020": "readonly",
+    "Ajv": "readonly",
+    "addFormats": "readonly",
+    "Papa": "readonly",
+    "SiteChrome": "readonly"
+  },
+  "parserOptions": { "ecmaVersion": "latest" },
+  "rules": {
+    "no-undef": "error",
+    "no-unused-vars": ["error", { "vars": "local", "argsIgnorePattern": "^_" }]
+  }
+}

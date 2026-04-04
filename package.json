@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "scripts": {
+    "lint": "eslint assets/js/*.js",
+    "lint:html": "html-validate index.html form.html"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "html-validate": "^8.18.2"
+  }
+}

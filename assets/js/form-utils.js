@@ -182,26 +182,44 @@ function walkJsonSchema(schema, visitor) {
 }
 
 /**
- * `format: "longtext"` e `x-longtext: true` (JSON Schema estensione) → `format: "textarea"`
- * così json-editor usa un campo multilinea invece di input su una riga.
+ * Campi stringa che in json-editor sarebbero `<input type="text">` → `format: "textarea"`.
+ * Mantiene formati riservati (email, date, url, select, …). `longtext` / `x-longtext` come prima.
+ * L’altezza dinamica è gestita da `initJeLongtextFit` su `#editor-container`.
  * @param {object} schema
  */
-function normalizeLongtextFormatsInSchema(schema) {
+function normalizeStringFieldsToTextarea(schema) {
   walkJsonSchema(schema, node => {
     const types = node.type;
     const isString = types === 'string' || (Array.isArray(types) && types.includes('string'));
     if (!isString || node.enum) return;
-    const fmt = node.format;
-    if (fmt === 'longtext') {
-      node.format = 'textarea';
-      return;
-    }
+
+    const fmtRaw = node.format;
+    const fmt =
+      fmtRaw == null || (typeof fmtRaw === 'string' && fmtRaw.trim() === '')
+        ? ''
+        : String(fmtRaw).trim();
+
     if (node['x-longtext'] === true) {
       if (!fmt || !RESERVED_STRING_FORMATS.has(fmt)) {
         node.format = 'textarea';
       }
       delete node['x-longtext'];
+      return;
     }
+
+    if (fmt === 'longtext') {
+      node.format = 'textarea';
+      return;
+    }
+
+    if (!fmt || fmt === 'text') {
+      node.format = 'textarea';
+      return;
+    }
+
+    if (RESERVED_STRING_FORMATS.has(fmt)) return;
+
+    node.format = 'textarea';
   });
 }
 
@@ -215,7 +233,7 @@ function normalizeLongtextFormatsInSchema(schema) {
  *  2. Se esistono, imposta "readOnly" su proprietà `domanda` / `suggerimento` nelle
  *     definitions (tipico degli schemi onboarding EAA; su altri schemi non ha effetto).
  *  3. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
- *  4. Normalizza `longtext` / `x-longtext` in `format: "textarea"` per testi lunghi.
+ *  4. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
  *
  * @param {string} schemaUrl
  * @returns {Promise<object>} transformed schema
@@ -248,8 +266,8 @@ async function loadAndTransformSchema(schemaUrl) {
   // 3. Tabs layout for the root object
   schema.format = 'tabs';
 
-  // 4. longtext (schema) → textarea (json-editor)
-  normalizeLongtextFormatsInSchema(schema);
+  // 4. Input testo su una riga → textarea (json-editor) + fit righe in form.html
+  normalizeStringFieldsToTextarea(schema);
 
   return schema;
 }
@@ -376,4 +394,11 @@ function pickFile(accept = '*') {
 /* ── Sanitize a string for use as a filename ─────────────── */
 function sanitizeFilename(name) {
   return (name || 'form').replace(/[^a-z0-9_\-\s]/gi, '_').replace(/\s+/g, '_').substring(0, 64);
+}
+
+/** Escape text for safe insertion into HTML attribute or body context. */
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

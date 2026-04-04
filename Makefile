@@ -4,14 +4,19 @@ PORT ?= 8080
 
 .DEFAULT_GOAL := serve
 
-.PHONY: build serve local help
+.PHONY: build serve local lint help
 
 help:
 	@echo "Targets:"
 	@echo "  make / make serve  – build then http://127.0.0.1:$(PORT)/"
 	@echo "  make build         – verify files and JSON only"
+	@echo "  make lint          – ESLint (JS) + html-validate (richiede npm install)"
 	@echo "  make local         – serve and open browser (xdg-open)"
 	@echo "  PORT=9000 make     – custom port"
+
+lint:
+	npm run lint
+	npm run lint:html
 
 build:
 	@test -f index.html && test -f form.html
