@@ -5,14 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Modifica form – IT-Wallet Webforms</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon" sizes="any" />
-
-  <!-- Bootstrap 5 -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-  <!-- App styles -->
+  <!-- Riferimento unico snippet: assets/partials/head-assets.html -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
@@ -184,22 +179,9 @@
   </div>
 </div>
 
-<!-- ── Footer ────────────────────────────────────────────── -->
-<footer class="py-3 mt-auto">
-  <div class="container-fluid text-center">
-    <span id="footer-webform-label">Schema e dati di riferimento da manifest</span>
-    &middot; Dati salvati localmente nel browser
-    &middot;
-    <a href="https://github.com/italia/eid-wallet-it-forms" target="_blank" rel="noopener noreferrer"
-       class="d-inline-flex align-items-center gap-1 align-middle text-decoration-none footer-github-link">
-      <i class="bi bi-github fs-5" aria-hidden="true"></i>
-      <span>GitHub</span>
-    </a>
-  </div>
-</footer>
-
-<!-- ── Toast container ────────────────────────────────────── -->
-<div id="toast-container" class="toast-container p-3"></div>
+<!-- ── Footer + overlay condivisi (assets/js/site-chrome.js) ─ -->
+<footer id="site-footer" class="py-3 mt-auto"></footer>
+<div id="site-shared-overlays"></div>
 
 <!-- ── JSON preview modal ─────────────────────────────────── -->
 <div class="modal fade" id="json-modal" tabindex="-1" aria-labelledby="json-modal-label" aria-hidden="true">
@@ -224,28 +206,13 @@
   </div>
 </div>
 
-<!-- ── Errore caricamento risorse / eccezioni ──────────────── -->
-<div class="modal fade" id="app-error-modal" tabindex="-1" aria-labelledby="app-error-modal-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="app-error-modal-title">Errore</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-2" id="app-error-modal-lead"></p>
-        <pre class="small bg-light p-3 rounded text-break mb-0 border" id="app-error-modal-detail"
-             style="white-space:pre-wrap;max-height:240px;overflow:auto;font-size:.8rem;"></pre>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ── Scripts ────────────────────────────────────────────── -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/site-chrome.js"></script>
+<script>
+  SiteChrome.injectSharedOverlays(document.getElementById('site-shared-overlays'));
+  SiteChrome.injectSiteFooter(document.getElementById('site-footer'), { variant: 'form' });
+</script>
 <script src="assets/js/resource-errors.js"></script>
 <!-- json-editor (Bootstrap 5 theme) -->
 <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.15.1/dist/jsoneditor.min.js"></script>
@@ -325,13 +292,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ── Versioning da contenuto schema/JSON (non dal manifest) ─ */
-function renderDocumentVersioningBanner(rawSchema, data) {
+function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
   const vBanner = document.getElementById('versioning-banner');
   const vBody = document.getElementById('versioning-banner-body');
   const vBox = document.getElementById('versioning-banner-box');
   const vIcon = document.getElementById('versioning-banner-icon');
   if (!vBanner || !vBody) return;
-  const { items, hasAny, missingDeclaredVersion } = extractDocumentVersioning(rawSchema, data);
+  const { items, hasAny, missingDeclaredVersion } = extractDocumentVersioning(rawSchema, data, urlHints);
 
   if (vBox && vIcon) {
     if (missingDeclaredVersion) {
@@ -345,7 +312,7 @@ function renderDocumentVersioningBanner(rawSchema, data) {
     }
   }
 
-  const intro = `<p class="mb-2 text-body"><strong>Versioni nei file caricati</strong> <span class="text-muted fw-normal">(da JSON Schema e JSON, non dal catalogo)</span></p>`;
+  const intro = `<p class="mb-2 text-body"><strong>Versioni nei file caricati</strong> <span class="text-muted fw-normal">(da JSON Schema e JSON; per il dato compare anche l’URL HTTPS di caricamento, non dal catalogo)</span></p>`;
 
   let warnBlock = '';
   if (missingDeclaredVersion) {
@@ -610,8 +577,8 @@ async function initEditor() {
 
     const entry = findWebformEntry(manifest, webformFromQuery);
     _webformId = entry.id;
-    _schemaUrl = entry.schemaUrl;
-    _dataUrl = entry.dataUrl;
+    _schemaUrl = new URL(entry.schemaUrl, window.location.href).href;
+    _dataUrl = new URL(entry.dataUrl, window.location.href).href;
 
     const foot = document.getElementById('footer-webform-label');
     if (foot) {
@@ -651,7 +618,7 @@ async function initEditor() {
       }
     }
 
-    renderDocumentVersioningBanner(_rawSchema, startVal);
+    renderDocumentVersioningBanner(_rawSchema, startVal, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
 
     document.getElementById('form-name-input').value = formName;
     if (_currentId) {
@@ -780,7 +747,9 @@ function loadExample() {
   _editor.setValue(_exampleData);
   document.getElementById('form-name-input').value = 'Esempio ' +
     (_exampleData?.metadata?.nome_eaa || '');
-  if (_rawSchema) renderDocumentVersioningBanner(_rawSchema, _exampleData);
+  if (_rawSchema) {
+    renderDocumentVersioningBanner(_rawSchema, _exampleData, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
+  }
   showToast('Dati di esempio caricati.', 'info');
 }
 

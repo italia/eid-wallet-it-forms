@@ -52,13 +52,18 @@ function findWebformEntry(manifest, webformId) {
 
 /**
  * Informazioni di versione dichiarate **dentro** i file JSON Schema e JSON di istanza
- * (non nel manifest). Usa campi comuni: schema `$version`, `$id`; dato `metadata.versione`, `$schema`.
+ * (non nel manifest). Usa campi comuni: schema `$version`, `$id`; dato `metadata.versione`, `$schema` (solo se URL assoluto).
+ * Con `urlHints.dataUrl` aggiunge la riga **Sorgente JSON** con l’URL reale di caricamento (HTTPS), così non si mostra
+ * un `$schema` relativo nel file (es. `./json-schemas/...`).
  *
  * @param {object|null} rawSchema – schema così come restituito dal fetch (prima delle trasformazioni per l’editor)
  * @param {object|null} data – JSON di esempio o bozza aperta nell’editor
+ * @param {{ dataUrl?: string, schemaUrl?: string }} [urlHints] – URL usati dall’app per fetch (manifest / assoluti)
  * @returns {{ items: Array<{ section: 'schema'|'data', label: string, value: string, isUrl?: boolean }>, hasAny: boolean, hasSchemaVersion: boolean, hasDataVersion: boolean, missingDeclaredVersion: boolean }}
  */
-function extractDocumentVersioning(rawSchema, data) {
+function extractDocumentVersioning(rawSchema, data, urlHints) {
+  const hints = urlHints && typeof urlHints === 'object' ? urlHints : {};
+  const dataSourceUrl = hints.dataUrl != null ? String(hints.dataUrl).trim() : '';
   const items = [];
   let hasSchemaVersion = false;
   let hasDataVersion = false;
@@ -82,6 +87,14 @@ function extractDocumentVersioning(rawSchema, data) {
     }
   }
   if (data && typeof data === 'object') {
+    if (dataSourceUrl) {
+      items.push({
+        section: 'data',
+        label: 'Sorgente JSON',
+        value: dataSourceUrl,
+        isUrl: /^https?:\/\//i.test(dataSourceUrl)
+      });
+    }
     const mv = data.metadata && data.metadata.versione != null
       ? String(data.metadata.versione).trim()
       : '';
@@ -94,11 +107,15 @@ function extractDocumentVersioning(rawSchema, data) {
       });
     }
     if (data.$schema != null && String(data.$schema).trim() !== '') {
-      items.push({
-        section: 'data',
-        label: '$schema',
-        value: String(data.$schema).trim()
-      });
+      const vs = String(data.$schema).trim();
+      if (/^https?:\/\//i.test(vs)) {
+        items.push({
+          section: 'data',
+          label: '$schema',
+          value: vs,
+          isUrl: true
+        });
+      }
     }
   }
   const missingDeclaredVersion = !hasSchemaVersion && !hasDataVersion;
