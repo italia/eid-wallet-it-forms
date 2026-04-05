@@ -473,6 +473,12 @@ main { flex: 1; }
   z-index: 2;
 }
 
+/* Bootstrap Italia aggiunge un overlay decorativo su .toolbar::before:
+   non deve intercettare i click sui pulsanti della toolbar sticky. */
+.app-toolbar-sticky .toolbar.app-toolbar-inner::before {
+  pointer-events: none;
+}
+
 /* Barra nome form: evita overflow orizzontale su flex (min-width:0 sul campo) */
 .app-form-name-bar {
   min-width: 0;
