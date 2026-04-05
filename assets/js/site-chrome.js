@@ -62,6 +62,39 @@
       '</div></div></div></div>';
   }
 
+  /**
+   * Chiusura automatica del menu mobile Bootstrap Italia al click su link con href.
+   * Funziona sia su index.html (#navMain) sia su form.html (#navMainForm).
+   */
+  function enableMobileNavbarAutoClose() {
+    document.addEventListener('click', function (event) {
+      if (window.matchMedia('(min-width: 992px)').matches) return;
+      var link = event.target && event.target.closest
+        ? event.target.closest('.navbar-collapsable a[href]')
+        : null;
+      if (!link) return;
+
+      var menu = link.closest('.navbar-collapsable');
+      if (!menu) return;
+
+      var closeBtn = menu.querySelector('.close-menu');
+      if (closeBtn && typeof closeBtn.click === 'function') {
+        closeBtn.click();
+        return;
+      }
+
+      // Fallback difensivo: se il bottone close non è presente.
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enableMobileNavbarAutoClose);
+  } else {
+    enableMobileNavbarAutoClose();
+  }
+
   global.SiteChrome = {
     GITHUB_REPO_URL: REPO,
     injectSiteFooter: injectSiteFooter,

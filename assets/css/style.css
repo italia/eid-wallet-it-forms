@@ -403,6 +403,16 @@ main { flex: 1; }
   .it-header-navbar-wrapper .navbar.app-landing-navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link.active .bi {
     color: inherit !important;
   }
+  /* Menu mobile collassato: hover/focus ad alto contrasto su sfondo chiaro */
+  .it-header-navbar-wrapper .navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link:hover,
+  .it-header-navbar-wrapper .navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link:focus-visible {
+    color: var(--bs-primary, #06c) !important;
+    background-color: rgba(6, 102, 204, 0.08) !important;
+  }
+  .it-header-navbar-wrapper .navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link:hover .bi,
+  .it-header-navbar-wrapper .navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link:focus-visible .bi {
+    color: inherit !important;
+  }
 
   /* form.html: senza logo in fascia, allinea stato salvataggio a destra */
   .it-header-center-content-wrapper .it-right-zone--form {
@@ -880,8 +890,15 @@ footer.it-footer-service {
   gap: 0.35rem;
   margin: 0 !important;
 }
-.je-ready .je-array-item-row-controls > .btn {
+
+/* Uniforma la dimensione del solo pulsante JSON/proprietà nel titolo. */
+.je-ready .je-object__title > .btn-group > .json-editor-btntype-editjson,
+.je-ready .je-object__title > .btn-group > .json-editor-btntype-properties {
   min-width: 6.75rem;
+  min-height: 2.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .je-ready .card {
