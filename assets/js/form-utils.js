@@ -339,7 +339,55 @@ async function loadAndTransformSchema(schemaUrl) {
 async function loadExampleData(exampleUrl) {
   const resp = await fetch(exampleUrl);
   if (!resp.ok) throw new Error(`Impossibile caricare i dati di esempio: ${resp.status}`);
-  return resp.json();
+  const data = await resp.json();
+  return sanitizeFormData(data);
+}
+
+/**
+ * Some source examples include placeholder rows in arrays (objects with only empty strings/nulls).
+ * Remove those rows so the editor doesn't render visually empty items.
+ * @param {any} value
+ * @returns {any}
+ */
+function sanitizeFormData(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map(sanitizeFormData)
+      .filter(item => {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) return true;
+        return !isBlankObjectDeep(item);
+      });
+  }
+  if (!value || typeof value !== 'object') return value;
+  const out = {};
+  Object.keys(value).forEach(k => {
+    out[k] = sanitizeFormData(value[k]);
+  });
+  return out;
+}
+
+/**
+ * True when an object has no meaningful value in any nested property.
+ * `false` and numeric values are considered meaningful.
+ * @param {object} obj
+ * @returns {boolean}
+ */
+function isBlankObjectDeep(obj) {
+  const vals = Object.values(obj || {});
+  if (!vals.length) return true;
+  return vals.every(isBlankValueDeep);
+}
+
+/**
+ * @param {any} v
+ * @returns {boolean}
+ */
+function isBlankValueDeep(v) {
+  if (v == null) return true;
+  if (typeof v === 'string') return v.trim() === '';
+  if (Array.isArray(v)) return v.every(isBlankValueDeep);
+  if (typeof v === 'object') return isBlankObjectDeep(v);
+  return false;
 }
 
 /* ── Schema validation with AJV ──────────────────────────── */

@@ -378,6 +378,7 @@
 <script src="assets/js/csv-utils.js"></script>
 <script src="assets/js/form-utils.js"></script>
 <script src="assets/js/je-longtext-fit.js"></script>
+<script src="assets/js/je-array-control-card.js"></script>
 
 <script>
 /* ── State ──────────────────────────────────────────────── */
@@ -794,6 +795,20 @@ async function initEditor() {
         formName = saved.name;
       }
     }
+    if (typeof sanitizeFormData === 'function') {
+      const rawStart = startVal;
+      const cleanedStart = sanitizeFormData(startVal);
+      startVal = cleanedStart;
+      if (_currentId) {
+        try {
+          if (JSON.stringify(cleanedStart) !== JSON.stringify(rawStart)) {
+            saveForm(_currentId, formName, cleanedStart, _webformId);
+          }
+        } catch (e) {
+          console.warn('Impossibile aggiornare la bozza ripulita:', e);
+        }
+      }
+    }
 
     renderDocumentVersioningBanner(_rawSchema, startVal, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
 
@@ -831,6 +846,12 @@ async function initEditor() {
       document.getElementById('editor-container').classList.remove('d-none');
       if (typeof initJeLongtextFit === 'function') {
         initJeLongtextFit(document.getElementById('editor-container'));
+      }
+      if (typeof initJeArrayControlCard === 'function') {
+        initJeArrayControlCard(document.getElementById('editor-container'));
+      }
+      if (typeof setupJeArrayControlObserver === 'function') {
+        setupJeArrayControlObserver();
       }
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -896,9 +917,11 @@ function markClean(id) {
 /* ── Save ───────────────────────────────────────────────── */
 function saveCurrentForm() {
   if (!_editor) return;
-  const data = _editor.getValue();
+  const rawData = _editor.getValue();
+  const data = typeof sanitizeFormData === 'function' ? sanitizeFormData(rawData) : rawData;
   const name = document.getElementById('form-name-input').value.trim() || 'Form senza nome';
   try {
+    _editor.setValue(data);
     const id = saveForm(_currentId, name, data, _webformId);
     markClean(id);
     showToast('Form salvato con successo.', 'success');
@@ -909,11 +932,13 @@ function saveCurrentForm() {
 
 function saveAsNew() {
   if (!_editor) return;
-  const data = _editor.getValue();
+  const rawData = _editor.getValue();
+  const data = typeof sanitizeFormData === 'function' ? sanitizeFormData(rawData) : rawData;
   const baseName = document.getElementById('form-name-input').value.trim() || 'Form senza nome';
   const name = baseName + ' (copia)';
   document.getElementById('form-name-input').value = name;
   try {
+    _editor.setValue(data);
     const id = saveForm(null, name, data, _webformId);
     markClean(id);
     showToast('Salvato come nuovo form.', 'success');
@@ -926,11 +951,12 @@ function saveAsNew() {
 function loadExample() {
   if (!_editor || !_exampleData) return;
   if (_dirty && !confirm('Sovrascrivere le modifiche correnti con i dati di esempio?')) return;
-  _editor.setValue(_exampleData);
+  const nextData = typeof sanitizeFormData === 'function' ? sanitizeFormData(_exampleData) : _exampleData;
+  _editor.setValue(nextData);
   document.getElementById('form-name-input').value = 'Esempio ' +
-    (_exampleData?.metadata?.nome_eaa || '');
+    (nextData?.metadata?.nome_eaa || '');
   if (_rawSchema) {
-    renderDocumentVersioningBanner(_rawSchema, _exampleData, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
+    renderDocumentVersioningBanner(_rawSchema, nextData, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
   }
   showToast('Dati di esempio caricati.', 'info');
 }
@@ -960,7 +986,8 @@ function exportCsv() {
 async function importJson() {
   try {
     const { text } = await pickFile('.json,application/json');
-    const data = JSON.parse(text);
+    const parsed = JSON.parse(text);
+    const data = typeof sanitizeFormData === 'function' ? sanitizeFormData(parsed) : parsed;
     if (!_editor) return;
     if (_dirty && !confirm('Sovrascrivere i dati correnti?')) return;
     _editor.setValue(data);
@@ -982,8 +1009,9 @@ async function importCsv() {
     }
     if (!_editor) return;
     if (_dirty && !confirm('Sovrascrivere i dati correnti?')) return;
-    _editor.setValue(data);
-    const name = data?.metadata?.nome_eaa || 'Form CSV importato';
+    const sanitized = typeof sanitizeFormData === 'function' ? sanitizeFormData(data) : data;
+    _editor.setValue(sanitized);
+    const name = sanitized?.metadata?.nome_eaa || 'Form CSV importato';
     document.getElementById('form-name-input').value = name;
     showToast('Dati CSV importati.', 'success');
   } catch (e) {

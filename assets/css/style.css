@@ -737,15 +737,31 @@ footer.it-footer-service {
 
 /* Pannello «modifica JSON» (json-editor .je-modal): larghezza e griglia così Salva / Copia / Annulla restano sulla stessa riga */
 .je-ready .je-modal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 2000 !important;
   box-sizing: border-box;
   width: min(32rem, calc(100vw - 1.5rem));
   max-width: calc(100vw - 1rem);
+  max-height: min(90vh, 52rem);
+  overflow: auto;
   padding: 0.75rem;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   align-items: center;
   border-radius: var(--bs-border-radius, 0.25rem);
+}
+
+/* Backdrop pieno viewport per Edit JSON: resta sotto al dialog ma sopra sidebar/offcanvas/sticky toolbar */
+.je-ready .je-modal::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: -1;
 }
 
 .je-ready .je-modal > label.visually-hidden {
@@ -791,52 +807,51 @@ footer.it-footer-service {
   align-items: center;
 }
 
+/* Riduce rumore: mantiene azioni essenziali (+ item, elimina item, sposta). */
+.je-ready .json-editor-btntype-deletelast,
+.je-ready .json-editor-btntype-deleteall {
+  display: none !important;
+}
+
 /*
- * Righe array (delete/move): il tema può usare span o div .btn-group; classi json-editor-btn-delete / json-editor-btntype-delete.
- * — Stesso layout flex per tutti i .btn-group che contengono delete di riga (non solo figlio diretto del card-title).
- * — Contenitore item: cornice + spazio netto tra un item e il successivo (bordo superiore + padding).
- * — order: -1 sul .btn-group diretto dell’item (controlli in cima al blocco).
+ * Righe array (delete/move): layout stabile guidato da classi aggiunte da
+ * assets/js/je-array-control-card.js (niente selettori :has, più robusto cross-browser).
+ * I controlli sono mostrati nell'intestazione dell'item.
  */
-.je-ready .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
+.je-ready .je-array-item-header-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0.5rem;
+}
+
+.je-ready .je-array-item-header-row > .je-object__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.je-ready .je-array-item-header-row > .je-array-control-card,
+.je-ready .je-array-item-header-row > .je-object__controls {
+  flex: 0 0 auto;
+  flex-shrink: 1;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.je-ready .je-array-item-header-row .je-array-item-row-controls {
   display: inline-flex !important;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  vertical-align: middle;
-}
-
-.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))) {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  min-width: 0;
-  padding: 1rem 1.1rem 1.15rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--bs-border-radius, 0.375rem);
-  background-color: var(--light-bg, var(--bs-gray-100));
-}
-
-/* Spaziatore visibile tra item consecutivi (il margine inferiore da solo può “collassare” in layout a blocchi) */
-.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)))
-  + *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete))) {
-  margin-top: 0;
-  padding-top: 1.35rem;
-  border-top: 2px solid var(--border);
-}
-
-.je-ready *:has(> .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)))
-  > .btn-group:where(:has(.json-editor-btntype-delete), :has(.json-editor-btn-delete)) {
-  order: -1;
-  align-self: flex-start;
-  flex-shrink: 0;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  margin: 0 !important;
 }
 
 .je-ready .card {
