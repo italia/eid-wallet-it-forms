@@ -854,6 +854,36 @@ footer.it-footer-service {
   margin: 0 !important;
 }
 
+/* Variante preferita: controlli item inseriti dentro .je-object__title, prima del gruppo JSON/proprietà. */
+.je-ready .je-object__title > .je-array-control-card {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.je-ready .je-object__title > .je-array-control-card .je-array-item-row-controls {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 !important;
+}
+
+/* Posizionamento generico: il gruppo controlli item vive direttamente nel titolo. */
+.je-ready .je-object__title > .je-array-item-row-controls {
+  display: inline-flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 !important;
+}
+.je-ready .je-array-item-row-controls > .btn {
+  min-width: 6.75rem;
+}
+
 .je-ready .card {
   border: 1px solid var(--border);
   margin-bottom: 1rem;

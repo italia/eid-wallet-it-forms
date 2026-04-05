@@ -1,16 +1,12 @@
 /**
- * Avvolge i .btn-group delle righe array (cancella / sposta) in
- * <div class="card card-body bg-light je-array-control-card">.
- * Per gli oggetti-item: card prima di .je-object__controls; titolo + card + JSON in
- * <div class="je-array-item-header-row"> (flex nowrap, una sola riga).
+ * Posiziona i controlli item array (delete / move up / move down)
+ * dentro il titolo dell'item, tra testo heading e azioni JSON/proprietà.
+ * Logica generica basata su data-schemapath: funziona per qualunque schema.
  */
 (function () {
-  const WRAPPER_MARK = 'je-array-control-card';
-  const WRAPPER_CLASS = WRAPPER_MARK;
-  const HEADER_ROW_CLASS = 'je-array-item-header-row';
-  const ARRAY_ROW_HOST_CLASS = 'je-object--array-row-controls';
-  /** Marca il btn-group sposta/cancella riga: stile CSS unico (referenti, canali, faq, …). */
   const ROW_CTRL_CLASS = 'je-array-item-row-controls';
+  const LEGACY_WRAPPER_CLASS = 'je-array-control-card';
+  const LEGACY_HEADER_ROW_CLASS = 'je-array-item-header-row';
 
   function setButtonA11y(button, label) {
     if (!button || !label) return;
@@ -27,129 +23,167 @@
     button.prepend(icon);
   }
 
-  function isItemControlGroup(group) {
-    if (!group) return false;
-    const hasDelete = group.querySelector('.json-editor-btntype-delete, .json-editor-btn-delete');
-    if (!hasDelete) return false;
-    // Exclude array-level toolbars (add / delete last / delete all) and keep row-item controls only.
-    if (group.querySelector('.json-editor-btntype-deleteall, .json-editor-btntype-deletelast')) return false;
-    return !!group.querySelector('.json-editor-btntype-moveup, .json-editor-btntype-movedown');
+  function ensureButtonClasses(button, variant) {
+    if (!button) return;
+    button.classList.add('btn', 'btn-sm');
+    button.classList.remove('btn-xs', 'btn-xxs');
+    if (variant === 'danger') {
+      button.classList.add('btn-outline-danger');
+      button.classList.remove('btn-outline-secondary', 'btn-secondary', 'btn-primary');
+    } else {
+      button.classList.add('btn-outline-secondary');
+      button.classList.remove('btn-outline-danger', 'btn-secondary', 'btn-primary');
+    }
   }
 
-  function applyArrayButtonA11y(el) {
-    el.querySelectorAll('button').forEach(btn => {
+  function applyArrayButtonA11y(root) {
+    root.querySelectorAll('button').forEach(btn => {
       if (btn.classList.contains('json-editor-btntype-add')) {
         setButtonA11y(btn, 'Aggiungi elemento');
-        if (!(btn.textContent || '').trim()) btn.textContent = 'Aggiungi';
         setButtonIcon(btn, 'bi-plus-lg');
+        ensureButtonClasses(btn, 'neutral');
       }
       if (btn.classList.contains('json-editor-btntype-delete') || btn.classList.contains('json-editor-btn-delete')) {
         setButtonA11y(btn, 'Elimina elemento');
-        if (!(btn.textContent || '').trim()) btn.textContent = 'Elimina';
         setButtonIcon(btn, 'bi-trash');
+        ensureButtonClasses(btn, 'danger');
       }
       if (btn.classList.contains('json-editor-btntype-moveup')) {
         setButtonA11y(btn, 'Sposta elemento su');
-        if (!(btn.textContent || '').trim()) btn.textContent = 'Su';
         setButtonIcon(btn, 'bi-arrow-up');
+        ensureButtonClasses(btn, 'neutral');
       }
       if (btn.classList.contains('json-editor-btntype-movedown')) {
         setButtonA11y(btn, 'Sposta elemento giu');
-        if (!(btn.textContent || '').trim()) btn.textContent = 'Giu';
         setButtonIcon(btn, 'bi-arrow-down');
+        ensureButtonClasses(btn, 'neutral');
       }
       if (btn.classList.contains('json-editor-btntype-deleteall')) {
         setButtonA11y(btn, 'Elimina tutti gli elementi');
-        if (!(btn.textContent || '').trim()) btn.textContent = 'Elimina tutto';
         setButtonIcon(btn, 'bi-trash3');
+        ensureButtonClasses(btn, 'danger');
       }
       if (btn.classList.contains('json-editor-btntype-deletelast')) {
         setButtonA11y(btn, 'Elimina ultimo elemento');
-        if (!(btn.textContent || '').trim()) btn.textContent = 'Elimina ultimo';
         setButtonIcon(btn, 'bi-dash-circle');
+        ensureButtonClasses(btn, 'danger');
       }
     });
   }
 
+  function isIndexedSchemapath(sp) {
+    return /\[\d+\](?:\.|$)/.test(String(sp || ''));
+  }
 
-  function unwrapHeaderRows(el) {
-    el.querySelectorAll('.' + HEADER_ROW_CLASS).forEach(row => {
-      const parent = row.parentElement;
-      if (!parent) return;
-      while (row.firstChild) {
-        parent.insertBefore(row.firstChild, row);
+  function findIndexedHost(node) {
+    let cur = node;
+    while (cur && cur !== document.body) {
+      if (cur.getAttribute) {
+        const sp = cur.getAttribute('data-schemapath') || '';
+        if (isIndexedSchemapath(sp)) return cur;
       }
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
+  function findGenericHost(node) {
+    return (
+      (node && node.closest && node.closest('.je-object__container')) ||
+      (node && node.closest && node.closest('.card')) ||
+      (node && node.closest && node.closest('[data-schemapath]')) ||
+      null
+    );
+  }
+
+  function isItemControlGroup(group) {
+    if (!group || group.closest('.je-modal')) return false;
+    if (group.querySelector('.json-editor-btntype-deleteall, .json-editor-btntype-deletelast')) return false;
+    const hasDelete = group.querySelector('.json-editor-btntype-delete, .json-editor-btn-delete');
+    if (!hasDelete) return false;
+    return !!(findIndexedHost(group) || findGenericHost(group));
+  }
+
+  function topLevelChild(parent, descendant) {
+    let n = descendant;
+    while (n && n.parentElement !== parent) n = n.parentElement;
+    return n && n.parentElement === parent ? n : null;
+  }
+
+  function findItemTitle(host) {
+    if (!host) return null;
+    return (
+      host.querySelector(':scope > .je-object__title') ||
+      host.querySelector('.je-object__title') ||
+      host.querySelector(':scope > .card > .card-header .card-title') ||
+      host.querySelector('.card-header .card-title') ||
+      host.querySelector(':scope .card-title')
+    );
+  }
+
+  function findTitleActionsAnchor(title) {
+    if (!title) return null;
+    const actionBtn = title.querySelector(
+      'button.json-editor-btntype-editjson, button.json-editor-btntype-properties'
+    );
+    if (!actionBtn) return null;
+    const group = actionBtn.closest('.btn-group') || actionBtn;
+    return topLevelChild(title, group);
+  }
+
+  function clearLegacyStructure(root) {
+    root.querySelectorAll('.' + LEGACY_WRAPPER_CLASS).forEach(w => {
+      const p = w.parentElement;
+      if (!p) return;
+      while (w.firstChild) p.insertBefore(w.firstChild, w);
+      w.remove();
+    });
+    root.querySelectorAll('.' + LEGACY_HEADER_ROW_CLASS).forEach(row => {
+      const p = row.parentElement;
+      if (!p) return;
+      while (row.firstChild) p.insertBefore(row.firstChild, row);
       row.remove();
     });
   }
 
-  function repositionRowControlsInline(wrapper) {
-    let container = wrapper.parentElement;
-    if (!container || !container.classList.contains('je-object__container')) {
-      container = wrapper.closest('.je-object__container');
+  function moveGroupToHeading(group) {
+    const host = findIndexedHost(group) || findGenericHost(group);
+    const title = findItemTitle(host);
+    if (!host || !title) return;
+
+    group.classList.add(ROW_CTRL_CLASS);
+    group.classList.add('d-inline-flex', 'align-items-center');
+    const anchor = findTitleActionsAnchor(title);
+    if (anchor) {
+      title.insertBefore(group, anchor);
+      return;
     }
-    if (!container) return;
-    const controls = container.querySelector(':scope > .je-object__controls');
-    const title = container.querySelector(':scope > .je-object__title');
-    if (controls) {
-      container.insertBefore(wrapper, controls);
-    } else if (title && title.nextSibling) {
-      container.insertBefore(wrapper, title.nextSibling);
-    } else if (title) {
-      container.appendChild(wrapper);
-    }
-    container.classList.add(ARRAY_ROW_HOST_CLASS);
+    title.appendChild(group);
   }
 
-  function ensureHeaderRow(container) {
-    const title = container.querySelector(':scope > .je-object__title');
-    const card = container.querySelector(':scope > .je-array-control-card');
-    const controls = container.querySelector(':scope > .je-object__controls');
-    if (!title || !card) return;
-    if (title.parentElement && title.parentElement.classList.contains(HEADER_ROW_CLASS)) return;
-    const row = document.createElement('div');
-    row.className = HEADER_ROW_CLASS;
-    container.insertBefore(row, title);
-    row.appendChild(title);
-    row.appendChild(card);
-    if (controls && controls.querySelector('button')) row.appendChild(controls);
-  }
-
-  function wrapArrayRowControlGroupsImpl(el) {
-    unwrapHeaderRows(el);
-    el.querySelectorAll('.je-object__container.' + ARRAY_ROW_HOST_CLASS).forEach(c => {
-      c.classList.remove(ARRAY_ROW_HOST_CLASS);
-    });
-    el.querySelectorAll('.btn-group').forEach(group => {
+  function placeItemControlGroups(root) {
+    clearLegacyStructure(root);
+    root.querySelectorAll('.btn-group').forEach(group => {
       if (!isItemControlGroup(group)) return;
-      if (group.closest('.je-modal')) return;
-      if (group.closest('.' + WRAPPER_MARK)) return;
-      group.classList.add(ROW_CTRL_CLASS);
-      const wrap = document.createElement('div');
-      wrap.className = WRAPPER_CLASS;
-      group.parentNode.insertBefore(wrap, group);
-      wrap.appendChild(group);
+      moveGroupToHeading(group);
     });
-    el.querySelectorAll('.' + WRAPPER_MARK).forEach(repositionRowControlsInline);
-    el.querySelectorAll('.je-object__container.' + ARRAY_ROW_HOST_CLASS).forEach(ensureHeaderRow);
-    applyArrayButtonA11y(el);
+    applyArrayButtonA11y(root);
   }
 
   let _mo = null;
   let _moTimer = null;
 
-  function wrapArrayRowControlGroups(root) {
+  function initJeArrayControlCard(root) {
     const el = root || document.getElementById('editor-container');
     if (!el) return;
     if (_mo) _mo.disconnect();
     try {
-      wrapArrayRowControlGroupsImpl(el);
+      placeItemControlGroups(el);
     } finally {
       if (_mo) _mo.observe(el, { childList: true, subtree: true });
     }
   }
 
-  /** Da chiamare una volta dopo l’editor: json-editor riscrive il DOM in ritardo (es. referenti). */
   function setupJeArrayControlObserver() {
     const el = document.getElementById('editor-container');
     if (!el || _mo) return;
@@ -157,12 +191,12 @@
       if (_moTimer) clearTimeout(_moTimer);
       _moTimer = setTimeout(() => {
         _moTimer = null;
-        wrapArrayRowControlGroups(el);
-      }, 80);
+        initJeArrayControlCard(el);
+      }, 60);
     });
     _mo.observe(el, { childList: true, subtree: true });
   }
 
-  window.initJeArrayControlCard = wrapArrayRowControlGroups;
+  window.initJeArrayControlCard = initJeArrayControlCard;
   window.setupJeArrayControlObserver = setupJeArrayControlObserver;
 })();
