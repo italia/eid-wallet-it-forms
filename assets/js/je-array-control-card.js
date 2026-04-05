@@ -5,20 +5,15 @@
 (function () {
   const ROW_CTRL_CLASS = 'je-array-item-row-controls';
 
-  function isIndexedSchemapath(sp) {
-    return /\[\d+\](?:\.|$)/.test(String(sp || ''));
+  function isItemSchemapath(sp) {
+    const s = String(sp || '');
+    // Supports both styles used by json-editor: root.arr[0] and root.arr.0
+    return /\[\d+\](?:\.|$)|(?:^|\.)\d+(?:\.|$)/.test(s);
   }
 
-  function findIndexedHost(node) {
-    let cur = node;
-    while (cur && cur !== document.body) {
-      if (cur.getAttribute) {
-        const sp = cur.getAttribute('data-schemapath') || '';
-        if (isIndexedSchemapath(sp)) return cur;
-      }
-      cur = cur.parentElement;
-    }
-    return null;
+  function cssEscapeValue(v) {
+    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(v);
+    return String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   }
 
   function findItemTitle(host) {
@@ -30,21 +25,6 @@
       host.querySelector('.card-header .card-title') ||
       host.querySelector(':scope .card-title')
     );
-  }
-
-  function findPlacementScope(node) {
-    if (!node || !node.closest) return null;
-    const candidates = [
-      node.closest('.je-object__container'),
-      node.closest('.well'),
-      node.closest('.card'),
-      node.closest('[data-schemapath]')
-    ].filter(Boolean);
-    for (const scope of candidates) {
-      const title = findItemTitle(scope);
-      if (title) return scope;
-    }
-    return null;
   }
 
   function findTitleActionsAnchor(title) {
@@ -97,16 +77,62 @@
 
   function isMoveUpButton(btn) {
     if (!btn || btn.tagName !== 'BUTTON') return false;
-    return btn.className.indexOf('moveup') >= 0;
+    return btn.className.indexOf('moveup') >= 0 || /move\s*up/i.test(btn.getAttribute('title') || '');
   }
 
   function isMoveDownButton(btn) {
     if (!btn || btn.tagName !== 'BUTTON') return false;
-    return btn.className.indexOf('movedown') >= 0;
+    return btn.className.indexOf('movedown') >= 0 || /move\s*down/i.test(btn.getAttribute('title') || '');
   }
 
   function isItemButton(btn) {
     return isDeleteButton(btn) || isMoveUpButton(btn) || isMoveDownButton(btn);
+  }
+
+  function parseButtonIndex(btn) {
+    const raw = btn && btn.getAttribute ? btn.getAttribute('data-i') : null;
+    if (raw == null) return null;
+    const n = Number(raw);
+    return Number.isInteger(n) && n >= 0 ? n : null;
+  }
+
+  function nearestSchemapathAncestors(node) {
+    const out = [];
+    let cur = node;
+    while (cur && cur !== document.body) {
+      if (cur.getAttribute) {
+        const sp = cur.getAttribute('data-schemapath');
+        if (sp) out.push({ el: cur, sp });
+      }
+      cur = cur.parentElement;
+    }
+    return out;
+  }
+
+  function resolveItemScope(btn, root) {
+    const direct = btn.closest('.je-object__container[data-schemapath]');
+    if (direct) {
+      const sp = direct.getAttribute('data-schemapath') || '';
+      if (isItemSchemapath(sp)) return direct;
+    }
+
+    const idx = parseButtonIndex(btn);
+    if (idx == null) return direct || null;
+
+    const ancestors = nearestSchemapathAncestors(btn);
+    for (const a of ancestors) {
+      const c1 = `${a.sp}.${idx}`;
+      const c2 = `${a.sp}[${idx}]`;
+      const local1 = a.el.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c1)}"]`);
+      if (local1) return local1;
+      const local2 = a.el.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c2)}"]`);
+      if (local2) return local2;
+      const global1 = root.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c1)}"]`);
+      if (global1) return global1;
+      const global2 = root.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c2)}"]`);
+      if (global2) return global2;
+    }
+    return direct || null;
   }
 
   function getItemButtonType(btn) {
@@ -130,51 +156,50 @@
     });
   }
 
-  function isItemControlGroup(group) {
-    if (!group || group.closest('.je-modal')) return false;
-    const hasDelete = !!group.querySelector('button.json-editor-btntype-delete, button.json-editor-btn-delete');
-    const hasMove = !!group.querySelector('button[class*="moveup"], button[class*="movedown"]');
-    const hasArrayLevel = !!group.querySelector(
-      'button.json-editor-btntype-add, button.json-editor-btntype-deletelast, button.json-editor-btntype-deleteall'
-    );
-    const hasStructural = !!group.querySelector(
-      'button.json-editor-btntype-editjson, button.json-editor-btntype-properties, button.json-editor-btntype-toggle, button.json-editor-btn-collapse'
-    );
-    // Item group can be delete-only, move-only, or delete+move, but never array-level/structural.
-    return (hasDelete || hasMove) && !hasArrayLevel && !hasStructural;
-  }
-
   function placeItemControlGroups(root) {
-    const groups = [...root.querySelectorAll('.btn-group')].filter(isItemControlGroup);
-    groups.forEach(group => {
-      const scope = findPlacementScope(group);
+    const itemButtons = [...root.querySelectorAll('button')]
+      .filter(btn => !btn.closest('.je-modal'))
+      .filter(isItemButton);
+    itemButtons.forEach(btn => {
+      const scope = resolveItemScope(btn, root);
       if (!scope) return;
+      const sp = scope.getAttribute('data-schemapath') || '';
+      if (!isItemSchemapath(sp)) return;
       const title = findItemTitle(scope);
       if (!title) return;
       const row = ensureRowGroupInTitle(title);
-
-      const itemButtons = [...group.querySelectorAll(':scope > button')].filter(isItemButton);
-      itemButtons.forEach(btn => {
-        const type = getItemButtonType(btn);
-        if (!type) return;
-        if (btn.closest('.' + ROW_CTRL_CLASS) === row) return;
-        const existing = row.querySelector(':scope > button');
-        if (existing && getItemButtonType(existing) === type) {
-          btn.remove();
-          return;
-        }
+      const type = getItemButtonType(btn);
+      if (!type) return;
+      if (btn.closest('.' + ROW_CTRL_CLASS) !== row) {
         const existingSameType = [...row.querySelectorAll(':scope > button')]
           .find(b => getItemButtonType(b) === type);
         if (existingSameType) {
           btn.remove();
-          return;
+        } else {
+          decorateButton(btn);
+          const oldParent = btn.parentElement;
+          row.appendChild(btn);
+          if (
+            oldParent &&
+            oldParent !== row &&
+            oldParent.classList &&
+            oldParent.classList.contains('btn-group') &&
+            !oldParent.querySelector('button')
+          ) {
+            oldParent.remove();
+          }
         }
-        decorateButton(btn);
-        row.appendChild(btn);
-      });
-
+      }
       dedupeRowButtons(row);
-      if (!group.querySelector(':scope > button')) group.remove();
+    });
+
+    // Hard safety: no item-control row is allowed on non-item headings.
+    [...root.querySelectorAll('.je-object__container[data-schemapath]')].forEach(scope => {
+      const sp = scope.getAttribute('data-schemapath') || '';
+      if (isItemSchemapath(sp)) return;
+      const title = findItemTitle(scope);
+      if (!title) return;
+      title.querySelectorAll(':scope > .' + ROW_CTRL_CLASS).forEach(row => row.remove());
     });
   }
 
@@ -184,14 +209,13 @@
     return [...root.querySelectorAll('button')]
       .filter(isItemButton)
       .map(btn => {
-        const host = findIndexedHost(btn);
-        const scope = findPlacementScope(btn.closest('.btn-group') || btn);
-        const title = findItemTitle(scope || host);
+        const scope = resolveItemScope(btn, root);
+        const title = findItemTitle(scope);
         const row = title && title.querySelector(':scope > .' + ROW_CTRL_CLASS);
         return {
           label: (btn.textContent || '').replace(/\s+/g, ' ').trim(),
           classes: btn.className,
-          hostSchemapath: host ? (host.getAttribute('data-schemapath') || null) : null,
+          hostSchemapath: scope ? (scope.getAttribute('data-schemapath') || null) : null,
           scopeClass: scope ? scope.className : null,
           inTitleRow: !!(row && btn.closest('.' + ROW_CTRL_CLASS) === row),
           parentTag: btn.parentElement ? btn.parentElement.tagName : null,
