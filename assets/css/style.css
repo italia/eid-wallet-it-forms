@@ -81,6 +81,27 @@ main { flex: 1; }
 .form-toc-offcanvas {
   --bs-offcanvas-width: min(320px, 92vw);
 }
+
+/*
+ * Sommario offcanvas: niente scroll interno sul body — elenco per intero; se serve scroll,
+ * è sul pannello intero (header + voci) così non compare una seconda area a scorrimento.
+ */
+.form-toc-offcanvas.offcanvas {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.form-toc-offcanvas .offcanvas-body {
+  flex: 0 0 auto;
+  overflow: visible;
+  min-height: 0;
+}
 .form-toc-link:hover,
 .form-toc-link:focus {
   background-color: var(--light-bg);
@@ -102,19 +123,15 @@ main { flex: 1; }
 }
 
 /*
- * Card: larghezza colonna, altezza solo quanto serve (niente riempimento verticale della colonna).
- * Sticky sul viewport; scroll interno solo nel .card-body per tenere fissa «Sezioni».
- * Niente overflow:hidden sulla card: in alcuni motori impedisce al figlio sticky di agganciarsi allo scroll.
+ * Card: larghezza colonna; sticky sotto la toolbar. Nessun max-height / scroll interno sul body:
+ * tutte le voci restano visibili (si scorre la pagina principale).
  */
 .form-toc-sidebar--end .app-form-toc-card {
-  /* Sotto la toolbar sticky (altezza variabile): margine generoso per evitare che «Sezioni» resti tagliata */
   --app-form-toc-sticky-top: 9rem;
-  --app-form-toc-viewport-margin: 0.5rem;
   align-self: flex-start;
   width: 100%;
   position: sticky;
   top: var(--app-form-toc-sticky-top);
-  max-height: calc(100vh - var(--app-form-toc-sticky-top) - var(--app-form-toc-viewport-margin));
   display: flex;
   flex-direction: column;
   z-index: 1040;
@@ -128,28 +145,13 @@ main { flex: 1; }
 }
 
 .form-toc-sidebar--end .app-form-toc-card .card-body {
-  flex: 1 1 auto !important;
+  flex: 0 0 auto !important;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 .form-toc-sidebar--end #form-toc-sidebar-items.nav {
   margin-bottom: 0;
-}
-
-/* Toolbar a più righe: serve più offset dal top del viewport */
-@media (max-width: 991.98px) {
-  .form-toc-sidebar--end .app-form-toc-card {
-    --app-form-toc-sticky-top: 11.5rem;
-  }
-}
-
-@media (max-width: 575.98px) {
-  .form-toc-sidebar--end .app-form-toc-card {
-    --app-form-toc-sticky-top: 12.5rem;
-  }
 }
 
 .form-toc-link--sidebar {
@@ -183,6 +185,85 @@ main { flex: 1; }
 }
 .app-brand-form-icon path {
   fill: currentColor;
+}
+
+/* Fascia centrale slim header: logo e testo bianchi su primary (index + form desktop) */
+.it-header-center-wrapper.it-small-header .it-brand-wrapper .app-brand-link {
+  color: #fff;
+}
+.it-header-center-wrapper.it-small-header .it-brand-wrapper .app-brand-form-icon path {
+  fill: #fff;
+}
+.it-header-center-wrapper.it-small-header .it-brand-wrapper a:focus-visible {
+  outline-color: #fff;
+}
+/* Catalogo / bozze (index): titolo e sottotitolo brand espliciti (il kit può colorare .it-brand-title) */
+.it-nav-wrapper:has(.app-landing-navbar) .it-header-center-wrapper.it-small-header .it-brand-wrapper .app-brand-link {
+  color: #fff !important;
+}
+.it-nav-wrapper:has(.app-landing-navbar) .it-header-center-wrapper.it-small-header .it-brand-wrapper .app-brand-form-icon path {
+  fill: #fff !important;
+}
+.it-nav-wrapper:has(.app-landing-navbar) .it-header-center-wrapper.it-small-header .it-brand-wrapper .it-brand-title,
+.it-nav-wrapper:has(.app-landing-navbar) .it-header-center-wrapper.it-small-header .it-brand-wrapper .it-brand-tagline {
+  color: #fff !important;
+}
+
+/*
+ * index.html (catalogo / bozze): riga navbar su primary a tutti i breakpoint così link Catalogo/Bozze
+ * e icone Bootstrap Icons restano bianchi anche da desktop (prima il blu era solo sotto i 992px).
+ */
+.it-header-wrapper .it-header-navbar-wrapper:has(.app-landing-navbar) {
+  background-color: #06c;
+  background-color: var(--bs-primary, #06c);
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.92);
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .nav-link:hover,
+.it-header-navbar-wrapper .navbar.app-landing-navbar .nav-link:focus-visible {
+  color: #fff;
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .nav-link.active {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: var(--bs-border-radius, 0.25rem);
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .nav-link .bi {
+  color: inherit;
+  opacity: 1;
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .app-navbar-search .input-group-text {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .app-navbar-search .form-control {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .app-navbar-search .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .app-navbar-search .form-control:focus {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #fff;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.2);
+}
+
+/*
+ * Catalogo / bozze: icona hamburger (svg.icon.bg-override) in bianco; il kit può forzare un fill
+ * diverso da currentColor sul path.
+ */
+.it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-toggler-leading {
+  color: #fff;
+}
+.it-header-navbar-wrapper .navbar.app-landing-navbar .custom-navbar-toggler .app-form-navbar-toggler-icon,
+.it-header-navbar-wrapper .navbar.app-landing-navbar .custom-navbar-toggler .app-form-navbar-toggler-icon path {
+  color: #fff;
+  fill: #fff !important;
 }
 
 /* form.html: brand compatto in riga navbar (mobile), dopo il menu */
@@ -243,8 +324,12 @@ main { flex: 1; }
     height: 1.375rem;
     flex-shrink: 0;
   }
-  .it-header-navbar-wrapper .custom-navbar-toggler .app-form-navbar-toggler-icon path,
-  .it-header-navbar-wrapper .custom-navbar-toggler > svg.icon path {
+  /*
+   * Solo form editor: su catalogo/bozze (.app-landing-navbar) serve fill esplicito (vedi fine file),
+   * altrimenti currentColor + regole .icon del kit possono risultare in icona scura.
+   */
+  .it-header-navbar-wrapper .navbar:not(.app-landing-navbar) .custom-navbar-toggler .app-form-navbar-toggler-icon path,
+  .it-header-navbar-wrapper .navbar:not(.app-landing-navbar) .custom-navbar-toggler > svg.icon path {
     fill: currentColor;
   }
   .it-header-center-wrapper.it-small-header .it-header-center-content-wrapper {
@@ -258,7 +343,8 @@ main { flex: 1; }
     padding-top: 0.35rem;
     padding-bottom: 0.35rem;
   }
-  .it-header-navbar-wrapper .navbar.app-form-navbar {
+  .it-header-navbar-wrapper .navbar.app-form-navbar,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
     align-items: center;
@@ -267,39 +353,55 @@ main { flex: 1; }
   }
 
   /*
-   * form.html: fascia navbar come header (icone bianche: hamburger a sinistra, logo progetto dopo).
+   * form.html: fascia navbar primary su mobile (landing usa regole globali :has(.app-landing-navbar)).
    */
   .it-header-wrapper .it-header-navbar-wrapper:has(.app-form-navbar) {
     background-color: #06c;
     background-color: var(--bs-primary, #06c);
   }
-  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-toggler-leading {
+  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-toggler-leading,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-toggler-leading {
     order: 0;
     color: #fff;
     border-color: rgba(255, 255, 255, 0.45);
   }
   .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-toggler-leading:hover,
-  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-toggler-leading:focus-visible {
+  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-toggler-leading:focus-visible,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-toggler-leading:hover,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-toggler-leading:focus-visible {
     color: #fff;
     background-color: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.65);
   }
-  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand {
+  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-mobile-brand {
     order: 1;
     color: #fff;
     flex: 1 1 0;
     min-width: 0;
   }
   .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand:hover,
-  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand:focus-visible {
+  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand:focus-visible,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-mobile-brand:hover,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-mobile-brand:focus-visible {
     color: rgba(255, 255, 255, 0.92);
   }
-  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand:focus-visible {
+  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand:focus-visible,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-mobile-brand:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.85);
     outline-offset: 2px;
   }
-  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand .app-brand-form-icon--navbar path {
+  .it-header-navbar-wrapper .navbar.app-form-navbar .app-form-navbar-mobile-brand .app-brand-form-icon--navbar path,
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .app-form-navbar-mobile-brand .app-brand-form-icon--navbar path {
     fill: #fff;
+  }
+  /* Menu mobile catalogo/bozze: attivo non bianco per garantire contrasto */
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link.active {
+    color: var(--bs-primary, #06c) !important;
+    background-color: rgba(6, 102, 204, 0.12) !important;
+  }
+  .it-header-navbar-wrapper .navbar.app-landing-navbar .navbar-collapsable .menu-wrapper .navbar-nav .nav-link.active .bi {
+    color: inherit !important;
   }
 
   /* form.html: senza logo in fascia, allinea stato salvataggio a destra */
@@ -953,4 +1055,35 @@ footer.it-footer-service a.footer-github-link:focus-visible {
   .toolbar .btn i {
     margin-right: 0 !important;
   }
+}
+
+/*
+ * Catalogo / bozze (index): ultima parola sulla cascade — Bootstrap Italia ripete `.icon{fill:#06c}` nel
+ * minificato; questo blocco sta dopo tutto il resto del progetto.
+ */
+.it-header-wrapper .it-nav-wrapper:has(.app-landing-navbar) .navbar.app-landing-navbar .app-form-navbar-toggler-leading {
+  color: #fff !important;
+}
+.it-header-wrapper .it-nav-wrapper:has(.app-landing-navbar) .navbar.app-landing-navbar .custom-navbar-toggler svg.app-form-navbar-toggler-icon,
+.it-header-wrapper .it-nav-wrapper:has(.app-landing-navbar) .navbar.app-landing-navbar .custom-navbar-toggler svg.app-form-navbar-toggler-icon path {
+  fill: #fff !important;
+  color: #fff !important;
+}
+
+/*
+ * Fallback senza :has() per browser/casi dove il parser non applica i selettori relazionali.
+ * Forza il bianco su catalogo/bozze per: toggler, logo brand, intestazione hero.
+ */
+.it-header-navbar-wrapper .navbar.app-landing-navbar .custom-navbar-toggler .app-form-navbar-toggler-icon,
+.it-header-navbar-wrapper .navbar.app-landing-navbar .custom-navbar-toggler .app-form-navbar-toggler-icon path {
+  fill: #fff !important;
+  color: #fff !important;
+}
+#nav-brand,
+#nav-brand .it-brand-title,
+#nav-brand .it-brand-tagline {
+  color: #fff !important;
+}
+#nav-brand .app-brand-form-icon path {
+  fill: #fff !important;
 }

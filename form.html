@@ -52,8 +52,8 @@
               <button class="custom-navbar-toggler flex-shrink-0 me-2 me-lg-0 app-form-navbar-toggler-leading" type="button" aria-controls="navMainForm"
                       aria-expanded="false" aria-label="Mostra o nascondi la navigazione"
                       data-bs-toggle="navbarcollapsible" data-bs-target="#navMainForm">
-                <svg class="icon bg-override app-form-navbar-toggler-icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-                  <path d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
+                <svg class="icon icon-white app-form-navbar-toggler-icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                  <path fill="#fff" d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
                 </svg>
               </button>
               <a class="app-form-navbar-mobile-brand d-lg-none" href="index.html#catalog" title="IT-Wallet Webforms">
@@ -241,7 +241,7 @@
         <div class="card shadow-sm border">
           <div class="card-header bg-light border-bottom py-3 px-3 px-md-4">
             <h2 class="h5 mb-1 fw-bold">Modulo</h2>
-            <p class="small text-muted mb-0">Campi e sezioni sono definiti dallo JSON Schema del webform. Usa il sommario a destra su schermi medi e grandi per saltare tra le sezioni.</p>
+            <p class="small text-muted mb-0">Campi e sezioni sono definiti dallo JSON Schema del webform. Su schermi piccoli e in orizzontale usa il pulsante «Sommario» nella barra azioni; da schermi grandi il sommario è nella colonna a destra.</p>
           </div>
           <div class="card-body p-2 p-md-3">
             <div id="editor-container" class="je-ready d-none"></div>
@@ -672,7 +672,7 @@ function buildFormToc() {
   if (!useTabs && !schemaSections.length) {
     if (btnToc) {
       btnToc.classList.add('d-none');
-      btnToc.classList.remove('d-inline-block', 'd-md-none');
+      btnToc.classList.remove('d-inline-block', 'd-lg-none');
     }
     if (emptyEl) emptyEl.classList.remove('d-none');
     if (hintEl) hintEl.classList.add('d-none');
@@ -686,7 +686,7 @@ function buildFormToc() {
 
   if (btnToc) {
     btnToc.classList.remove('d-none');
-    btnToc.classList.add('d-inline-block', 'd-md-none');
+    btnToc.classList.add('d-inline-block', 'd-lg-none');
   }
   if (emptyEl) emptyEl.classList.add('d-none');
   if (hintEl) {
@@ -698,10 +698,10 @@ function buildFormToc() {
   if (sidebarEmptyEl) sidebarEmptyEl.classList.add('d-none');
   if (sidebarAside) {
     sidebarAside.className =
-      'form-toc-sidebar form-toc-sidebar--end col-md-4 col-lg-3 col-xl-3 d-none d-md-block';
+      'form-toc-sidebar form-toc-sidebar--end col-lg-3 col-xl-3 d-none d-lg-block';
   }
   if (mainCol) {
-    mainCol.className = 'col-12 col-md-8 col-lg-9 col-xl-9';
+    mainCol.className = 'col-12 col-lg-9 col-xl-9';
   }
 
   const appendRow = (listEl, label, onClick, compact) => {
