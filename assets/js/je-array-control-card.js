@@ -5,15 +5,15 @@
 (function () {
   const ROW_CTRL_CLASS = 'je-array-item-row-controls';
 
+  function cssEscapeValue(v) {
+    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(v);
+    return String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
   function isItemSchemapath(sp) {
     const s = String(sp || '');
     // Supports both styles used by json-editor: root.arr[0] and root.arr.0
     return /\[\d+\](?:\.|$)|(?:^|\.)\d+(?:\.|$)/.test(s);
-  }
-
-  function cssEscapeValue(v) {
-    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(v);
-    return String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   }
 
   function findItemTitle(host) {
@@ -109,30 +109,32 @@
     return out;
   }
 
-  function resolveItemScope(btn, root) {
-    const direct = btn.closest('.je-object__container[data-schemapath]');
-    if (direct) {
-      const sp = direct.getAttribute('data-schemapath') || '';
-      if (isItemSchemapath(sp)) return direct;
-    }
-
+  function resolveScopeFromButtonIndex(btn, root) {
     const idx = parseButtonIndex(btn);
-    if (idx == null) return direct || null;
-
+    if (idx == null) return null;
     const ancestors = nearestSchemapathAncestors(btn);
     for (const a of ancestors) {
-      const c1 = `${a.sp}.${idx}`;
-      const c2 = `${a.sp}[${idx}]`;
-      const local1 = a.el.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c1)}"]`);
+      const p1 = `${a.sp}.${idx}`;
+      const p2 = `${a.sp}[${idx}]`;
+      const local1 = a.el.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(p1)}"]`);
       if (local1) return local1;
-      const local2 = a.el.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c2)}"]`);
+      const local2 = a.el.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(p2)}"]`);
       if (local2) return local2;
-      const global1 = root.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c1)}"]`);
+      const global1 = root.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(p1)}"]`);
       if (global1) return global1;
-      const global2 = root.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(c2)}"]`);
+      const global2 = root.querySelector(`.je-object__container[data-schemapath="${cssEscapeValue(p2)}"]`);
       if (global2) return global2;
     }
-    return direct || null;
+    return null;
+  }
+
+  function parseItemIndexFromSchemapath(sp) {
+    const s = String(sp || '');
+    const m = s.match(/(?:\[(\d+)\]|\.([0-9]+))(?!.*(?:\[(\d+)\]|\.([0-9]+)))/);
+    if (!m) return null;
+    const raw = m[1] != null ? m[1] : m[2];
+    const n = Number(raw);
+    return Number.isInteger(n) ? n : null;
   }
 
   function getItemButtonType(btn) {
@@ -156,12 +158,91 @@
     });
   }
 
+  function isVisible(el) {
+    if (!el) return false;
+    const cs = window.getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
+    return !!(el.offsetParent || el.getClientRects().length);
+  }
+
   function placeItemControlGroups(root) {
-    const itemButtons = [...root.querySelectorAll('button')]
+    const itemScopes = [...root.querySelectorAll('.je-object__container[data-schemapath]')]
+      .filter(scope => isItemSchemapath(scope.getAttribute('data-schemapath') || ''));
+
+    const byPath = new Map();
+    itemScopes.forEach(scope => {
+      const sp = scope.getAttribute('data-schemapath') || '';
+      if (!byPath.has(sp)) byPath.set(sp, []);
+      byPath.get(sp).push(scope);
+    });
+
+    byPath.forEach((scopes, sp) => {
+      const idx = parseItemIndexFromSchemapath(sp);
+      const primary =
+        scopes.find(s => {
+          const t = findItemTitle(s);
+          return t && isVisible(t);
+        }) || scopes[0];
+      if (!primary) return;
+      const primaryTitle = findItemTitle(primary);
+      if (!primaryTitle) return;
+      const row = ensureRowGroupInTitle(primaryTitle);
+
+      const allButtons = scopes
+        .flatMap(scope => [...scope.querySelectorAll('button')])
+        .filter(btn => !btn.closest('.je-modal'))
+        .filter(isItemButton)
+        .filter(btn => {
+          const bIdx = parseButtonIndex(btn);
+          if (idx != null && bIdx != null) return bIdx === idx;
+          return true;
+        });
+
+      allButtons.forEach(btn => {
+        const type = getItemButtonType(btn);
+        if (!type) return;
+        if (btn.closest('.' + ROW_CTRL_CLASS) === row) return;
+
+        const existingSameType = [...row.querySelectorAll(':scope > button')]
+          .find(b => getItemButtonType(b) === type);
+        if (existingSameType) {
+          btn.remove();
+          return;
+        }
+
+        decorateButton(btn);
+        const oldParent = btn.parentElement;
+        row.appendChild(btn);
+        if (
+          oldParent &&
+          oldParent !== row &&
+          oldParent.classList &&
+          oldParent.classList.contains('btn-group') &&
+          !oldParent.querySelector('button')
+        ) {
+          oldParent.remove();
+        }
+      });
+
+      dedupeRowButtons(row);
+
+      // Remove stale row groups from duplicate non-primary scopes.
+      scopes.forEach(scope => {
+        if (scope === primary) return;
+        const t = findItemTitle(scope);
+        if (!t) return;
+        t.querySelectorAll(':scope > .' + ROW_CTRL_CLASS).forEach(x => x.remove());
+      });
+    });
+
+    // Fallback: some layouts render row controls outside the item container.
+    // Reattach them by matching data-i against nearest array schemapath ancestors.
+    const strayButtons = [...root.querySelectorAll('button')]
       .filter(btn => !btn.closest('.je-modal'))
-      .filter(isItemButton);
-    itemButtons.forEach(btn => {
-      const scope = resolveItemScope(btn, root);
+      .filter(isItemButton)
+      .filter(btn => !btn.closest('.' + ROW_CTRL_CLASS));
+    strayButtons.forEach(btn => {
+      const scope = resolveScopeFromButtonIndex(btn, root);
       if (!scope) return;
       const sp = scope.getAttribute('data-schemapath') || '';
       if (!isItemSchemapath(sp)) return;
@@ -170,25 +251,23 @@
       const row = ensureRowGroupInTitle(title);
       const type = getItemButtonType(btn);
       if (!type) return;
-      if (btn.closest('.' + ROW_CTRL_CLASS) !== row) {
-        const existingSameType = [...row.querySelectorAll(':scope > button')]
-          .find(b => getItemButtonType(b) === type);
-        if (existingSameType) {
-          btn.remove();
-        } else {
-          decorateButton(btn);
-          const oldParent = btn.parentElement;
-          row.appendChild(btn);
-          if (
-            oldParent &&
-            oldParent !== row &&
-            oldParent.classList &&
-            oldParent.classList.contains('btn-group') &&
-            !oldParent.querySelector('button')
-          ) {
-            oldParent.remove();
-          }
-        }
+      const existingSameType = [...row.querySelectorAll(':scope > button')]
+        .find(b => getItemButtonType(b) === type);
+      if (existingSameType) {
+        btn.remove();
+        return;
+      }
+      decorateButton(btn);
+      const oldParent = btn.parentElement;
+      row.appendChild(btn);
+      if (
+        oldParent &&
+        oldParent !== row &&
+        oldParent.classList &&
+        oldParent.classList.contains('btn-group') &&
+        !oldParent.querySelector('button')
+      ) {
+        oldParent.remove();
       }
       dedupeRowButtons(row);
     });
@@ -209,7 +288,7 @@
     return [...root.querySelectorAll('button')]
       .filter(isItemButton)
       .map(btn => {
-        const scope = resolveItemScope(btn, root);
+        const scope = btn.closest('.je-object__container');
         const title = findItemTitle(scope);
         const row = title && title.querySelector(':scope > .' + ROW_CTRL_CLASS);
         return {
