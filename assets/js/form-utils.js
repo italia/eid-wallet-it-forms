@@ -224,30 +224,55 @@ function normalizeStringFieldsToTextarea(schema) {
 }
 
 /**
- * Fetch the JSON schema and transform it so that @json-editor/json-editor
- * can consume it (Draft-07 compatible conventions).
- * Usato per ogni webform: `schemaUrl` arriva dal manifest (schemi diversi per voce).
- *
- * Transformations applied:
- *  1. "$defs" → "definitions" (and "$ref": "#/$defs/X" → "#/definitions/X")
- *  2. Se esistono, imposta "readOnly" su proprietà `domanda` / `suggerimento` nelle
- *     definitions (tipico degli schemi onboarding EAA; su altri schemi non ha effetto).
- *  3. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
- *  4. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
- *
- * @param {string} schemaUrl
- * @returns {Promise<object>} transformed schema
+ * Deep clone for JSON-compatible structures.
+ * @param {object} value
+ * @returns {object}
  */
-async function loadAndTransformSchema(schemaUrl) {
-  const resp = await fetch(schemaUrl);
-  if (!resp.ok) throw new Error(`Impossibile caricare lo schema: ${resp.status}`);
-  let schema = await resp.json();
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
 
-  // 1. Normalise $defs → definitions
-  let str = JSON.stringify(schema)
-    .replace(/"#\/\$defs\//g, '"#/definitions/')
-    .replace(/"\$defs"/g, '"definitions"');
-  schema = JSON.parse(str);
+/**
+ * Convert Draft 2020-12 references used by source schemas to conventions accepted by json-editor.
+ * - "$defs" -> "definitions"
+ * - "$ref": "#/$defs/X" -> "#/definitions/X"
+ * @param {object} node
+ */
+function normalizeDefsAndRefs(node) {
+  if (!node || typeof node !== 'object') return;
+  if (typeof node.$ref === 'string' && node.$ref.startsWith('#/$defs/')) {
+    node.$ref = '#/definitions/' + node.$ref.slice('#/$defs/'.length);
+  }
+  if (node.$defs && typeof node.$defs === 'object') {
+    if (!node.definitions || typeof node.definitions !== 'object') {
+      node.definitions = node.$defs;
+    } else {
+      for (const k of Object.keys(node.$defs)) {
+        if (!(k in node.definitions)) {
+          node.definitions[k] = node.$defs[k];
+        }
+      }
+    }
+    delete node.$defs;
+  }
+  for (const key of Object.keys(node)) {
+    const child = node[key];
+    if (child && typeof child === 'object') {
+      normalizeDefsAndRefs(child);
+    }
+  }
+}
+
+/**
+ * Transform a raw schema to json-editor compatible schema.
+ * @param {object} rawSchema
+ * @returns {object}
+ */
+function transformSchemaForEditor(rawSchema) {
+  const schema = cloneJson(rawSchema);
+
+  // 1. Normalize $defs/$ref conventions
+  normalizeDefsAndRefs(schema);
 
   // 2. Make domanda/suggerimento read-only in all definitions
   if (schema.definitions) {
@@ -266,10 +291,44 @@ async function loadAndTransformSchema(schemaUrl) {
   // 3. Tabs layout for the root object
   schema.format = 'tabs';
 
-  // 4. Input testo su una riga → textarea (json-editor) + fit righe in form.html
+  // 4. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
   normalizeStringFieldsToTextarea(schema);
-
   return schema;
+}
+
+/**
+ * Fetch the JSON schema and transform it so that @json-editor/json-editor
+ * can consume it (Draft-07 compatible conventions).
+ * Usato per ogni webform: `schemaUrl` arriva dal manifest (schemi diversi per voce).
+ *
+ * Transformations applied:
+ *  1. "$defs" → "definitions" (and "$ref": "#/$defs/X" → "#/definitions/X")
+ *  2. Se esistono, imposta "readOnly" su proprietà `domanda` / `suggerimento` nelle
+ *     definitions (tipico degli schemi onboarding EAA; su altri schemi non ha effetto).
+ *  3. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
+ *  4. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
+ *
+ * @param {string} schemaUrl
+ * @returns {Promise<{ rawSchema: object, editorSchema: object }>}
+ */
+async function loadSchemaBundle(schemaUrl) {
+  const resp = await fetch(schemaUrl);
+  if (!resp.ok) throw new Error(`Impossibile caricare lo schema: ${resp.status}`);
+  const rawSchema = await resp.json();
+  return {
+    rawSchema,
+    editorSchema: transformSchemaForEditor(rawSchema)
+  };
+}
+
+/**
+ * Compat helper for existing callers expecting only transformed schema.
+ * @param {string} schemaUrl
+ * @returns {Promise<object>} transformed schema
+ */
+async function loadAndTransformSchema(schemaUrl) {
+  const bundle = await loadSchemaBundle(schemaUrl);
+  return bundle.editorSchema;
 }
 
 /**

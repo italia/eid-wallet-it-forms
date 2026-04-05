@@ -948,6 +948,21 @@ footer.it-footer-service {
   max-height: min(40vh, 280px);
   overflow-y: auto;
 }
+#validation-panel .callout,
+#validation-panel .callout-title,
+#validation-panel .callout-title span,
+#validation-panel .callout p,
+#validation-panel .callout li {
+  font-family: var(--bs-body-font-family) !important;
+}
+#validation-panel .callout code,
+#validation-panel .callout pre {
+  font-family: var(--bs-font-monospace, ui-monospace, monospace) !important;
+}
+.validation-ok,
+.validation-err {
+  font-family: var(--bs-body-font-family) !important;
+}
 .validation-ok  { color: var(--success); }
 .validation-err { color: var(--danger); }
 

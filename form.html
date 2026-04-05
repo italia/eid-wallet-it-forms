@@ -776,16 +776,13 @@ async function initEditor() {
       history.replaceState(null, '', url);
     }
 
-    const [schema, example] = await Promise.all([
-      loadAndTransformSchema(_schemaUrl),
+    const [{ rawSchema, editorSchema }, example] = await Promise.all([
+      loadSchemaBundle(_schemaUrl),
       loadExampleData(_dataUrl)
     ]);
     _exampleData = example;
-    _tocEditorSchema = schema;
-
-    const rawResp = await fetch(_schemaUrl);
-    if (!rawResp.ok) throw new Error('Schema: HTTP ' + rawResp.status);
-    _rawSchema = await rawResp.json();
+    _tocEditorSchema = editorSchema;
+    _rawSchema = rawSchema;
 
     let startVal = example;
     let formName = 'Nuovo Form';
@@ -808,7 +805,7 @@ async function initEditor() {
     JSONEditor.defaults.options.iconlib  = 'bootstrap';
 
     _editor = new JSONEditor(document.getElementById('editor-container'), {
-      schema:                  schema,
+      schema:                  editorSchema,
       startval:                startVal,
       theme:                   'bootstrap5',
       iconlib:                 'bootstrap',

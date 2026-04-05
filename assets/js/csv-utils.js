@@ -7,6 +7,8 @@
  *  - Import: Parse the two-column CSV and re-inflate to a nested object.
  */
 
+const DANGEROUS_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
+
 /* ── Export ──────────────────────────────────────────────── */
 
 /**
@@ -127,20 +129,38 @@ function csvToJson(csvText) {
  *      → ['e_service', 'response', 'dataset', 0, 'nome_campo']
  */
 function parsePath(path) {
+  if (typeof path !== 'string' || path.trim() === '') {
+    throw new Error('percorso vuoto');
+  }
   const parts = [];
-  // Split on dots, then handle bracket notation
-  for (const segment of path.split('.')) {
-    const bracketMatch = segment.match(/^(.+?)\[(\d+)\](.*)$/);
-    if (bracketMatch) {
-      if (bracketMatch[1]) parts.push(bracketMatch[1]);
-      parts.push(parseInt(bracketMatch[2], 10));
-      if (bracketMatch[3]) {
-        // Strip any leading dot, then split remaining sub-path
-        bracketMatch[3].replace(/^\./, '').split('.').filter(Boolean).forEach(p => parts.push(p));
-      }
-    } else {
-      parts.push(segment);
+  // Split on dots, then parse each segment with optional [index] suffixes.
+  for (const dotSegment of path.split('.')) {
+    if (!dotSegment) {
+      throw new Error('segmento path non valido');
     }
+    let segment = dotSegment;
+    while (segment.length > 0) {
+      const keyMatch = segment.match(/^[^[\]]+/);
+      if (keyMatch) {
+        const key = keyMatch[0];
+        if (DANGEROUS_PATH_SEGMENTS.has(key)) {
+          throw new Error(`chiave non consentita: ${key}`);
+        }
+        parts.push(key);
+        segment = segment.slice(key.length);
+        continue;
+      }
+      const indexMatch = segment.match(/^\[(\d+)\]/);
+      if (indexMatch) {
+        parts.push(parseInt(indexMatch[1], 10));
+        segment = segment.slice(indexMatch[0].length);
+        continue;
+      }
+      throw new Error('notazione [] non valida');
+    }
+  }
+  if (!parts.length) {
+    throw new Error('percorso non valido');
   }
   return parts;
 }
@@ -149,16 +169,25 @@ function parsePath(path) {
  * Set a nested value on an object using an array of path segments.
  */
 function setNestedValue(obj, parts, value) {
+  if (!Array.isArray(parts) || parts.length === 0) {
+    throw new Error('percorso non valido');
+  }
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const key  = parts[i];
     const next = parts[i + 1];
+    if (typeof key === 'string' && DANGEROUS_PATH_SEGMENTS.has(key)) {
+      throw new Error(`chiave non consentita: ${key}`);
+    }
     if (cur[key] === undefined || cur[key] === null) {
-      cur[key] = typeof next === 'number' ? [] : {};
+      cur[key] = typeof next === 'number' ? [] : Object.create(null);
     }
     cur = cur[key];
   }
   const last = parts[parts.length - 1];
+  if (typeof last === 'string' && DANGEROUS_PATH_SEGMENTS.has(last)) {
+    throw new Error(`chiave non consentita: ${last}`);
+  }
   cur[last] = value;
 }
 
