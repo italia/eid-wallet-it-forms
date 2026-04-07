@@ -535,14 +535,6 @@ footer.it-footer-service {
   color: var(--bs-secondary-color);
 }
 
-/*
- * Corpo card: Bootstrap Italia compila da components/_card-old.scss (.card-body + override .card .card-body con $card-padding, ~24px).
- * Qui si riduce senza fork del kit; le utility p-* su singole card restano valide (!important nel CSS Bootstrap).
- */
-.card-body {
-  padding: 5px !important;
-}
-
 /* ── Card catalogo / bozze (azioni visibili senza scroll: wrap + card abbastanza larghe) ─ */
 .webform-catalog-card,
 .bozza-card {
@@ -611,6 +603,14 @@ footer.it-footer-service {
 /* ── Form editor page ────────────────────────────────────── */
 #editor-container {
   min-height: 60vh;
+}
+
+/*
+ * Solo sezioni/campi generati da json-editor (form.html): non bozza, card «Modulo», sommario, index.
+ * Padding kit da _card-old.scss (~24px); utility p-* sulle singole .card-body dentro l’editor hanno priorità (!important).
+ */
+#editor-container.je-ready .card-body {
+  padding: 5px !important;
 }
 
 /* json-editor overrides */
