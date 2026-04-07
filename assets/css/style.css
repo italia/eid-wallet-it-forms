@@ -7,7 +7,14 @@
   --warning: var(--bs-warning);
   --danger: var(--bs-danger);
   --light-bg: var(--bs-light);
+  /* Stesso fondo di footer.it-footer-service (hero, card header, ecc.) */
+  --app-surface-light: var(--bs-gray-100, var(--light-bg));
   --border: var(--bs-border-color);
+}
+
+/* Allinea la utility Bootstrap a footer servizio (stesso token del footer) */
+.bg-light {
+  background-color: var(--app-surface-light) !important;
 }
 
 /* ── Layout ──────────────────────────────────────────────── */
@@ -523,9 +530,17 @@ main { flex: 1; }
 /* Footer coerente con area servizio */
 footer.it-footer-service {
   border-top: 1px solid var(--border);
-  background-color: var(--bs-gray-100, var(--light-bg));
+  background-color: var(--app-surface-light);
   font-size: 0.875rem;
   color: var(--bs-secondary-color);
+}
+
+/*
+ * Corpo card: Bootstrap Italia compila da components/_card-old.scss (.card-body + override .card .card-body con $card-padding, ~24px).
+ * Qui si riduce senza fork del kit; le utility p-* su singole card restano valide (!important nel CSS Bootstrap).
+ */
+.card-body {
+  padding: 5px !important;
 }
 
 /* ── Card catalogo / bozze (azioni visibili senza scroll: wrap + card abbastanza larghe) ─ */

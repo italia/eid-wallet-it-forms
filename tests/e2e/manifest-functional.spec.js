@@ -209,7 +209,12 @@ test.describe('Functional webforms coverage from manifest', () => {
     );
     fs.writeFileSync(
       csvFixturePath,
-      'path;value\r\nmetadata.nome_eaa;E2E CSV Draft\r\n',
+      [
+        'percorso;tipo_dato;valore',
+        // stringa con ";": virgolette RFC 4180 sul valore
+        'metadata.nome_eaa;stringa;"E2E CSV; punto e virgola nel nome"',
+        ''
+      ].join('\r\n'),
       'utf8'
     );
 
@@ -227,7 +232,7 @@ test.describe('Functional webforms coverage from manifest', () => {
     ]);
     await csvChooser.setFiles(csvFixturePath);
     await expect(page.locator('#form-list .bozza-card')).toHaveCount(2);
-    await expect(page.locator('#form-list')).toContainText('E2E CSV Draft');
+    await expect(page.locator('#form-list')).toContainText('E2E CSV; punto e virgola nel nome');
 
     const [jsonDownload] = await Promise.all([
       page.waitForEvent('download'),

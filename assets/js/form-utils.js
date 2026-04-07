@@ -367,6 +367,48 @@ function sanitizeFormData(value) {
 }
 
 /**
+ * Copia profonda tramite JSON (adeguata ai dati del form: oggetti, array, primitivi).
+ * @param {any} data
+ * @returns {any}
+ */
+function cloneFormData(data) {
+  return data === undefined ? undefined : JSON.parse(JSON.stringify(data));
+}
+
+/**
+ * Unisce il valore corrente dell'editor con uno snapshot di riferimento così che
+ * proprietà che json-editor non espone in getValue() (es. campi opzionali/read-only
+ * come `suggerimento`) o normalizzazioni indesiderate non spariscano da export e salvataggio.
+ *
+ * @param {any} base     Snapshot coerente con l'ultimo caricamento / salvataggio
+ * @param {any} current  Risultato di JSONEditor.getValue()
+ * @returns {any}
+ */
+function mergeFormExportBaseline(base, current) {
+  if (current === undefined || current === null) {
+    return base === undefined || base === null ? current : cloneFormData(base);
+  }
+  if (base === undefined || base === null) {
+    return cloneFormData(current);
+  }
+  if (Array.isArray(current)) {
+    if (!Array.isArray(base)) return cloneFormData(current);
+    return current.map((item, i) => mergeFormExportBaseline(base[i], item));
+  }
+  if (typeof current !== 'object') {
+    return current;
+  }
+  if (typeof base !== 'object' || base === null) {
+    return cloneFormData(current);
+  }
+  const out = Object.assign({}, base);
+  for (const k of Object.keys(current)) {
+    out[k] = mergeFormExportBaseline(base[k], current[k]);
+  }
+  return out;
+}
+
+/**
  * True when an object has no meaningful value in any nested property.
  * `false` and numeric values are considered meaningful.
  * @param {object} obj
