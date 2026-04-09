@@ -950,10 +950,29 @@ footer.it-footer-service {
 .je-ready .je-object__container > .je-object__title {
   display: inline-flex !important;
   align-items: center;
+  justify-content: flex-start;
+  text-align: left;
   flex-wrap: wrap;
   gap: 0.5rem 1.1rem;
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/*
+ * json-editor (CSS iniettato) imposta text-align:center su .je-tab / .je-tab--top (righe array in tabs-top).
+ * Il tema bootstrap5 aggiunge la classe text-center ai .nav-link delle tab.
+ * Allineamento a sinistra come il resto delle intestazioni (#editor-container ha classe .je-ready).
+ */
+#editor-container.je-ready .je-tab,
+#editor-container.je-ready .je-tab--top,
+#editor-container.je-ready .nav-link,
+#editor-container.je-ready .nav-pills .nav-link,
+#editor-container.je-ready .nav-tabs .nav-link {
+  text-align: left !important;
+}
+
+#editor-container.je-ready .je-object__title {
+  text-align: left;
 }
 
 .je-ready .je-object__container > .je-object__controls.btn-group {

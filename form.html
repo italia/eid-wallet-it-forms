@@ -841,6 +841,8 @@ async function initEditor() {
       remove_false_properties: false,
       prompt_before_delete:    true,
       array_controls_top:      true,
+      /* 2 = disabilita invece di display:none: triplet delete/move visibile e verificabile ovunque */
+      button_state_mode:       2,
     });
 
     _editor.on('ready', () => {

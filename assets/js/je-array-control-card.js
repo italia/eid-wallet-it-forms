@@ -16,15 +16,56 @@
     return /\[\d+\](?:\.|$)|(?:^|\.)\d+(?:\.|$)/.test(s);
   }
 
+  function titleDepthFromHost(title, host) {
+    if (!title || !host) return null;
+    let depth = 0;
+    let p = title.parentElement;
+    while (p) {
+      if (p === host) return depth;
+      p = p.parentElement;
+      depth++;
+    }
+    return null;
+  }
+
+  /**
+   * Titolo “di item” nell’header: con allOf/sezioni annidate il primo `.je-object__title` nel DOM
+   * può essere un sotto-blocco (es. mappatura_errore), non la riga dell’array. Preferiamo il titolo
+   * più superficiale che contiene Edit JSON / proprietà / controlli, altrimenti il più superficiale.
+   */
   function findItemTitle(host) {
     if (!host) return null;
-    return (
-      host.querySelector(':scope > .je-object__title') ||
-      host.querySelector('.je-object__title') ||
-      host.querySelector(':scope > .card > .card-header .card-title') ||
-      host.querySelector('.card-header .card-title') ||
-      host.querySelector(':scope .card-title')
+    const direct = host.querySelector(':scope > .je-object__title');
+    if (direct) return direct;
+    const arHead = host.querySelector(':scope > .je-array-item-header-row > .je-object__title');
+    if (arHead) return arHead;
+
+    const headers = [...host.querySelectorAll('.je-object__title')].filter(
+      t => titleDepthFromHost(t, host) !== null
     );
+    if (!headers.length) {
+      return (
+        host.querySelector(':scope > .card > .card-header .card-title') ||
+        host.querySelector('.card-header .card-title') ||
+        host.querySelector(':scope .card-title')
+      );
+    }
+    const withHeaderActions = headers.filter(t =>
+      t.querySelector(
+        'button.json-editor-btntype-editjson, button.json-editor-btntype-properties, .je-object__controls'
+      )
+    );
+    const pool = withHeaderActions.length ? withHeaderActions : headers;
+    let best = null;
+    let bestDepth = Infinity;
+    pool.forEach(t => {
+      const d = titleDepthFromHost(t, host);
+      if (d != null && d < bestDepth) {
+        bestDepth = d;
+        best = t;
+      }
+    });
+    return best;
   }
 
   function findTitleActionsAnchor(title) {
@@ -158,6 +199,56 @@
     });
   }
 
+  /**
+   * In layout a tab, json-editor non crea il move-up sulla prima riga (indice 0).
+   * Duplica lo stile dal move-down della stessa riga così restano sempre 3 controlli coerenti.
+   */
+  function ensureMoveUpStubInRow(row, root) {
+    if (!row || !root) return;
+    const direct = [...row.querySelectorAll(':scope > button')];
+    if (direct.some(isMoveUpButton)) return;
+    const down = direct.find(isMoveDownButton);
+    if (!down) return;
+    const refUp = root.querySelector(
+      'button.moveup.json-editor-btntype-move:not(.je-array-control-stub)'
+    );
+    const stub = document.createElement('button');
+    stub.type = 'button';
+    stub.className =
+      down.className
+        .replace(/\bmovedown\b/g, 'moveup')
+        .replace(/json-editor-btn-movedown/g, 'json-editor-btn-moveup') + ' je-array-control-stub';
+    stub.innerHTML = down.innerHTML
+      .replace(/\bmovedown\b/g, 'moveup')
+      .replace(/json-editor-btn-movedown/g, 'json-editor-btn-moveup')
+      .replace(/chevron-down/gi, 'chevron-up')
+      .replace(/arrow-down/gi, 'arrow-up');
+    if (refUp) {
+      stub.title = refUp.getAttribute('title') || refUp.title || '';
+    } else {
+      stub.title = down.getAttribute('title') || down.title || '';
+    }
+    stub.disabled = true;
+    stub.setAttribute('aria-disabled', 'true');
+    row.insertBefore(stub, down);
+    decorateButton(stub);
+  }
+
+  function finalizeArrayItemMoveStubs(root) {
+    const reorderEnabled = [...root.querySelectorAll('button')]
+      .filter(btn => !btn.closest('.je-modal'))
+      .some(btn => btn.classList.contains('json-editor-btntype-move'));
+    if (!reorderEnabled) return;
+    root.querySelectorAll('.' + ROW_CTRL_CLASS).forEach(row => ensureMoveUpStubInRow(row, root));
+  }
+
+  /** Evita gruppi vuoti (tab duplicati / ridegrafiche) che non sono controlli reali. */
+  function pruneEmptyItemControlRows(root) {
+    root.querySelectorAll('.' + ROW_CTRL_CLASS).forEach(row => {
+      if (!row.querySelector(':scope > button')) row.remove();
+    });
+  }
+
   function isVisible(el) {
     if (!el) return false;
     const cs = window.getComputedStyle(el);
@@ -182,7 +273,11 @@
         scopes.find(s => {
           const t = findItemTitle(s);
           return t && isVisible(t);
-        }) || scopes[0];
+        }) ||
+        scopes.find(s =>
+          [...(s.querySelectorAll('button') || [])].some(btn => !btn.closest('.je-modal') && isItemButton(btn))
+        ) ||
+        scopes[0];
       if (!primary) return;
       const primaryTitle = findItemTitle(primary);
       if (!primaryTitle) return;
@@ -280,6 +375,9 @@
       if (!title) return;
       title.querySelectorAll(':scope > .' + ROW_CTRL_CLASS).forEach(row => row.remove());
     });
+
+    finalizeArrayItemMoveStubs(root);
+    pruneEmptyItemControlRows(root);
   }
 
   // Runtime helper to debug placement in browser console.
@@ -319,7 +417,12 @@
 
   function setupJeArrayControlObserver() {
     const el = document.getElementById('editor-container');
-    if (!el || _mo) return;
+    if (!el) return;
+    if (!el.dataset.jeArrayTabBound) {
+      el.dataset.jeArrayTabBound = '1';
+      el.addEventListener('shown.bs.tab', () => initJeArrayControlCard(el));
+    }
+    if (_mo) return;
     _mo = new MutationObserver(() => {
       if (_moTimer) clearTimeout(_moTimer);
       _moTimer = setTimeout(() => {

@@ -264,6 +264,188 @@ function normalizeDefsAndRefs(node) {
 }
 
 /**
+ * Etichetta heading: nome proprietà / definizione così com’è (es. campo_risposta, mappatura_errori).
+ * Se lo schema espone già `title` sul nodo, non sovrascrivere (solo dove manca).
+ * @param {string} key
+ * @returns {string}
+ */
+function headingLabelFromKey(key) {
+  if (key == null || key === '') return '';
+  return String(key);
+}
+
+/**
+ * Valore proprietà che è solo `$ref`: aggiunge titolo visibile in json-editor.
+ * @param {object} node
+ * @param {string} propertyLabel
+ */
+function liftBareRefToAllOf(node, propertyLabel) {
+  if (!node || typeof node !== 'object' || !propertyLabel) return;
+  const keys = Object.keys(node);
+  if (keys.length !== 1 || typeof node.$ref !== 'string') return;
+  const ref = node.$ref;
+  delete node.$ref;
+  node.allOf = [{ $ref: ref }, { title: propertyLabel }];
+}
+
+/**
+ * Per ogni elemento di array: titolo con prefisso = nome proprietà padre (json-editor: headerTemplate + indice).
+ * Per `$ref` verso `#/definitions/…` si **inline-a** una copia della definition: con `allOf` esterno
+ * (es. mappatura_errore) json-editor non applica `headerTemplate` al titolo/tab visibili.
+ * @param {object} arraySchema
+ * @param {string} parentLabel
+ * @param {object} schemaRoot - schema completo (con `definitions`) per risolvere i ref
+ */
+function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
+  if (
+    !arraySchema ||
+    typeof arraySchema !== 'object' ||
+    arraySchema.type !== 'array' ||
+    !arraySchema.items ||
+    typeof arraySchema.items !== 'object' ||
+    Array.isArray(arraySchema.items)
+  ) {
+    return;
+  }
+
+  const items = arraySchema.items;
+  const suffix = ' · {{i1}}';
+  const headingExtra = {
+    title: parentLabel,
+    headerTemplate: parentLabel + suffix
+  };
+
+  if (typeof items.$ref === 'string' && Object.keys(items).length === 1) {
+    const ref = items.$ref;
+    const m = typeof ref === 'string' ? ref.match(/^#\/definitions\/(.+)$/) : null;
+    if (m && schemaRoot && schemaRoot.definitions && schemaRoot.definitions[m[1]]) {
+      const inlined = cloneJson(schemaRoot.definitions[m[1]]);
+      inlined.title = parentLabel;
+      inlined.headerTemplate = parentLabel + suffix;
+      /*
+       * Non impostare mai `format: tabs` sulla radice dell’item inline: in json-editor 2.15 quel layout
+       * sulla radice dell’oggetto-item **sopprime il titolo di riga** (`headerTemplate`, es. mappatura_errori · 1,
+       * canali · 1). Layout a griglia + `title` sui campi (decorateEditorHeadings) è sufficiente anche con allOf/if.
+       */
+      arraySchema.items = inlined;
+      recurseItemsSchemaForHeadings(inlined, schemaRoot);
+      return;
+    }
+    items.allOf = [{ $ref: ref }, headingExtra];
+    delete items.$ref;
+    recurseItemsSchemaForHeadings(items, schemaRoot);
+    return;
+  }
+
+  if (Array.isArray(items.allOf)) {
+    items.allOf.push(headingExtra);
+  } else if (items.type === 'object') {
+    if (!items.title) items.title = parentLabel;
+    if (!items.headerTemplate) items.headerTemplate = parentLabel + suffix;
+  } else {
+    if (!items.title) items.title = parentLabel;
+    if (!items.headerTemplate) items.headerTemplate = parentLabel + suffix;
+  }
+
+  recurseItemsSchemaForHeadings(items, schemaRoot);
+}
+
+/**
+ * @param {object} node
+ * @param {string} propertyKey
+ * @param {object} schemaRoot
+ */
+function ensureNodeHasHeading(node, propertyKey, schemaRoot) {
+  if (!node || typeof node !== 'object' || propertyKey == null || propertyKey === '') return;
+  const label = headingLabelFromKey(propertyKey);
+
+  liftBareRefToAllOf(node, label);
+
+  const missingTitle = !node.title || String(node.title).trim() === '';
+
+  if (node.type === 'object' && missingTitle) {
+    node.title = label;
+  } else if (
+    missingTitle &&
+    (node.type === 'string' ||
+      node.type === 'integer' ||
+      node.type === 'number' ||
+      node.type === 'boolean')
+  ) {
+    node.title = label;
+  }
+
+  if (node.type === 'array') {
+    patchArrayItemsForHeadings(node, label, schemaRoot);
+  }
+}
+
+/**
+ * @param {object} properties
+ * @param {object} schemaRoot
+ */
+function decoratePropertySchemasForHeadings(properties, schemaRoot) {
+  if (!properties || typeof properties !== 'object') return;
+  for (const key of Object.keys(properties)) {
+    const sub = properties[key];
+    if (!sub || typeof sub !== 'object') continue;
+    ensureNodeHasHeading(sub, key, schemaRoot);
+    recurseSchemaForHeadings(sub, schemaRoot);
+  }
+}
+
+/**
+ * @param {object} itemsSchema
+ * @param {object} schemaRoot
+ */
+function recurseItemsSchemaForHeadings(itemsSchema, schemaRoot) {
+  if (!itemsSchema || typeof itemsSchema !== 'object') return;
+  if (itemsSchema.properties) decoratePropertySchemasForHeadings(itemsSchema.properties, schemaRoot);
+  for (const k of ['allOf', 'anyOf', 'oneOf']) {
+    if (Array.isArray(itemsSchema[k])) {
+      itemsSchema[k].forEach(br => recurseSchemaForHeadings(br, schemaRoot));
+    }
+  }
+}
+
+/**
+ * @param {object} node
+ * @param {object} schemaRoot
+ */
+function recurseSchemaForHeadings(node, schemaRoot) {
+  if (!node || typeof node !== 'object') return;
+  if (node.properties) decoratePropertySchemasForHeadings(node.properties, schemaRoot);
+  if (node.type === 'array' && node.items && typeof node.items === 'object' && !Array.isArray(node.items)) {
+    recurseItemsSchemaForHeadings(node.items, schemaRoot);
+  }
+  for (const k of ['allOf', 'anyOf', 'oneOf']) {
+    if (Array.isArray(node[k])) node[k].forEach(br => recurseSchemaForHeadings(br, schemaRoot));
+  }
+  if (node.if) recurseSchemaForHeadings(node.if, schemaRoot);
+  if (node.then) recurseSchemaForHeadings(node.then, schemaRoot);
+  if (node.else) recurseSchemaForHeadings(node.else, schemaRoot);
+}
+
+/**
+ * Intestazioni in json-editor: decorate property keys, array headerTemplate, senza titolo sulla radice delle definitions.
+ * @param {object} schema
+ */
+function decorateEditorHeadings(schema) {
+  if (!schema || typeof schema !== 'object') return;
+
+  if (schema.definitions) {
+    for (const name of Object.keys(schema.definitions)) {
+      const def = schema.definitions[name];
+      if (!def || typeof def !== 'object') continue;
+      /* Non impostare title sulla radice della definition (es. campo_booleano): in UI si usa il nome della proprietà che fa $ref. */
+      recurseSchemaForHeadings(def, schema);
+    }
+  }
+
+  if (schema.properties) decoratePropertySchemasForHeadings(schema.properties, schema);
+}
+
+/**
  * Transform a raw schema to json-editor compatible schema.
  * @param {object} rawSchema
  * @returns {object}
@@ -288,10 +470,13 @@ function transformSchemaForEditor(rawSchema) {
     }
   }
 
-  // 3. Tabs layout for the root object
+  // 3. Titoli / heading per ogni blocco e prefisso padre sugli item array (json-editor)
+  decorateEditorHeadings(schema);
+
+  // 4. Tabs layout for the root object
   schema.format = 'tabs';
 
-  // 4. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
+  // 5. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
   normalizeStringFieldsToTextarea(schema);
   return schema;
 }
@@ -305,8 +490,12 @@ function transformSchemaForEditor(rawSchema) {
  *  1. "$defs" → "definitions" (and "$ref": "#/$defs/X" → "#/definitions/X")
  *  2. Se esistono, imposta "readOnly" su proprietà `domanda` / `suggerimento` nelle
  *     definitions (tipico degli schemi onboarding EAA; su altri schemi non ha effetto).
- *  3. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
- *  4. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
+ *  3. Titoli json-editor: chiave proprietà se manca `title` (i nomi delle definition non diventano titoli di
+ *     blocco; così i $ref verso campo_booleano / campo_risposta usano il nome della proprietà padre).
+ *     Item array: `title` + `headerTemplate` con nome array e ` · {{i1}}`. Niente `format: tabs` sulla radice dell’item.
+ *     Campi primitivi senza title ricevono etichetta dal nome proprietà.
+ *  4. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
+ *  5. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
  *
  * @param {string} schemaUrl
  * @returns {Promise<{ rawSchema: object, editorSchema: object }>}
