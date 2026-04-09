@@ -644,6 +644,43 @@ footer.it-footer-service {
   color: var(--bs-body-color);
 }
 
+/*
+ * Etichetta vs textarea: json-editor mette spesso label e textarea in `.form-group > .row > .col`,
+ * quindi il figlio diretto del .form-group non è la label (`> label` non matcha mai).
+ * Se label e control si sovrappongono (BI / stacking), i click finiscono sulla label.
+ */
+#editor-container.je-ready .form-group:has(textarea.form-control:not(.je-edit-json--textarea)) label.form-label,
+#editor-container.je-ready .form-group:has(textarea.form-control:not(.je-edit-json--textarea)) label.control-label {
+  pointer-events: none;
+}
+/*
+ * Textarea sopra nello stacking context; forza ricezione eventi (alcuni temi ereditano none da wrapper).
+ */
+#editor-container.je-ready textarea.form-control:not(.je-edit-json--textarea) {
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+}
+
+/*
+ * Voci array in card (assistenza.referenti, assistenza.canali, …): dentro .card-body Bootstrap Italia
+ * può ancora vincere con label in position:absolute / transform. Forziamo lo stesso trucco con !important.
+ */
+#editor-container.je-ready .card-body .form-group:has(textarea.form-control:not(.je-edit-json--textarea)) label.form-label,
+#editor-container.je-ready .card-body .form-group:has(textarea.form-control:not(.je-edit-json--textarea)) label.control-label {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  pointer-events: none;
+}
+#editor-container.je-ready .card-body textarea.form-control:not(.je-edit-json--textarea) {
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+}
+
 /* Spaziatura verticale da BI (3rem) pensata per floating label; con label normale basta meno respiro */
 .je-ready .form-group {
   margin-bottom: 1.25rem;
@@ -731,6 +768,7 @@ footer.it-footer-service {
   margin-bottom: 0 !important;
   position: relative;
   z-index: 1;
+  pointer-events: none;
 }
 .je-ready [data-schemapath*=".$schema"] .form-control,
 .je-ready [data-schemapath*=".$schema"] textarea.form-control {
@@ -739,7 +777,7 @@ footer.it-footer-service {
   overflow-wrap: anywhere;
   word-break: break-word;
   position: relative;
-  z-index: 0;
+  z-index: 2;
 }
 
 /* Stesso problema se il path non contiene il suffisso atteso: colonna grid che contiene id root[$schema] */

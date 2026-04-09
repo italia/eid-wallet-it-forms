@@ -16,6 +16,8 @@ const webforms = Array.isArray(manifest.webforms) ? manifest.webforms : [];
  * - Layout assistenza.canali (se presente): titolo riga item; per tipo/risposta/note nome campo + controllo con
  *   getBoundingClientRect nello stesso evaluate (affidabile); regole: sopra, sinistra in riga, o stesso blocco a colonna
  * - Nessun title/tab con testo esatto = nomi technical $defs campo_* (da schema) né "Campo Risposta"
+ * - Testo nelle textarea: smoke sulla prima textarea visibile; poi esempio + collapse + oneOf «textarea»
+ *   su assistenza.referenti.*.email e assistenza.canali.*.risposta (Email), dove lo schema usa maxLength:0|email
  */
 
 function webformUrl(id) {
@@ -159,11 +161,22 @@ async function defNamesWithCampoPrefix(request, schemaUrl) {
 /**
  * Ogni host oggetto il cui schemapath termina con .N (item di array) deve avere nel titolo la tripla
  * delete / move up / move down quando il riordino è attivo nel form.
+ * Si considerano tutti gli item che hanno almeno un campo figlio (es. …0.codice), non solo chi ha già i
+ * pulsanti nel DOM (altrimenti le regressioni su mappatura_errori / canali passano inosservate).
  */
 async function assertEveryIndexedArrayItemObjectHasHeadingControls(page) {
   const issues = await page.evaluate(() => {
     const root = document.getElementById('editor-container');
     if (!root) return ['manca #editor-container'];
+
+    function isVisibleJeObjectHost(el) {
+      if (!el || el.closest('.je-modal')) return false;
+      if (!root.contains(el)) return false;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }
 
     const reorderActive = [...root.querySelectorAll('button')].some(
       b => !b.closest('.je-modal') && b.classList.contains('json-editor-btntype-move')
@@ -171,6 +184,19 @@ async function assertEveryIndexedArrayItemObjectHasHeadingControls(page) {
     if (!reorderActive) return [];
 
     const endsWithIndex = /\.(\d+)$/;
+    function hostHasIndexedChildField(sp) {
+      const pref = sp + '.';
+      let found = false;
+      root.querySelectorAll('[data-schemapath]').forEach(n => {
+        if (found) return;
+        const p = n.getAttribute('data-schemapath') || '';
+        if (!p.startsWith(pref)) return;
+        const rest = p.slice(pref.length);
+        const seg = rest.split('.')[0];
+        if (seg && !/^\d+$/.test(seg) && !seg.startsWith('$')) found = true;
+      });
+      return found;
+    }
     function isDel(b) {
       return (
         (b.classList.contains('json-editor-btntype-delete') || b.classList.contains('json-editor-btn-delete')) &&
@@ -189,18 +215,25 @@ async function assertEveryIndexedArrayItemObjectHasHeadingControls(page) {
     const containers = [...root.querySelectorAll('.je-object__container[data-schemapath]')].filter(el => {
       const sp = el.getAttribute('data-schemapath') || '';
       if (!endsWithIndex.test(sp)) return false;
-      return !!el.querySelector(
-        'button.json-editor-btntype-delete, button.json-editor-btntype-move, button.json-editor-btn-delete'
-      );
+      if (el.closest('.je-modal')) return false;
+      if (!isVisibleJeObjectHost(el)) return false;
+      return hostHasIndexedChildField(sp);
     });
 
     containers.forEach(c => {
       const sp = c.getAttribute('data-schemapath') || '';
-      const row = [...c.querySelectorAll('.je-array-item-row-controls')].find(r => {
+      let row = [...c.querySelectorAll('.je-array-item-row-controls')].find(r => {
         if (!c.contains(r)) return false;
         const host = r.closest('.je-object__container[data-schemapath]');
         return host && host.getAttribute('data-schemapath') === sp;
       });
+      if (!row) {
+        const card = c.closest('.card');
+        const body = card && card.querySelector(':scope > .card-body');
+        if (card && body && body.contains(c)) {
+          row = card.querySelector(':scope > .card-header .je-array-item-row-controls');
+        }
+      }
       if (!row) {
         out.push(`${sp}: nessuna .je-array-item-row-controls nel titolo di questo item`);
         return;
@@ -265,9 +298,18 @@ async function assertFieldChromeForAllIndexedObjectHosts(page) {
     }
 
     const out = [];
+    function isVisibleJeObjectHost(el) {
+      if (!el || el.closest('.je-modal')) return false;
+      if (!root.contains(el)) return false;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }
+
     const hosts = [...root.querySelectorAll('.je-object__container[data-schemapath]')].filter(el => {
       const sp = el.getAttribute('data-schemapath') || '';
-      return /\.\d+(?:\.|$)/.test(sp);
+      return /\.\d+(?:\.|$)/.test(sp) && isVisibleJeObjectHost(el);
     });
 
     hosts.forEach(host => {
@@ -315,7 +357,26 @@ async function assertEveryArrayObjectItemRowHeaderShowsParentAndIndex(page) {
     const itemPathRe = /^(.+)\.([^.\d$][\w]*)\.(\d+)$/;
     const out = [];
 
+    function isVisibleJeObjectHost(el) {
+      if (!el || el.closest('.je-modal')) return false;
+      if (!root.contains(el)) return false;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }
+
     function itemRowTitleEl(host) {
+      const card = host.closest('.card');
+      if (card) {
+        const body = card.querySelector(':scope > .card-body');
+        if (body && body.contains(host)) {
+          const inHeader =
+            card.querySelector(':scope > .card-header .je-object__title') ||
+            card.querySelector(':scope > .card-header .card-title');
+          if (inHeader) return inHeader;
+        }
+      }
       return (
         host.querySelector(':scope > .je-object__title') ||
         host.querySelector(':scope > .je-array-item-header-row .je-object__title') ||
@@ -323,18 +384,30 @@ async function assertEveryArrayObjectItemRowHeaderShowsParentAndIndex(page) {
       );
     }
 
+    function hostHasIndexedChildField(sp) {
+      const pref = sp + '.';
+      let found = false;
+      root.querySelectorAll('[data-schemapath]').forEach(n => {
+        if (found) return;
+        const p = n.getAttribute('data-schemapath') || '';
+        if (!p.startsWith(pref)) return;
+        const rest = p.slice(pref.length);
+        const seg = rest.split('.')[0];
+        if (seg && !/^\d+$/.test(seg) && !seg.startsWith('$')) found = true;
+      });
+      return found;
+    }
+
     [...root.querySelectorAll('.je-object__container[data-schemapath]')].forEach(host => {
       if (host.closest('.je-modal')) return;
+      if (!isVisibleJeObjectHost(host)) return;
       const sp = host.getAttribute('data-schemapath') || '';
       const m = sp.match(itemPathRe);
       if (!m) return;
       const parentKey = m[2];
       if (parentKey.startsWith('$')) return;
 
-      const hasItemUi = host.querySelector(
-        'button.json-editor-btntype-delete, button.json-editor-btntype-move, button.json-editor-btn-delete'
-      );
-      if (!hasItemUi) return;
+      if (!hostHasIndexedChildField(sp)) return;
 
       const titleEl = itemRowTitleEl(host);
       if (!titleEl) {
@@ -350,6 +423,20 @@ async function assertEveryArrayObjectItemRowHeaderShowsParentAndIndex(page) {
       const hasIndexHint = /[·\u00b7]/.test(raw) || /\d/.test(raw);
       if (!hasIndexHint) {
         out.push(`${sp}: titolo riga senza separatore · né cifra — «${raw.slice(0, 160)}»`);
+        return;
+      }
+      const pathIdx = Number(m[3]);
+      if (Number.isInteger(pathIdx) && /[·\u00b7]/.test(raw)) {
+        const tail = raw.split(/[·\u00b7]/).pop().replace(/\s+/g, ' ').trim();
+        const numMatch = tail.match(/^(\d+)/);
+        if (numMatch) {
+          const shown = Number(numMatch[1]);
+          if (shown !== pathIdx + 1) {
+            out.push(
+              `${sp}: titolo mostra indice ${shown}, atteso ${pathIdx + 1} — «${raw.slice(0, 160)}»`
+            );
+          }
+        }
       }
     });
     return out;
@@ -413,8 +500,12 @@ async function assertAssistenzaCanaliArrayItemLayout(page) {
 
   for (const base of bases) {
     const host = await firstVisibleJeObjectContainer(page, base);
-    /* oneOf / switcher: aspettare i ruoli nel item reale evita rect instabili se il test parte dopo altri case. */
-    const rowTitle = host.locator(':scope > .je-object__title').first();
+    const titleInBody = host.locator(':scope > .je-object__title').first();
+    const titleInCardHeader = host
+      .locator('xpath=ancestor::div[contains(@class,"card")][1]')
+      .locator('.card-header .je-object__title, .card-header .card-title')
+      .first();
+    const rowTitle = titleInBody.or(titleInCardHeader);
     await expect(rowTitle, `titolo riga array ${base}`).toBeVisible();
     const titleText = (await rowTitle.textContent()) || '';
     expect(titleText.toLowerCase(), `testo titolo ${base}`).toContain('canali');
@@ -544,14 +635,14 @@ async function assertArrayItemControlsPlacement(page) {
         issues.push(`button ${index}: fuori da .je-array-item-row-controls`);
         return;
       }
-      const title = row.closest('.je-object__title');
+      const title = row.closest('.je-object__title, .card-title');
       if (!title) {
-        issues.push(`button ${index}: controlli fuori da .je-object__title`);
+        issues.push(`button ${index}: controlli fuori da titolo riga (.je-object__title / .card-title)`);
         return;
       }
 
       const actionAnchor = title.querySelector(
-        ':scope > .btn-group > .json-editor-btntype-editjson, :scope > .btn-group > .json-editor-btntype-properties'
+        ':scope > .btn-group > .json-editor-btntype-editjson, :scope > .btn-group > .json-editor-btntype-properties, .btn-group > .json-editor-btntype-editjson, .btn-group > .json-editor-btntype-properties'
       );
       if (actionAnchor) {
         const rowIsBeforeActions =
@@ -618,6 +709,131 @@ async function assertArrayItemControlsComplete(page) {
   expect(issues, `Controlli item incompleti:\n${issues.join('\n')}`).toEqual([]);
 }
 
+async function acceptConfirmIfShown(page) {
+  page.once('dialog', d => d.accept());
+}
+
+async function loadExampleIntoEditor(page) {
+  acceptConfirmIfShown(page);
+  await clickToolbarButton(page, '#btn-load-example');
+  await page.waitForFunction(
+    () => !!document.querySelector('[data-schemapath*="assistenza.referenti.0"]'),
+    null,
+    { timeout: 120000 }
+  );
+  await page.evaluate(() => {
+    if (typeof initJeLongtextFit === 'function') {
+      initJeLongtextFit(document.getElementById('editor-container'));
+    }
+    if (typeof initJeArrayControlCard === 'function') {
+      initJeArrayControlCard(document.getElementById('editor-container'));
+    }
+  });
+}
+
+/** Espande tutti i pannelli collapse sotto l’editor (assistenza è annidata sotto e_service, non è una nav-tab). */
+async function expandAllEditorCollapses(page) {
+  for (let pass = 0; pass < 4; pass++) {
+    const clicked = await page.evaluate(() => {
+      const root = document.getElementById('editor-container');
+      if (!root) return 0;
+      let n = 0;
+      root.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
+        if (btn.closest('.je-modal')) return;
+        const t = btn.getAttribute('aria-expanded');
+        if (t === 'true') return;
+        try {
+          btn.click();
+          n++;
+        } catch (e) {
+          /* ignore */
+        }
+      });
+      return n;
+    });
+    if (clicked === 0) break;
+    await page.waitForTimeout(120);
+  }
+  await page.evaluate(() => {
+    if (typeof initJeLongtextFit === 'function') {
+      initJeLongtextFit(document.getElementById('editor-container'));
+    }
+  });
+}
+
+/**
+ * Dopo **Carica esempio**, se il campo ha `select.je-switcher` (oneOf vuoto vs formato), sceglie l’opzione
+ * «textarea» così il controllo visibile è quello che l’utente usa per testo libero / email non strutturata.
+ */
+async function assertTextareaTypingInAssistenzaOneOfField(page, base, field, probe) {
+  const cell = await firstVisibleFieldCell(page, base, field);
+  const switcher = cell.locator('select.je-switcher').first();
+  if ((await switcher.count()) > 0) {
+    await switcher.selectOption({ label: 'textarea' });
+    await expect(cell.locator('textarea.form-control').first()).toBeVisible({ timeout: 10000 });
+  }
+  const ta = cell.locator('textarea.form-control').first();
+  await expect(ta).toBeVisible();
+  await expect(ta).not.toHaveAttribute('maxlength', '0');
+  await ta.scrollIntoViewIfNeeded();
+  await ta.focus();
+  await ta.fill('');
+  await ta.fill(probe);
+  await expect(ta).toHaveValue(probe);
+}
+
+/**
+ * Le stringhe nello schema diventano textarea: non devono risultare «bloccate» (label, stacking,
+ * `maxlength="0"` da oneOf, observer).
+ *
+ * - Smoke: **prima** textarea visibile nel DOM (di solito metadata).
+ * - Assistenza: tab + collapse, poi oneOf su `referenti.0.email` e `canali.0.risposta` (esempio: primo canale Email).
+ */
+async function assertEditorTextareaAcceptsTyping(page) {
+  const editor = page.locator('#editor-container');
+  await expect(editor).toBeVisible();
+  const count = await editor.locator('textarea.form-control').count();
+  expect(count, 'atteso almeno una textarea generata da json-editor').toBeGreaterThan(0);
+
+  const probe = `e2e-ta-${Date.now()}`;
+  let ok = false;
+  for (let i = 0; i < count; i++) {
+    const ta = editor.locator('textarea.form-control').nth(i);
+    if ((await ta.getAttribute('readonly')) !== null) continue;
+    if ((await ta.getAttribute('disabled')) !== null) continue;
+    const inModal = await ta.evaluate(el => el.closest('.je-modal') != null).catch(() => true);
+    if (inModal) continue;
+    if (!(await ta.isVisible())) continue;
+
+    await ta.scrollIntoViewIfNeeded();
+    await ta.focus();
+    await ta.fill('');
+    await ta.pressSequentially(probe, { delay: 20 });
+    await expect(ta, `textarea#${i} deve contenere testo da tastiera`).toHaveValue(probe);
+
+    ok = true;
+    break;
+  }
+  expect(ok, 'nessuna textarea visibile e modificabile trovata sotto #editor-container').toBe(true);
+
+  await loadExampleIntoEditor(page);
+  await activateAllJsonEditorTabs(page);
+  await expandAllEditorCollapses(page);
+
+  await assertTextareaTypingInAssistenzaOneOfField(
+    page,
+    'root.assistenza.referenti.0',
+    'email',
+    `e2e-ass-ref-email-${Date.now()}`
+  );
+  await assertTextareaTypingInAssistenzaOneOfField(
+    page,
+    'root.assistenza.canali.0',
+    'risposta',
+    `e2e-ass-can-risp-${Date.now()}`
+  );
+}
+
 test.describe('Functional webforms coverage from manifest', () => {
   test.beforeEach(async ({ page }) => {
     await clearDrafts(page);
@@ -633,6 +849,16 @@ test.describe('Functional webforms coverage from manifest', () => {
       const compileSelector = `#webforms-catalog a[href*="form.html?webform=${encodeURIComponent(webform.id)}"]`;
       await expect(page.locator(compileSelector).first()).toBeVisible();
       await expect(page.locator('#webforms-catalog')).toContainText(webform.title);
+    }
+  });
+
+  test('editor textareas accept focus and keyboard input (no blocked typing)', async ({ page }) => {
+    for (const webform of webforms) {
+      await test.step(`textarea typing ${webform.id}`, async () => {
+        await page.goto(webformUrl(webform.id));
+        await waitForEditorReady(page);
+        await assertEditorTextareaAcceptsTyping(page);
+      });
     }
   });
 

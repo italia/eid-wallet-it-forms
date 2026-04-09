@@ -290,8 +290,10 @@ function liftBareRefToAllOf(node, propertyLabel) {
 
 /**
  * Per ogni elemento di array: titolo con prefisso = nome proprietà padre (json-editor: headerTemplate + indice).
- * Per `$ref` verso `#/definitions/…` si **inline-a** una copia della definition: con `allOf` esterno
- * (es. mappatura_errore) json-editor non applica `headerTemplate` al titolo/tab visibili.
+ * Per `$ref` verso `#/definitions/…` si **inline-a** una copia della definition.
+ * In json-editor 2.15, se la radice dell’item ha già `allOf` o `if`/`then`, `title`/`headerTemplate` sulla
+ * stessa radice **non** producono la riga visibile (`mappatura_errori`, `assistenza.canali`): vanno messi come
+ * ultimo congiunto `allOf` — stesso trucco del caso `{ $ref }` + `headingExtra`.
  * @param {object} arraySchema
  * @param {string} parentLabel
  * @param {object} schemaRoot - schema completo (con `definitions`) per risolvere i ref
@@ -320,12 +322,25 @@ function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
     const m = typeof ref === 'string' ? ref.match(/^#\/definitions\/(.+)$/) : null;
     if (m && schemaRoot && schemaRoot.definitions && schemaRoot.definitions[m[1]]) {
       const inlined = cloneJson(schemaRoot.definitions[m[1]]);
+      const hasAllOf = Array.isArray(inlined.allOf) && inlined.allOf.length > 0;
+      const hasConditional = !!(inlined.if || inlined.then || inlined.else);
+
+      if (hasAllOf) {
+        inlined.allOf = inlined.allOf.concat([headingExtra]);
+        arraySchema.items = inlined;
+        recurseItemsSchemaForHeadings(inlined, schemaRoot);
+        return;
+      }
+      if (hasConditional) {
+        arraySchema.items = { allOf: [inlined, headingExtra] };
+        recurseItemsSchemaForHeadings(arraySchema.items, schemaRoot);
+        return;
+      }
       inlined.title = parentLabel;
       inlined.headerTemplate = parentLabel + suffix;
       /*
        * Non impostare mai `format: tabs` sulla radice dell’item inline: in json-editor 2.15 quel layout
-       * sulla radice dell’oggetto-item **sopprime il titolo di riga** (`headerTemplate`, es. mappatura_errori · 1,
-       * canali · 1). Layout a griglia + `title` sui campi (decorateEditorHeadings) è sufficiente anche con allOf/if.
+       * sulla radice dell’oggetto-item può sopprimere il titolo di riga.
        */
       arraySchema.items = inlined;
       recurseItemsSchemaForHeadings(inlined, schemaRoot);
@@ -624,6 +639,23 @@ function isBlankValueDeep(v) {
 /* ── Schema validation with AJV ──────────────────────────── */
 
 /**
+ * `format` in JSON Schema (es. email) non è validato da Ajv a meno di registrare il formato.
+ * `addFormats` da `ajv-formats` è opzionale in form.html; qui si applicano i formati minimi usati negli schemi IT-Wallet.
+ * Regex email allineata al criterio WHATWG per input type=email (sottoinsieme pratico RFC 5322).
+ * @param {*} ajv – istanza Ajv (metodo addFormat)
+ */
+function applyDefaultAjvFormats(ajv) {
+  if (!ajv || typeof ajv.addFormat !== 'function') return;
+  const emailRe =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  try {
+    ajv.addFormat('email', emailRe);
+  } catch (e) {
+    /* già registrato (es. addFormats) */
+  }
+}
+
+/**
  * Validate data against the original schema using AJV 8 (Draft 2020-12).
  * Supports `Ajv2020`, `ajv2020` (ajv-dist UMD), or `Ajv` globals.
  * @param {object} schema – The raw schema (before transformation)
@@ -642,8 +674,9 @@ function validateWithAjv(schema, data) {
 
   try {
     const ajv = new AjvClass({ allErrors: true, strict: false });
-    /* addFormats (pacchetto ajv-formats) non è più caricato da CDN: opzionale se presente globalmente */
+    /* addFormats (pacchetto ajv-formats): opzionale se presente globalmente in form.html */
     if (typeof addFormats !== 'undefined') addFormats(ajv);
+    else applyDefaultAjvFormats(ajv);
     const validate = ajv.compile(schema);
     const valid = validate(data);
     return { valid, errors: validate.errors || [] };

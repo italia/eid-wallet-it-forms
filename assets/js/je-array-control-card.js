@@ -37,8 +37,44 @@
     if (!host) return null;
     const direct = host.querySelector(':scope > .je-object__title');
     if (direct) return direct;
-    const arHead = host.querySelector(':scope > .je-array-item-header-row > .je-object__title');
-    if (arHead) return arHead;
+
+    const arRow = host.querySelector(':scope > .je-array-item-header-row');
+    if (arRow) {
+      const nestedTitle =
+        arRow.querySelector('.je-object__title') || arRow.querySelector('.card-title');
+      if (nestedTitle) return nestedTitle;
+      /*
+       * Bootstrap 5 / json-editor 2.15: a volte il titolo item è solo testo in un generic, senza .je-object__title.
+       * Usiamo la “riga” che contiene delete/move (stessa riga del collapse), così ensureRowGroupInTitle può
+       * inserire .je-array-item-row-controls prima dei btn-group esistenti.
+       */
+      const lines = arRow.querySelectorAll(':scope > *');
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (
+          line.querySelector(
+            'button.json-editor-btntype-delete, button.json-editor-btn-delete, button.json-editor-btntype-move'
+          )
+        ) {
+          return line;
+        }
+      }
+    }
+
+    /*
+     * Con item inline in allOf/if (es. mappatura_errori, canali) json-editor mette spesso il titolo di riga
+     * nel .card-header della card, mentre .je-object__container[data-schemapath] sta nel .card-body.
+     */
+    const card = host.closest('.card');
+    if (card) {
+      const body = card.querySelector(':scope > .card-body');
+      if (body && body.contains(host)) {
+        const inHeader =
+          card.querySelector(':scope > .card-header .je-object__title') ||
+          card.querySelector(':scope > .card-header .card-title');
+        if (inHeader) return inHeader;
+      }
+    }
 
     const headers = [...host.querySelectorAll('.je-object__title')].filter(
       t => titleDepthFromHost(t, host) !== null
@@ -84,7 +120,15 @@
     row.className = 'btn-group ' + ROW_CTRL_CLASS + ' d-inline-flex align-items-center';
     const anchor = findTitleActionsAnchor(title);
     if (anchor) title.insertBefore(row, anchor);
-    else title.appendChild(row);
+    else {
+      const firstItemBtnGrp = [...title.querySelectorAll(':scope .btn-group')].find(g =>
+        g.querySelector(
+          'button.json-editor-btntype-delete, button.json-editor-btn-delete, button.json-editor-btntype-move'
+        )
+      );
+      if (firstItemBtnGrp) title.insertBefore(row, firstItemBtnGrp);
+      else title.appendChild(row);
+    }
     return row;
   }
 
@@ -256,6 +300,49 @@
     return !!(el.offsetParent || el.getClientRects().length);
   }
 
+  /**
+   * headerTemplate su item con allOf/if in json-editor 2.15 può mostrare sempre lo stesso i1 (es. solo «· 1»).
+   * Allinea il testo al path `…<array>.<i>` (indice 1-based in UI = i + 1).
+   */
+  function setItemHeadingLabelText(titleEl, fullLabel, parentKey) {
+    if (!titleEl || !parentKey) return;
+    const skipTag = 'button, .btn-group, .je-array-item-row-controls, .je-object__controls';
+    const textNode = [...titleEl.childNodes].find(
+      n => n.nodeType === Node.TEXT_NODE && (n.textContent || '').trim()
+    );
+    if (textNode) {
+      textNode.textContent = fullLabel;
+      return;
+    }
+    for (let i = 0; i < titleEl.children.length; i++) {
+      const ch = titleEl.children[i];
+      if (ch.matches(skipTag)) continue;
+      const raw = (ch.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!raw || !raw.toLowerCase().includes(String(parentKey).toLowerCase())) continue;
+      ch.textContent = fullLabel;
+      return;
+    }
+  }
+
+  function syncArrayItemHeaderTitles(root) {
+    const itemPathRe = /^(.+)\.([^.\d$][\w]*)\.(\d+)$/;
+    root.querySelectorAll('.je-object__container[data-schemapath]').forEach(host => {
+      if (host.closest('.je-modal')) return;
+      const sp = host.getAttribute('data-schemapath') || '';
+      const m = sp.match(itemPathRe);
+      if (!m) return;
+      const parentKey = m[2];
+      if (parentKey.startsWith('$')) return;
+      if (!isVisible(host)) return;
+      const idx = Number(m[3]);
+      if (!Number.isInteger(idx) || idx < 0) return;
+      const titleEl = findItemTitle(host);
+      if (!titleEl) return;
+      const want = parentKey + ' · ' + (idx + 1);
+      setItemHeadingLabelText(titleEl, want, parentKey);
+    });
+  }
+
   function placeItemControlGroups(root) {
     const itemScopes = [...root.querySelectorAll('.je-object__container[data-schemapath]')]
       .filter(scope => isItemSchemapath(scope.getAttribute('data-schemapath') || ''));
@@ -378,6 +465,7 @@
 
     finalizeArrayItemMoveStubs(root);
     pruneEmptyItemControlRows(root);
+    syncArrayItemHeaderTitles(root);
   }
 
   // Runtime helper to debug placement in browser console.
