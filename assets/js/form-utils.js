@@ -485,6 +485,11 @@ function transformSchemaForEditor(rawSchema) {
     }
   }
 
+  // 2b. Il riferimento tecnico "$schema" è sempre di sola lettura nel form
+  if (schema.properties && schema.properties.$schema) {
+    schema.properties.$schema.readOnly = true;
+  }
+
   // 3. Titoli / heading per ogni blocco e prefisso padre sugli item array (json-editor)
   decorateEditorHeadings(schema);
 

@@ -838,6 +838,8 @@ async function initEditor() {
       no_additional_properties: false,
       required_by_default:     false,
       use_default_values:      true,
+      /* I campi con "const" nello schema vengono precompilati col valore costante e disabilitati (non scrivibili). */
+      enforce_const:           true,
       remove_false_properties: false,
       prompt_before_delete:    true,
       array_controls_top:      true,
@@ -863,6 +865,9 @@ async function initEditor() {
       if (typeof setupJeArrayControlObserver === 'function') {
         setupJeArrayControlObserver();
       }
+      _locksReady = true;
+      captureLockSnapshot();
+      enforceLockedFields();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           buildFormToc();
@@ -875,6 +880,7 @@ async function initEditor() {
 
     _editor.on('change', () => {
       markDirty();
+      enforceLockedFields();
     });
 
   } catch (err) {
@@ -924,9 +930,124 @@ function markClean(id) {
   history.replaceState(null, '', url);
 }
 
+/* ── Blocco campi readOnly / const (anche via "Edit JSON" grezzo) ── */
+let _lockSnapshot = {};            // path -> valore canonico dei campi readOnly
+let _enforcingLocks = false;       // guardia anti-ricorsione
+let _suspendLockEnforcement = false; // sospende durante i caricamenti completi (esempio/import)
+let _locksReady = false;           // attiva l'enforcement solo dopo lo snapshot iniziale (evento ready)
+
+/** @returns {'const'|'readonly'|null} natura del vincolo dello schema. */
+function lockKindForSchema(schema) {
+  if (!schema) return null;
+  if (Object.prototype.hasOwnProperty.call(schema, 'const')) return 'const';
+  if (schema.readOnly || schema.readonly) return 'readonly';
+  return null;
+}
+
+/** Registra i valori canonici correnti dei campi readOnly (i const usano sempre schema.const). */
+function captureLockSnapshot() {
+  if (!_editor || !_editor.editors) return;
+  _lockSnapshot = {};
+  Object.keys(_editor.editors).forEach((path) => {
+    const ed = _editor.editors[path];
+    if (!ed || !ed.schema) return;
+    if (lockKindForSchema(ed.schema) === 'readonly') {
+      try { _lockSnapshot[path] = JSON.parse(JSON.stringify(ed.getValue())); }
+      catch (_e) { /* editor non serializzabile: ignora */ }
+    }
+  });
+}
+
+/**
+ * Ripristina i campi readOnly/const se sono stati alterati.
+ * Nei widget del form sono già disabilitati: l'unico modo per modificarli è l'editor JSON grezzo,
+ * quindi questo intercetta quel caso e ripristina i valori canonici.
+ */
+function enforceLockedFields() {
+  if (!_editor || !_editor.editors || !_locksReady || _enforcingLocks || _suspendLockEnforcement) return;
+  _enforcingLocks = true;
+  let reverted = false;
+  try {
+    Object.keys(_editor.editors).forEach((path) => {
+      const ed = _editor.editors[path];
+      if (!ed || !ed.schema) return;
+      const kind = lockKindForSchema(ed.schema);
+      if (!kind) return;
+      let desired;
+      if (kind === 'const') desired = ed.schema.const;
+      else if (path in _lockSnapshot) desired = _lockSnapshot[path];
+      else return;
+      let cur;
+      try { cur = ed.getValue(); } catch (_e) { return; }
+      if (JSON.stringify(cur) !== JSON.stringify(desired)) {
+        try { ed.setValue(desired); reverted = true; } catch (_e) { /* no-op */ }
+      }
+    });
+  } finally {
+    _enforcingLocks = false;
+  }
+  if (reverted) {
+    showToast('I campi di sola lettura o a valore fisso non sono modificabili: i valori sono stati ripristinati.', 'warning');
+  }
+}
+
+/**
+ * Rileva i campi readOnly/const il cui valore corrente diverge da quello atteso
+ * (const → schema.const; readOnly → valore canonico in _lockSnapshot).
+ * Usato in validazione e salvataggio per far fallire l'operazione se questi campi sono stati alterati.
+ * @returns {{path:string,msg:string}[]}
+ */
+function collectLockViolations() {
+  const out = [];
+  if (!_editor || !_editor.editors) return out;
+  Object.keys(_editor.editors).forEach((path) => {
+    const ed = _editor.editors[path];
+    if (!ed || !ed.schema) return;
+    const kind = lockKindForSchema(ed.schema);
+    if (!kind) return;
+    let desired;
+    if (kind === 'const') desired = ed.schema.const;
+    else if (path in _lockSnapshot) desired = _lockSnapshot[path];
+    else return;
+    let cur;
+    try { cur = ed.getValue(); } catch (_e) { return; }
+    if (JSON.stringify(cur) !== JSON.stringify(desired)) {
+      out.push({
+        path: path.replace(/^root\.?/, ''),
+        msg: kind === 'const'
+          ? `valore fisso non modificabile: atteso ${JSON.stringify(desired)}`
+          : 'campo di sola lettura: non modificabile'
+      });
+    }
+  });
+  return out;
+}
+
+/** Esegue un caricamento dati completo sospendendo l'enforcement, poi rifissa lo snapshot. */
+function loadDataWithLocks(nextData) {
+  _suspendLockEnforcement = true;
+  try {
+    _editor.setValue(nextData);
+  } finally {
+    _suspendLockEnforcement = false;
+  }
+  captureLockSnapshot();
+  enforceLockedFields();
+}
+
+/** Blocca il salvataggio se i campi readOnly/const risultano alterati: mostra gli errori e avvisa. */
+function blockSaveOnLockViolations() {
+  const violations = collectLockViolations();
+  if (violations.length === 0) return false;
+  runValidation();
+  showToast('Salvataggio annullato: campi di sola lettura o a valore fisso modificati.', 'danger', 0);
+  return true;
+}
+
 /* ── Save ───────────────────────────────────────────────── */
 function saveCurrentForm() {
   if (!_editor) return;
+  if (blockSaveOnLockViolations()) return;
   const rawData = getFormData();
   const data = typeof sanitizeFormData === 'function' ? sanitizeFormData(rawData) : rawData;
   const name = document.getElementById('form-name-input').value.trim() || 'Form senza nome';
@@ -943,6 +1064,7 @@ function saveCurrentForm() {
 
 function saveAsNew() {
   if (!_editor) return;
+  if (blockSaveOnLockViolations()) return;
   const rawData = getFormData();
   const data = typeof sanitizeFormData === 'function' ? sanitizeFormData(rawData) : rawData;
   const baseName = document.getElementById('form-name-input').value.trim() || 'Form senza nome';
@@ -964,7 +1086,7 @@ function loadExample() {
   if (!_editor || !_exampleData) return;
   if (_dirty && !confirm('Sovrascrivere le modifiche correnti con i dati di esempio?')) return;
   const nextData = typeof sanitizeFormData === 'function' ? sanitizeFormData(_exampleData) : _exampleData;
-  _editor.setValue(nextData);
+  loadDataWithLocks(nextData);
   _formExportBaseline = typeof cloneFormData === 'function' ? cloneFormData(nextData) : JSON.parse(JSON.stringify(nextData));
   document.getElementById('form-name-input').value = 'Esempio ' +
     (nextData?.metadata?.nome_eaa || '');
@@ -1008,7 +1130,7 @@ async function importJson() {
     const data = typeof sanitizeFormData === 'function' ? sanitizeFormData(parsed) : parsed;
     if (!_editor) return;
     if (_dirty && !confirm('Sovrascrivere i dati correnti?')) return;
-    _editor.setValue(data);
+    loadDataWithLocks(data);
     _formExportBaseline = typeof cloneFormData === 'function' ? cloneFormData(data) : JSON.parse(JSON.stringify(data));
     const name = data?.metadata?.nome_eaa || 'Form importato';
     document.getElementById('form-name-input').value = name;
@@ -1029,7 +1151,7 @@ async function importCsv() {
     if (!_editor) return;
     if (_dirty && !confirm('Sovrascrivere i dati correnti?')) return;
     const sanitized = typeof sanitizeFormData === 'function' ? sanitizeFormData(data) : data;
-    _editor.setValue(sanitized);
+    loadDataWithLocks(sanitized);
     _formExportBaseline = typeof cloneFormData === 'function' ? cloneFormData(sanitized) : JSON.parse(JSON.stringify(sanitized));
     const name = sanitized?.metadata?.nome_eaa || 'Form CSV importato';
     document.getElementById('form-name-input').value = name;
@@ -1055,7 +1177,8 @@ function runValidation() {
 
   const allErrors = [
     ...jeErrors.map(e  => ({ path: e.path, msg: e.message })),
-    ...ajvErrors.map(e => ({ path: e.instancePath || '', msg: e.message }))
+    ...ajvErrors.map(e => ({ path: e.instancePath || '', msg: e.message })),
+    ...collectLockViolations()
   ];
 
   wrapper.classList.remove('d-none');
