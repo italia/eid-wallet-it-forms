@@ -715,7 +715,8 @@ function buildFormToc() {
     b.className = compact
       ? 'form-toc-link form-toc-link--sidebar w-100 text-start btn btn-sm btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom'
       : 'form-toc-link w-100 text-start btn btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom';
-    b.textContent = (label || '').replace(/\s+/g, ' ').trim() || 'Sezione';
+    const labNorm = (label || '').replace(/\s+/g, ' ').trim();
+    b.textContent = labNorm ? labNorm.charAt(0).toUpperCase() + labNorm.slice(1) : 'Sezione';
     b.addEventListener('click', onClick);
     li.appendChild(b);
     listEl.appendChild(li);

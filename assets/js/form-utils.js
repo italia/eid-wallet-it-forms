@@ -52,9 +52,9 @@ function findWebformEntry(manifest, webformId) {
 
 /**
  * Informazioni di versione dichiarate **dentro** i file JSON Schema e JSON di istanza
- * (non nel manifest). Usa campi comuni: schema `$version`, `$id`; dato `metadata.versione`, `$schema` (solo se URL assoluto).
- * Con `urlHints.dataUrl` aggiunge la riga **Sorgente JSON** con l’URL reale di caricamento (HTTPS), così non si mostra
- * un `$schema` relativo nel file (es. `./json-schemas/...`).
+ * (non nel manifest). Usa campi comuni: schema `$version`; dato `metadata.versione`, `$schema` (solo se URL assoluto).
+ * Con `urlHints.schemaUrl` aggiunge la riga **Sorgente schema** (URL reale di caricamento dal manifest) e con
+ * `urlHints.dataUrl` la riga **Sorgente JSON**, così non si mostra un `$schema` relativo nel file (es. `./json-schemas/...`).
  *
  * @param {object|null} rawSchema – schema così come restituito dal fetch (prima delle trasformazioni per l’editor)
  * @param {object|null} data – JSON di esempio o bozza aperta nell’editor
@@ -64,25 +64,25 @@ function findWebformEntry(manifest, webformId) {
 function extractDocumentVersioning(rawSchema, data, urlHints) {
   const hints = urlHints && typeof urlHints === 'object' ? urlHints : {};
   const dataSourceUrl = hints.dataUrl != null ? String(hints.dataUrl).trim() : '';
+  const schemaSourceUrl = hints.schemaUrl != null ? String(hints.schemaUrl).trim() : '';
   const items = [];
   let hasSchemaVersion = false;
   let hasDataVersion = false;
   if (rawSchema && typeof rawSchema === 'object') {
+    if (schemaSourceUrl) {
+      items.push({
+        section: 'schema',
+        label: 'Sorgente schema',
+        value: schemaSourceUrl,
+        isUrl: /^https?:\/\//i.test(schemaSourceUrl)
+      });
+    }
     if (rawSchema.$version != null && String(rawSchema.$version).trim() !== '') {
       hasSchemaVersion = true;
       items.push({
         section: 'schema',
         label: '$version',
         value: String(rawSchema.$version).trim()
-      });
-    }
-    if (rawSchema.$id != null && String(rawSchema.$id).trim() !== '') {
-      const id = String(rawSchema.$id).trim();
-      items.push({
-        section: 'schema',
-        label: '$id',
-        value: id,
-        isUrl: /^https?:\/\//i.test(id)
       });
     }
   }
