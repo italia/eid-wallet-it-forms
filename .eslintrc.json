@@ -10,7 +10,9 @@
     "Ajv": "readonly",
     "addFormats": "readonly",
     "Papa": "readonly",
-    "SiteChrome": "readonly"
+    "SiteChrome": "readonly",
+    "initJeLongtextFit": "readonly",
+    "initJeArrayControlCard": "readonly"
   },
   "parserOptions": { "ecmaVersion": "latest" },
   "rules": {
