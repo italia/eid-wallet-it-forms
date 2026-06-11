@@ -125,7 +125,7 @@ async function activateAllJsonEditorTabs(page) {
       const root = document.getElementById('editor-container');
       if (!root) return 0;
       let n = 0;
-      root.querySelectorAll('[data-bs-toggle="tab"]').forEach(trigger => {
+      root.querySelectorAll('a.nav-link, [data-bs-toggle="tab"]').forEach(trigger => {
         try {
           if (trigger.closest('.je-modal')) return;
           const cs = window.getComputedStyle(trigger);
@@ -475,6 +475,9 @@ async function assertForbiddenExactEditorChrome(page, forbiddenList) {
  * @param {import('@playwright/test').Page} page
  */
 async function assertAssistenzaCanaliArrayItemLayout(page) {
+  await openEditorPropertyTab(page, 'assistenza');
+  await expandAllEditorCollapses(page);
+
   const bases = await page.evaluate(() => {
     const root = document.getElementById('editor-container');
     if (!root) return [];
@@ -744,17 +747,47 @@ async function loadExampleIntoEditor(page) {
   });
 }
 
-/** Espande tutti i pannelli collapse sotto l’editor (assistenza è annidata sotto e_service, non è una nav-tab). */
+/** Apre la tab json-editor della proprietà root indicata (es. `assistenza`). */
+async function openEditorPropertyTab(page, propertyKey) {
+  const opened = await page.evaluate(pk => {
+    const root = document.getElementById('editor-container');
+    if (!root) return false;
+    const want = String(pk).toLowerCase();
+    const links = [...root.querySelectorAll('a.nav-link, [data-bs-toggle="tab"]')].filter(
+      a => !a.closest('.je-modal')
+    );
+    const match =
+      links.find(a => (a.textContent || '').trim().toLowerCase() === want) ||
+      links.find(a => {
+        const href = (a.getAttribute('href') || '').toLowerCase();
+        return href.includes(want);
+      });
+    if (!match) return false;
+    match.click();
+    return true;
+  }, propertyKey);
+  if (opened) await page.waitForTimeout(150);
+}
+
+/** Espande oggetti/array chiusi (pulsante «Expand» di json-editor e, se presenti, collapse Bootstrap). */
 async function expandAllEditorCollapses(page) {
-  for (let pass = 0; pass < 4; pass++) {
-    const clicked = await page.evaluate(() => {
+  for (let pass = 0; pass < 8; pass++) {
+    const opened = await page.evaluate(() => {
       const root = document.getElementById('editor-container');
       if (!root) return 0;
       let n = 0;
+      root.querySelectorAll('button.json-editor-btntype-toggle[title="Expand"]').forEach(btn => {
+        if (btn.closest('.je-modal')) return;
+        try {
+          btn.click();
+          n++;
+        } catch (e) {
+          /* ignore */
+        }
+      });
       root.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
         if (btn.closest('.je-modal')) return;
-        const t = btn.getAttribute('aria-expanded');
-        if (t === 'true') return;
+        if (btn.getAttribute('aria-expanded') === 'true') return;
         try {
           btn.click();
           n++;
@@ -764,7 +797,7 @@ async function expandAllEditorCollapses(page) {
       });
       return n;
     });
-    if (clicked === 0) break;
+    if (opened === 0) break;
     await page.waitForTimeout(120);
   }
   await page.evaluate(() => {
@@ -815,14 +848,9 @@ async function assertTextareaTypingInAssistenzaOneOfField(page, base, field, pro
  * - Smoke: **prima** textarea visibile nel DOM (di solito metadata).
  * - Assistenza: tab + collapse, poi oneOf su `referenti.0.email` e `canali.0.dettaglio canale` (esempio: primo canale Email).
  */
-async function assertEditorTextareaAcceptsTyping(page) {
+async function firstEditableVisibleTextarea(page) {
   const editor = page.locator('#editor-container');
-  await expect(editor).toBeVisible();
   const count = await editor.locator('textarea.form-control').count();
-  expect(count, 'atteso almeno una textarea generata da json-editor').toBeGreaterThan(0);
-
-  const probe = `e2e-ta-${Date.now()}`;
-  let ok = false;
   for (let i = 0; i < count; i++) {
     const ta = editor.locator('textarea.form-control').nth(i);
     if ((await ta.getAttribute('readonly')) !== null) continue;
@@ -830,17 +858,39 @@ async function assertEditorTextareaAcceptsTyping(page) {
     const inModal = await ta.evaluate(el => el.closest('.je-modal') != null).catch(() => true);
     if (inModal) continue;
     if (!(await ta.isVisible())) continue;
-
-    await ta.scrollIntoViewIfNeeded();
-    await ta.focus();
-    await ta.fill('');
-    await ta.pressSequentially(probe, { delay: 20 });
-    await expect(ta, `textarea#${i} deve contenere testo da tastiera`).toHaveValue(probe);
-
-    ok = true;
-    break;
+    return ta;
   }
-  expect(ok, 'nessuna textarea visibile e modificabile trovata sotto #editor-container').toBe(true);
+  return null;
+}
+
+async function assertEditorTextareaAcceptsTyping(page) {
+  const editor = page.locator('#editor-container');
+  await expect(editor).toBeVisible();
+  expect(
+    await editor.locator('textarea.form-control').count(),
+    'atteso almeno una textarea generata da json-editor'
+  ).toBeGreaterThan(0);
+
+  const probe = `e2e-ta-${Date.now()}`;
+  let ta = null;
+  const tabLinks = page.locator('#editor-container a.nav-link, #editor-container [data-bs-toggle="tab"]');
+  const tabCount = await tabLinks.count();
+  for (let t = 0; t < Math.max(tabCount, 1); t++) {
+    if (tabCount > 0) {
+      await tabLinks.nth(t).click();
+      await page.waitForTimeout(100);
+    }
+    await expandAllEditorCollapses(page);
+    ta = await firstEditableVisibleTextarea(page);
+    if (ta) break;
+  }
+  expect(ta, 'nessuna textarea visibile e modificabile trovata sotto #editor-container').toBeTruthy();
+
+  await ta.scrollIntoViewIfNeeded();
+  await ta.focus();
+  await ta.fill('');
+  await ta.pressSequentially(probe, { delay: 20 });
+  await expect(ta, 'textarea smoke deve contenere testo da tastiera').toHaveValue(probe);
 
   await loadExampleIntoEditor(page);
   await activateAllJsonEditorTabs(page);

@@ -516,9 +516,60 @@ function transformSchemaForEditor(rawSchema) {
   // 4. Tabs layout for the root object
   schema.format = 'tabs';
 
-  // 5. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
+  // 5. Solo le sezioni di primo livello chiuse all’apertura; i blocchi annidati restano aperti
+  setNestedEditorsCollapsedByDefault(schema);
+
+  // 6. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
   normalizeStringFieldsToTextarea(schema);
   return schema;
+}
+
+/**
+ * Imposta `options.collapsed: true` solo sulle proprietà di primo livello sotto la radice (profondità 1).
+ * All’atterraggio si espande la radice (form.html): restano chiuse le tab/sezioni principali; oggetti,
+ * array e campi annidati partono aperti (niente card vuote su array collassati in profondità).
+ * @param {object} schema
+ */
+function setNestedEditorsCollapsedByDefault(schema) {
+  function visit(node, depth) {
+    if (!node || typeof node !== 'object') return;
+    const isObject =
+      node.type === 'object' || (node.properties && typeof node.properties === 'object');
+    const isArray = node.type === 'array';
+    if (depth === 1 && (isObject || isArray)) {
+      if (!node.options || typeof node.options !== 'object') {
+        node.options = {};
+      }
+      node.options.collapsed = true;
+    }
+    if (node.properties && typeof node.properties === 'object') {
+      Object.values(node.properties).forEach(child => visit(child, depth + 1));
+    }
+    if (node.patternProperties && typeof node.patternProperties === 'object') {
+      Object.values(node.patternProperties).forEach(child => visit(child, depth + 1));
+    }
+    if (node.additionalProperties && typeof node.additionalProperties === 'object') {
+      visit(node.additionalProperties, depth + 1);
+    }
+    if (node.items) {
+      if (Array.isArray(node.items)) node.items.forEach(child => visit(child, depth + 1));
+      else visit(node.items, depth + 1);
+    }
+    if (Array.isArray(node.prefixItems)) {
+      node.prefixItems.forEach(child => visit(child, depth + 1));
+    }
+    if (node.definitions && typeof node.definitions === 'object') {
+      Object.values(node.definitions).forEach(child => visit(child, depth + 1));
+    }
+    for (const k of ['allOf', 'anyOf', 'oneOf']) {
+      if (Array.isArray(node[k])) node[k].forEach(child => visit(child, depth + 1));
+    }
+    if (node.if) visit(node.if, depth + 1);
+    if (node.then) visit(node.then, depth + 1);
+    if (node.else) visit(node.else, depth + 1);
+    if (node.not) visit(node.not, depth + 1);
+  }
+  visit(schema, 0);
 }
 
 /**
@@ -535,7 +586,8 @@ function transformSchemaForEditor(rawSchema) {
  *     Item array: `title` + `headerTemplate` con nome array e ` · {{i1}}`. Niente `format: tabs` sulla radice dell’item.
  *     Campi primitivi senza title ricevono etichetta dal nome proprietà.
  *  4. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
- *  5. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
+ *  5. `options.collapsed: true` solo sulle sezioni di primo livello (annidati aperti).
+ *  6. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
  *
  * @param {string} schemaUrl
  * @returns {Promise<{ rawSchema: object, editorSchema: object }>}

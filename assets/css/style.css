@@ -964,6 +964,14 @@ footer.it-footer-service {
   border: 1px solid var(--border);
   margin-bottom: 1rem;
 }
+
+/*
+ * json-editor 2.15: array/oggetto collassato lascia visibile il wrapper .card.card-body con un solo
+ * figlio nascosto (display:none) → riquadro grigio vuoto. Nascondiamo quel guscio finché non si espande.
+ */
+#editor-container.je-ready .card.card-body.my-3.bg-light:has(> div:only-child[style*="display: none"]) {
+  display: none !important;
+}
 .je-ready .card-header {
   background: var(--light-bg);
   font-weight: 600;
@@ -993,6 +1001,36 @@ footer.it-footer-service {
   flex-wrap: wrap;
   gap: 0.5rem 1.1rem;
   flex: 1 1 auto;
+  min-width: 0;
+}
+
+/*
+ * Array di primo livello (es. mappatura errori / stati): json-editor usa span.card-title.level-2
+ * senza .je-object__title → inline-block e zero gap tra collapse e label. Stesso layout delle sezioni oggetto.
+ */
+#editor-container.je-ready div[data-schematype="array"][data-schemapath^="root."].col-md-12:has(> .card-title.level-2) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.35rem;
+}
+
+#editor-container.je-ready div[data-schematype="array"][data-schemapath^="root."].col-md-12:has(> .card-title.level-2) > .card-title.level-2 {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#editor-container.je-ready div[data-schematype="array"][data-schemapath^="root."].col-md-12:has(> .card-title.level-2) > :not(.card-title.level-2) {
+  flex: 1 0 100%;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 

@@ -867,6 +867,16 @@ async function initEditor() {
         setupJeArrayControlObserver();
       }
       _locksReady = true;
+      /* Radice espansa: tab/sezioni di primo livello visibili ma chiuse; annidati aperti (options.collapsed depth 1). */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const rootHost = document.querySelector('#editor-container [data-schemapath="root"]');
+          const rootExpand = rootHost?.querySelector(
+            ':scope > .je-object__title button.json-editor-btntype-toggle[title="Expand"]'
+          );
+          if (rootExpand) rootExpand.click();
+        });
+      });
       captureLockSnapshot();
       enforceLockedFields();
       requestAnimationFrame(() => {
