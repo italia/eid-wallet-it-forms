@@ -169,6 +169,9 @@ function walkJsonSchema(schema, visitor) {
     if (Array.isArray(schema.items)) schema.items.forEach(s => walkJsonSchema(s, visitor));
     else walkJsonSchema(schema.items, visitor);
   }
+  if (Array.isArray(schema.prefixItems)) {
+    schema.prefixItems.forEach(s => walkJsonSchema(s, visitor));
+  }
   if (schema.definitions && typeof schema.definitions === 'object') {
     Object.values(schema.definitions).forEach(s => walkJsonSchema(s, visitor));
   }
@@ -289,28 +292,19 @@ function liftBareRefToAllOf(node, propertyLabel) {
 }
 
 /**
- * Per ogni elemento di array: titolo con prefisso = nome proprietà padre (json-editor: headerTemplate + indice).
+ * Applica titolo/headerTemplate a uno schema `items` o a un elemento di `prefixItems`.
  * Per `$ref` verso `#/definitions/…` si **inline-a** una copia della definition.
  * In json-editor 2.15, se la radice dell’item ha già `allOf` o `if`/`then`, `title`/`headerTemplate` sulla
  * stessa radice **non** producono la riga visibile (`mappatura_errori`, `assistenza.canali`): vanno messi come
  * ultimo congiunto `allOf` — stesso trucco del caso `{ $ref }` + `headingExtra`.
- * @param {object} arraySchema
+ * @param {object} items
  * @param {string} parentLabel
- * @param {object} schemaRoot - schema completo (con `definitions`) per risolvere i ref
+ * @param {object} schemaRoot
+ * @returns {object}
  */
-function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
-  if (
-    !arraySchema ||
-    typeof arraySchema !== 'object' ||
-    arraySchema.type !== 'array' ||
-    !arraySchema.items ||
-    typeof arraySchema.items !== 'object' ||
-    Array.isArray(arraySchema.items)
-  ) {
-    return;
-  }
+function patchItemsNodeForHeadings(items, parentLabel, schemaRoot) {
+  if (!items || typeof items !== 'object' || Array.isArray(items)) return items;
 
-  const items = arraySchema.items;
   const suffix = ' · {{i1}}';
   const headingExtra = {
     title: parentLabel,
@@ -327,14 +321,13 @@ function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
 
       if (hasAllOf) {
         inlined.allOf = inlined.allOf.concat([headingExtra]);
-        arraySchema.items = inlined;
         recurseItemsSchemaForHeadings(inlined, schemaRoot);
-        return;
+        return inlined;
       }
       if (hasConditional) {
-        arraySchema.items = { allOf: [inlined, headingExtra] };
-        recurseItemsSchemaForHeadings(arraySchema.items, schemaRoot);
-        return;
+        const wrapped = { allOf: [inlined, headingExtra] };
+        recurseItemsSchemaForHeadings(wrapped, schemaRoot);
+        return wrapped;
       }
       inlined.title = parentLabel;
       inlined.headerTemplate = parentLabel + suffix;
@@ -342,14 +335,13 @@ function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
        * Non impostare mai `format: tabs` sulla radice dell’item inline: in json-editor 2.15 quel layout
        * sulla radice dell’oggetto-item può sopprimere il titolo di riga.
        */
-      arraySchema.items = inlined;
       recurseItemsSchemaForHeadings(inlined, schemaRoot);
-      return;
+      return inlined;
     }
     items.allOf = [{ $ref: ref }, headingExtra];
     delete items.$ref;
     recurseItemsSchemaForHeadings(items, schemaRoot);
-    return;
+    return items;
   }
 
   if (Array.isArray(items.allOf)) {
@@ -363,6 +355,31 @@ function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
   }
 
   recurseItemsSchemaForHeadings(items, schemaRoot);
+  return items;
+}
+
+/**
+ * Per ogni elemento di array: titolo con prefisso = nome proprietà padre (json-editor: headerTemplate + indice).
+ * Gestisce sia `items` sia `prefixItems` (Draft 2020-12, es. canali/referenti nello schema EAA).
+ * @param {object} arraySchema
+ * @param {string} parentLabel
+ * @param {object} schemaRoot - schema completo (con `definitions`) per risolvere i ref
+ */
+function patchArrayItemsForHeadings(arraySchema, parentLabel, schemaRoot) {
+  if (!arraySchema || typeof arraySchema !== 'object' || arraySchema.type !== 'array') {
+    return;
+  }
+
+  const items = arraySchema.items;
+  if (items && typeof items === 'object' && !Array.isArray(items)) {
+    arraySchema.items = patchItemsNodeForHeadings(items, parentLabel, schemaRoot);
+  }
+
+  if (Array.isArray(arraySchema.prefixItems)) {
+    arraySchema.prefixItems = arraySchema.prefixItems.map(prefixItem =>
+      patchItemsNodeForHeadings(prefixItem, parentLabel, schemaRoot)
+    );
+  }
 }
 
 /**
@@ -432,6 +449,9 @@ function recurseSchemaForHeadings(node, schemaRoot) {
   if (node.properties) decoratePropertySchemasForHeadings(node.properties, schemaRoot);
   if (node.type === 'array' && node.items && typeof node.items === 'object' && !Array.isArray(node.items)) {
     recurseItemsSchemaForHeadings(node.items, schemaRoot);
+  }
+  if (node.type === 'array' && Array.isArray(node.prefixItems)) {
+    node.prefixItems.forEach(prefixItem => recurseItemsSchemaForHeadings(prefixItem, schemaRoot));
   }
   for (const k of ['allOf', 'anyOf', 'oneOf']) {
     if (Array.isArray(node[k])) node[k].forEach(br => recurseSchemaForHeadings(br, schemaRoot));

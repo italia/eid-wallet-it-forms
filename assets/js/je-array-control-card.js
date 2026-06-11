@@ -314,14 +314,24 @@
       textNode.textContent = fullLabel;
       return;
     }
+    let fallback = null;
     for (let i = 0; i < titleEl.children.length; i++) {
       const ch = titleEl.children[i];
       if (ch.matches(skipTag)) continue;
       const raw = (ch.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!raw || !raw.toLowerCase().includes(String(parentKey).toLowerCase())) continue;
-      ch.textContent = fullLabel;
-      return;
+      if (!raw) continue;
+      if (raw.toLowerCase().includes(String(parentKey).toLowerCase())) {
+        ch.textContent = fullLabel;
+        return;
+      }
+      /* json-editor default «item N item» quando headerTemplate/allOf non produce etichetta (es. prefixItems). */
+      if (!fallback && /^item\s+\d+\s+item$/i.test(raw)) {
+        fallback = ch;
+      } else if (!fallback) {
+        fallback = ch;
+      }
     }
+    if (fallback) fallback.textContent = fullLabel;
   }
 
   function syncArrayItemHeaderTitles(root) {

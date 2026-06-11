@@ -13,11 +13,11 @@ const webforms = Array.isArray(manifest.webforms) ? manifest.webforms : [];
  * - Ogni item oggetto con schemapath …N (indice array): tripla controlli nel titolo se il riordino è attivo
  * - Sotto percorsi con indici (.0, .1, …): ogni proprietà diretta ha tab o label leggibile
  * - Ogni item oggetto …<nome_array>.<i> con UI item: titolo di riga contiene il nome array + indice (headerTemplate)
- * - Layout assistenza.canali (se presente): titolo riga item; per tipo/risposta/note nome campo + controllo con
+ * - Layout assistenza.canali (se presente): titolo riga item; per tipo/dettaglio canale (campi obbligatori) nome campo + controllo con
  *   getBoundingClientRect nello stesso evaluate (affidabile); regole: sopra, sinistra in riga, o stesso blocco a colonna
  * - Nessun title/tab con testo esatto = nomi technical $defs campo_* (da schema) né "Campo Risposta"
  * - Testo nelle textarea: smoke sulla prima textarea visibile; poi esempio + collapse + oneOf «textarea»
- *   su assistenza.referenti.*.email e assistenza.canali.*.risposta (Email), dove lo schema usa maxLength:0|email
+ *   su assistenza.referenti.*.email e assistenza.canali.*.dettaglio canale (Email), dove lo schema usa maxLength:0|email
  */
 
 function webformUrl(id) {
@@ -496,7 +496,7 @@ async function assertAssistenzaCanaliArrayItemLayout(page) {
     return;
   }
 
-  const fields = ['tipo', 'risposta', 'note'];
+  const fields = ['tipo', 'dettaglio canale'];
 
   for (const base of bases) {
     const host = await firstVisibleJeObjectContainer(page, base);
@@ -518,10 +518,23 @@ async function assertAssistenzaCanaliArrayItemLayout(page) {
       const path = `${base}.${f}`;
       const cell = await firstVisibleFieldCell(page, base, f);
 
-      const control =
+      await cell.evaluate(el => {
+        el.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
+          if (btn.getAttribute('aria-expanded') !== 'true') btn.click();
+        });
+      });
+
+      const namedControl =
         f === 'tipo'
-          ? cell.getByRole('combobox', { name: new RegExp(`^${f}$`, 'i') }).first()
+          ? cell
+              .getByRole('combobox', { name: new RegExp(`^${f}$`, 'i') })
+              .first()
+              .or(cell.getByRole('textbox', { name: new RegExp(`^${f}$`, 'i') }).first())
           : cell.getByRole('textbox', { name: new RegExp(`^${f}$`, 'i') }).first();
+      const control =
+        (await namedControl.count()) > 0 && (await namedControl.isVisible().catch(() => false))
+          ? namedControl
+          : cell.locator('input.form-control:visible, select.form-control:visible, textarea.form-control:visible').first();
       await expect(control, `controllo ${path}`).toBeVisible();
 
       /*
@@ -769,11 +782,24 @@ async function assertTextareaTypingInAssistenzaOneOfField(page, base, field, pro
   const cell = await firstVisibleFieldCell(page, base, field);
   const switcher = cell.locator('select.je-switcher').first();
   if ((await switcher.count()) > 0) {
-    await switcher.selectOption({ label: 'textarea' });
-    await expect(cell.locator('textarea.form-control').first()).toBeVisible({ timeout: 10000 });
+    const options = await switcher.evaluate(el =>
+      [...el.options].map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+    );
+    const pick =
+      options.find(o => /^textarea$/i.test(o.label)) ||
+      options.find(o => /email/i.test(o.label)) ||
+      (options.length > 1 ? options[1] : options[options.length - 1]);
+    expect(pick, `oneOf switcher per ${base}.${field}`).toBeTruthy();
+    await switcher.selectOption(pick.value);
+    await cell.evaluate(el => {
+      el.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
+        if (btn.getAttribute('aria-expanded') !== 'true') btn.click();
+      });
+    });
+    await page.waitForTimeout(120);
   }
-  const ta = cell.locator('textarea.form-control').first();
-  await expect(ta).toBeVisible();
+  const ta = cell.locator('textarea.form-control:visible, input.form-control:visible').first();
+  await expect(ta).toBeVisible({ timeout: 10000 });
   await expect(ta).not.toHaveAttribute('maxlength', '0');
   await ta.scrollIntoViewIfNeeded();
   await ta.focus();
@@ -787,7 +813,7 @@ async function assertTextareaTypingInAssistenzaOneOfField(page, base, field, pro
  * `maxlength="0"` da oneOf, observer).
  *
  * - Smoke: **prima** textarea visibile nel DOM (di solito metadata).
- * - Assistenza: tab + collapse, poi oneOf su `referenti.0.email` e `canali.0.risposta` (esempio: primo canale Email).
+ * - Assistenza: tab + collapse, poi oneOf su `referenti.0.email` e `canali.0.dettaglio canale` (esempio: primo canale Email).
  */
 async function assertEditorTextareaAcceptsTyping(page) {
   const editor = page.locator('#editor-container');
@@ -829,7 +855,7 @@ async function assertEditorTextareaAcceptsTyping(page) {
   await assertTextareaTypingInAssistenzaOneOfField(
     page,
     'root.assistenza.canali.0',
-    'risposta',
+    'dettaglio canale',
     `e2e-ass-can-risp-${Date.now()}`
   );
 }
@@ -878,6 +904,7 @@ test.describe('Functional webforms coverage from manifest', () => {
         await expect(page.locator('#validation-panel .callout')).toBeVisible();
 
         await activateAllJsonEditorTabs(page);
+        await expandAllEditorCollapses(page);
 
         await assertArrayItemControlsPlacement(page);
         await assertArrayItemControlsComplete(page);
