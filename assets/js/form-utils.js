@@ -844,6 +844,100 @@ function sanitizeFilename(name) {
   return (name || 'form').replace(/[^a-z0-9_\-\s]/gi, '_').replace(/\s+/g, '_').substring(0, 64);
 }
 
+/* ── json-editor: collassa / espandi tutte le sezioni ─────── */
+
+/**
+ * @param {ParentNode|null|undefined} container
+ * @returns {number}
+ */
+function countJsonEditorExpandButtons(container) {
+  const root = container || document.getElementById('editor-container');
+  if (!root) return 0;
+  let n = 0;
+  root.querySelectorAll('button.json-editor-btntype-toggle[title="Expand"]').forEach(btn => {
+    if (btn.closest('.je-modal')) return;
+    n++;
+  });
+  return n;
+}
+
+/**
+ * Espande o collassa tutti i pannelli json-editor (più passate per annidamenti).
+ * In chiusura la radice `root` resta aperta così le tab di primo livello restano navigabili.
+ * @param {boolean} expanded
+ * @param {ParentNode|null|undefined} [container]
+ */
+function setAllJsonEditorCollapses(expanded, container) {
+  const root = container || document.getElementById('editor-container');
+  if (!root) return;
+  const toggleTitle = expanded ? 'Expand' : 'Collapse';
+  for (let pass = 0; pass < 12; pass++) {
+    let n = 0;
+    root.querySelectorAll(`button.json-editor-btntype-toggle[title="${toggleTitle}"]`).forEach(btn => {
+      if (btn.closest('.je-modal')) return;
+      if (!expanded) {
+        const host = btn.closest('[data-schemapath]');
+        if (host && host.getAttribute('data-schemapath') === 'root') return;
+      }
+      try {
+        btn.click();
+        n++;
+      } catch (_) {
+        /* ignore */
+      }
+    });
+    root.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
+      if (btn.closest('.je-modal')) return;
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      if (expanded && !open) {
+        try {
+          btn.click();
+          n++;
+        } catch (_) {
+          /* ignore */
+        }
+      } else if (!expanded && open) {
+        try {
+          btn.click();
+          n++;
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    });
+    if (n === 0) break;
+  }
+  if (expanded) {
+    if (typeof initJeLongtextFit === 'function') initJeLongtextFit(root);
+    if (typeof initJeArrayControlCard === 'function') initJeArrayControlCard(root);
+  }
+}
+
+/**
+ * Aggiorna etichetta, icona e title del pulsante «Espandi/Collassa tutti».
+ * @param {HTMLElement|null|undefined} btn
+ * @param {ParentNode|null|undefined} [container]
+ */
+function updateJsonEditorCollapseToggleButton(btn, container) {
+  if (!btn) return;
+  const hasCollapsed = countJsonEditorExpandButtons(container) > 0;
+  const label = btn.querySelector('.app-toolbar-btn-label');
+  const icon = btn.querySelector('.bi');
+  if (hasCollapsed) {
+    btn.title = 'Espandi tutte le sezioni del modulo';
+    btn.setAttribute('aria-label', 'Espandi tutte le sezioni del modulo');
+    if (label) label.textContent = 'Espandi tutti';
+    if (icon) icon.className = 'bi bi-arrows-expand';
+    btn.dataset.collapseMode = 'expand';
+  } else {
+    btn.title = 'Collassa tutte le sezioni del modulo';
+    btn.setAttribute('aria-label', 'Collassa tutte le sezioni del modulo');
+    if (label) label.textContent = 'Collassa tutti';
+    if (icon) icon.className = 'bi bi-arrows-collapse';
+    btn.dataset.collapseMode = 'collapse';
+  }
+}
+
 /** Escape text for safe insertion into HTML attribute or body context. */
 function escHtml(str) {
   return String(str ?? '')

@@ -195,6 +195,12 @@
       </div>
 
       <div class="ms-auto d-flex flex-wrap gap-2 align-items-center toolbar-actions-end">
+        <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-toggle-all-sections"
+                title="Espandi tutte le sezioni del modulo"
+                aria-label="Espandi tutte le sezioni del modulo"
+                data-collapse-mode="expand">
+          <i class="bi bi-arrows-expand" aria-hidden="true"></i><span class="app-toolbar-btn-label">Espandi tutti</span>
+        </button>
         <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-form-toc"
                 data-bs-toggle="offcanvas" data-bs-target="#form-toc-offcanvas"
                 aria-controls="form-toc-offcanvas"
@@ -414,6 +420,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-import-csv').addEventListener('click', importCsv);
   document.getElementById('btn-validate').addEventListener('click', runValidation);
   document.getElementById('btn-download-json-modal').addEventListener('click', exportJson);
+  document.getElementById('btn-toggle-all-sections').addEventListener('click', () => {
+    const root = document.getElementById('editor-container');
+    const btn = document.getElementById('btn-toggle-all-sections');
+    const expand = countJsonEditorExpandButtons(root) > 0;
+    setAllJsonEditorCollapses(expand, root);
+    updateJsonEditorCollapseToggleButton(btn, root);
+  });
 
   // Warn before leaving with unsaved changes
   window.addEventListener('beforeunload', e => {
@@ -875,6 +888,11 @@ async function initEditor() {
             ':scope > .je-object__title button.json-editor-btntype-toggle[title="Expand"]'
           );
           if (rootExpand) rootExpand.click();
+          const collapseBtn = document.getElementById('btn-toggle-all-sections');
+          if (collapseBtn) {
+            collapseBtn.classList.remove('d-none');
+            updateJsonEditorCollapseToggleButton(collapseBtn);
+          }
         });
       });
       captureLockSnapshot();
