@@ -6,37 +6,65 @@
   'use strict';
 
   var REPO = 'https://github.com/italia/eid-wallet-it-forms';
-
-  function githubFooterLinkHtml() {
-    return (
-      '<a href="' +
-      REPO +
-      '" target="_blank" rel="noopener noreferrer" ' +
-      'class="d-inline-flex align-items-center gap-1 align-middle text-decoration-none footer-github-link">' +
-      '<i class="bi bi-github fs-5" aria-hidden="true"></i>' +
-      '<span>GitHub</span></a>'
-    );
-  }
+  var DTD_URL = 'https://innovazione.gov.it/dipartimento/';
+  var ACCESSIBILITY_URL =
+    'https://www.agid.gov.it/it/design-servizi/dichiarazione-accessibilita';
 
   /**
-   * @param {HTMLElement|null} el elemento <footer> (mantiene classi sul tag)
+   * @param {HTMLElement|null} el elemento <footer>
    * @param {{ variant?: 'index'|'form' }} opts
    */
   function injectSiteFooter(el, opts) {
     if (!el) return;
     var variant = (opts && opts.variant) || 'index';
-    var innerClass = variant === 'form' ? 'container-fluid text-center' : 'container text-center';
-    var prefix =
-      variant === 'form'
-        ? '<span id="footer-webform-label">Schema e dati di riferimento da manifest</span> &middot; '
-        : '';
+    el.className = 'it-footer';
     el.innerHTML =
-      '<div class="' +
-      innerClass +
-      '">' +
-      prefix +
-      'Dati salvati localmente nel browser &middot; ' +
-      githubFooterLinkHtml() +
+      '<div class="it-footer-main">' +
+      '<div class="container-xxl">' +
+      '<section>' +
+      '<div class="row clearfix">' +
+      '<div class="col-12">' +
+      '<div class="it-brand-wrapper app-footer-brand">' +
+      '<a href="' +
+      DTD_URL +
+      '" target="_blank" rel="noopener noreferrer" class="app-footer-brand-link">' +
+      '<img class="app-footer-emblem" src="assets/img/emblema-repubblica-italiana.svg" ' +
+      'width="64" height="78" alt="Emblema della Repubblica Italiana" />' +
+      '<img class="app-footer-dtd-logo" src="assets/img/logo-dipartimento-trasformazione-digitale-footer.png" ' +
+      'width="320" height="59" alt="Dipartimento per la trasformazione digitale" />' +
+      '</a>' +
+      '</div>' +
+      (variant === 'form'
+        ? '<p class="app-footer-form-meta small mb-0 mt-3" id="footer-webform-label"></p>'
+        : '') +
+      '</div>' +
+      '</div>' +
+      '</section>' +
+      '</div>' +
+      '</div>' +
+      '<div class="it-footer-small-prints clearfix">' +
+      '<div class="container-xxl">' +
+      '<h3 class="visually-hidden">Link utili</h3>' +
+      '<ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row gap-2 gap-md-4">' +
+      '<li class="list-inline-item">' +
+      '<a class="d-inline-flex align-items-center gap-1" href="' +
+      ACCESSIBILITY_URL +
+      '" target="_blank" rel="noopener noreferrer">' +
+      'Dichiarazione di accessibilità' +
+      '<i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>' +
+      '<span class="visually-hidden">(si apre in una nuova finestra)</span>' +
+      '</a>' +
+      '</li>' +
+      '<li class="list-inline-item">' +
+      '<a class="d-inline-flex align-items-center gap-1" href="' +
+      REPO +
+      '" target="_blank" rel="noopener noreferrer">' +
+      '<i class="bi bi-github" aria-hidden="true"></i>GitHub' +
+      '<span class="visually-hidden">(si apre in una nuova finestra)</span>' +
+      '</a>' +
+      '</li>' +
+      '</ul>' +
+      '</div>' +
       '</div>';
   }
 
@@ -83,7 +111,6 @@
         return;
       }
 
-      // Fallback difensivo: se il bottone close non è presente.
       menu.classList.remove('show');
       menu.setAttribute('aria-hidden', 'true');
     });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IT-Wallet Webforms</title>
+  <title>Moduli IT-Wallet</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon" sizes="any" />
   <!-- Riferimento unico snippet: assets/partials/head-assets.html -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/css/bootstrap-italia.min.css" />
@@ -13,8 +13,49 @@
 <body>
 <a class="visually-hidden-focusable position-absolute top-0 start-0 m-2 btn btn-sm btn-primary" href="#main-content">Vai al contenuto principale</a>
 
-<!-- ── Header (Bootstrap Italia: it-header-wrapper / navbar collassabile) ── -->
+<!-- ── Header (Bootstrap Italia: slim + center + navbar) ── -->
 <header class="it-header-wrapper">
+  <div class="it-header-slim-wrapper bg-primary">
+    <div class="container-xxl">
+      <div class="it-header-slim-wrapper-content d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="https://innovazione.gov.it/dipartimento/" target="_blank" rel="noopener noreferrer">
+          Dipartimento per la trasformazione digitale
+        </a>
+        <div class="it-header-slim-right-zone">
+          <div class="nav-item dropdown it-header-lang-dropdown">
+            <button type="button" id="lang-dropdown-index" class="nav-link dropdown-toggle"
+                    aria-controls="language-menu-index"
+                    aria-label="Selezione lingua, Italiano selezionata"
+                    data-bs-toggle="dropdown" aria-haspopup="menu" aria-expanded="false">
+              <span class="visually-hidden">lingua attiva:</span>
+              <span class="it-header-lang-label" aria-hidden="true">ITA</span>
+              <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div id="language-menu-index" class="dropdown-menu dropdown-menu-end" aria-labelledby="lang-dropdown-index">
+              <div class="row">
+                <div class="col-12">
+                  <div class="link-list-wrapper">
+                    <ul class="link-list" role="menu" aria-labelledby="lang-dropdown-index">
+                      <li>
+                        <a class="dropdown-item list-item active" href="#" aria-current="true" role="menuitem">
+                          <span>ITA <span class="visually-hidden">selezionata</span></span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item list-item disabled" href="#" tabindex="-1" aria-disabled="true" role="menuitem">
+                          <span>ENG</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="it-nav-wrapper">
     <div class="it-header-center-wrapper it-small-header">
       <div class="container-xxl">
@@ -22,15 +63,10 @@
           <div class="col-12">
             <div class="it-header-center-content-wrapper">
               <div class="it-brand-wrapper d-none d-lg-block">
-                <a class="text-decoration-none app-brand-link" href="index.html#catalog" id="nav-brand" title="IT-Wallet Webforms">
-                  <!-- Modulo / documento (non logo PA): glyph allineato a Bootstrap Icons file-earmark-text -->
-                  <svg class="icon app-brand-form-icon" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
-                    <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
-                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
-                  </svg>
+                <a class="text-decoration-none app-brand-link" href="index.html#catalog" id="nav-brand" title="Moduli IT-Wallet">
                   <div class="it-brand-text">
-                    <div class="it-brand-title">IT-Wallet Webforms</div>
-                    <div class="it-brand-tagline d-none d-md-block">Catalogo e bozze webform</div>
+                    <div class="it-brand-title">Moduli IT-Wallet</div>
+                    <div class="it-brand-tagline d-none d-md-block">Catalogo moduli e bozze</div>
                   </div>
                 </a>
               </div>
@@ -51,12 +87,8 @@
                   <path fill="#fff" d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
                 </svg>
               </button>
-              <a class="app-form-navbar-mobile-brand d-lg-none" href="index.html#catalog" title="IT-Wallet Webforms">
-                <svg class="icon app-brand-form-icon app-brand-form-icon--navbar" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
-                  <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
-                  <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
-                </svg>
-                <span class="app-form-navbar-mobile-brand-title">IT-Wallet Webforms</span>
+              <a class="app-form-navbar-mobile-brand d-lg-none" href="index.html#catalog" title="Moduli IT-Wallet">
+                <span class="app-form-navbar-mobile-brand-title">Moduli IT-Wallet</span>
               </a>
               <div class="navbar-collapsable" id="navMain" tabindex="-1">
                 <div class="close-div">
@@ -71,26 +103,13 @@
                   <ul class="navbar-nav">
                     <li class="nav-item active">
                       <a class="nav-link active nav-app-view" href="#catalog" id="nav-catalog" data-app-view="catalog" aria-current="page">
-                        <span><i class="bi bi-collection me-2" aria-hidden="true"></i>Catalogo webform</span>
+                        <span>Catalogo moduli</span>
                       </a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link nav-app-view" href="#bozze" id="nav-bozze" data-app-view="bozze">
-                        <span><i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Bozze webform salvate</span>
+                        <span>Bozze salvate</span>
                       </a>
-                    </li>
-                  </ul>
-                  <ul class="navbar-nav app-navbar-search-nav" role="search">
-                    <li class="nav-item py-2 py-lg-0 w-100 w-lg-auto">
-                      <label for="nav-search-input" class="visually-hidden">Cerca form o bozze</label>
-                      <div class="input-group input-group-sm app-navbar-search">
-                        <span class="input-group-text" id="nav-search-addon" aria-hidden="true">
-                          <i class="bi bi-search app-navbar-search-icon" aria-hidden="true"></i>
-                        </span>
-                        <input type="search" id="nav-search-input" class="form-control" autocomplete="off"
-                               placeholder="Cerca…" aria-label="Cerca form"
-                               aria-describedby="nav-search-addon" />
-                      </div>
                     </li>
                   </ul>
                 </div>
@@ -111,16 +130,17 @@
     <section class="page-hero page-hero--catalog bg-light border-bottom" aria-labelledby="page-hero-catalog-title">
       <div class="container-xxl py-4 py-md-5">
         <h1 class="h3 fw-bold page-hero-title mb-3" id="page-hero-catalog-title">
-          <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i>Catalogo webform
+          Moduli IT-Wallet
         </h1>
         <p class="mb-0 lead text-secondary page-hero-lead">
-          Scegli un webform: schema e JSON di esempio sono caricati dagli URL del <a class="fw-semibold" href="https://github.com/italia/eid-wallet-it-forms/blob/main/webforms-manifest.json" target="_blank" rel="noopener noreferrer" title="webforms-manifest.json nel repository GitHub">manifest</a>. Le bozze sono in <a class="fw-semibold" href="#bozze">Bozze webform salvate</a>.
+          Questo sito raccoglie tutti i moduli a supporto degli Enti pubblici e privati che intendono entrare nel sistema IT-Wallet o che ne sono già parte.
+          Compila un modulo di tuo interesse tra quelli disponibili, seguendo le relative istruzioni di compilazione e condivisione. Puoi sempre salvare in bozza e riprendere la compilazione in qualsiasi momento consultando la sezione <a class="fw-semibold" href="#bozze">Bozze salvate</a>.
         </p>
       </div>
     </section>
     <div class="container-xxl py-4 py-md-5 flex-grow-1">
       <section id="catalog-webforms" class="mb-0" aria-labelledby="catalog-heading">
-        <h2 id="catalog-heading" class="h5 fw-bold mb-2 visually-hidden">Catalogo webform</h2>
+        <h2 id="catalog-heading" class="h5 fw-bold mb-2 visually-hidden">Catalogo moduli</h2>
 
 
         <div id="webforms-catalog">
@@ -137,10 +157,10 @@
     <section class="page-hero page-hero--bozze bg-light border-bottom" aria-labelledby="page-hero-bozze-title">
       <div class="container-xxl py-4 py-md-5">
         <h1 class="h3 fw-bold page-hero-title mb-3" id="page-hero-bozze-title">
-          <i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Bozze webform salvate
+          Bozze salvate
         </h1>
         <p class="mb-0 lead text-secondary page-hero-lead">
-          Bozze nel browser (localStorage). Torna al <a class="fw-semibold" href="#catalog">catalogo</a> per aprire un nuovo webform.
+          Bozze salvate nel browser. Torna al <a class="fw-semibold" href="#catalog">catalogo moduli</a> per aprire un nuovo modulo.
         </p>
       </div>
     </section>
@@ -163,7 +183,7 @@
 </main>
 
 <!-- ── Footer + overlay condivisi (assets/js/site-chrome.js) ─ -->
-<footer id="site-footer" class="it-footer-service py-4 mt-auto"></footer>
+<footer id="site-footer" class="it-footer mt-auto"></footer>
 <div id="site-shared-overlays"></div>
 
 <!-- ── Delete confirm modal ──────────────────────────────── -->
@@ -204,31 +224,7 @@
 let _manifestPromise = null;
 let _manifestData = null;
 let _currentAppView = 'catalog';
-/** Ricerca navbar: separata per catalogo vs bozze */
-let _searchCatalog = '';
-let _searchBozze = '';
 
-function syncNavSearchUi() {
-  const inp = document.getElementById('nav-search-input');
-  if (!inp) return;
-  inp.value = _currentAppView === 'bozze' ? _searchBozze : _searchCatalog;
-  inp.placeholder = _currentAppView === 'bozze'
-    ? 'Cerca nelle bozze…'
-    : 'Cerca nel catalogo…';
-}
-
-function onNavSearchInput() {
-  const inp = document.getElementById('nav-search-input');
-  if (!inp) return;
-  const v = inp.value;
-  if (_currentAppView === 'bozze') {
-    _searchBozze = v;
-    renderPage();
-  } else {
-    _searchCatalog = v;
-    if (_manifestData) renderCatalog(_manifestData);
-  }
-}
 function ensureManifest() {
   if (!_manifestPromise) {
     _manifestPromise = loadWebformsManifest('webforms-manifest.json');
@@ -242,47 +238,58 @@ function getLatestSavedDraftForWebform(webformId) {
   return match.length ? match[0] : null;
 }
 
+/** Collega i riferimenti al manuale nella descrizione del catalogo. */
+function formatCatalogDescription(w) {
+  let html = escHtml(w.description || '');
+  if (!w.docsUrl) return html;
+  const href = escHtml(w.docsUrl);
+  const link = label =>
+    `<a href="${href}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
+  html = html.replace(
+    'Manuale operativo Titolari Fonte Autentica',
+    link('Manuale operativo Titolari Fonte Autentica')
+  );
+  html = html.replace(
+    'Manuale operativo Titolari di Fonte Autentica',
+    link('Manuale operativo Titolari di Fonte Autentica')
+  );
+  return html;
+}
+
 function renderCatalog(manifest) {
   const el = document.getElementById('webforms-catalog');
-  const q = _searchCatalog.toLowerCase().trim();
-  const list = !q
-    ? manifest.webforms.slice()
-    : manifest.webforms.filter(w =>
-        (w.title || '').toLowerCase().includes(q) ||
-        (w.description || '').toLowerCase().includes(q) ||
-        (w.id || '').toLowerCase().includes(q)
-      );
+  const list = manifest.webforms.slice();
   if (!list.length) {
-    el.innerHTML = q
-      ? `<p class="text-muted text-center py-4 mb-0"><i class="bi bi-search me-1"></i>Nessun webform corrisponde alla ricerca.</p>`
-      : `<p class="text-muted text-center py-4 mb-0">Nessun webform nel manifest.</p>`;
+    el.innerHTML = `<p class="text-muted text-center py-4 mb-0">Nessun modulo nel manifest.</p>`;
     return;
   }
   el.innerHTML = `
     <div class="row g-4">
       ${list.map(w => {
         const last = getLatestSavedDraftForWebform(w.id);
-        const lastBtn = last
-          ? `<a class="btn btn-outline-primary btn-sm" href="form.html?id=${encodeURIComponent(last.id)}&webform=${encodeURIComponent(w.id)}"
-                title="${escHtml(last.name)} · ${escHtml(relativeTime(last.updated_at))}">
-               <i class="bi bi-clock-history me-1"></i>Ultima bozza
-             </a>`
-          : `<span class="app-card-meta align-self-center px-1" title="Nessuna bozza salvata per questo webform">
-               <i class="bi bi-clock-history me-1"></i>Nessuna bozza
-             </span>`;
-        const docsBtn = w.docsUrl
-          ? `<a class="btn btn-outline-secondary btn-sm" href="${escHtml(w.docsUrl)}" target="_blank" rel="noopener">
-               <i class="bi bi-book me-1"></i>Docs
-             </a>`
+        const audience = w.audience
+          ? `<p class="app-card-audience text-primary fw-semibold mb-2">${escHtml(w.audience)}</p>`
           : '';
+        const actions = last
+          ? `<a class="btn btn-primary btn-sm" href="form.html?id=${encodeURIComponent(last.id)}&webform=${encodeURIComponent(w.id)}"
+                title="${escHtml(last.name)} · ${escHtml(relativeTime(last.updated_at))}">
+               <i class="bi bi-clock-history me-1"></i>Riprendi ultima bozza
+             </a>
+             <a class="btn btn-outline-primary btn-sm" href="form.html?webform=${encodeURIComponent(w.id)}">
+               <i class="bi bi-pencil-square me-1"></i>Compila nuovo modulo
+             </a>`
+          : `<a class="btn btn-primary btn-sm" href="form.html?webform=${encodeURIComponent(w.id)}">
+               <i class="bi bi-pencil-square me-1"></i>Compila modulo
+             </a>`;
         return `
         <div class="col-12 col-lg-6">
           <div class="card webform-catalog-card h-100 shadow-sm border">
             <div class="card-body app-card-body pb-2">
-              <h3 class="h5 card-title text-dark mb-2 text-truncate" title="${escHtml(w.title)}">
-                <i class="bi bi-file-earmark-text text-primary me-2" aria-hidden="true"></i>${escHtml(w.title)}
+              <h3 class="h5 card-title text-dark mb-1 text-truncate" title="${escHtml(w.title)}">
+                ${escHtml(w.title)}
               </h3>
-              <p class="app-card-meta mb-2">${escHtml(w.description || '')}</p>
+              ${audience}
+              <p class="app-card-meta mb-2">${formatCatalogDescription(w)}</p>
               <p class="app-card-meta mb-0 text-break">
                 <span class="fw-semibold text-body">Schema</span>
                 · <a href="${escHtml(w.schemaUrl)}" target="_blank" rel="noopener">Apri sorgente</a>
@@ -292,11 +299,7 @@ function renderCatalog(manifest) {
               </p>
             </div>
             <div class="card-footer card-footer-actions bg-light border-top">
-              <a class="btn btn-primary btn-sm" href="form.html?webform=${encodeURIComponent(w.id)}">
-                <i class="bi bi-pencil-square me-1"></i>Compila webform
-              </a>
-              ${docsBtn}
-              ${lastBtn}
+              ${actions}
             </div>
           </div>
         </div>`;
@@ -307,7 +310,6 @@ function renderCatalog(manifest) {
 /* ── Due viste: #catalog (landing) e #bozze ───────────────── */
 function showAppView(view) {
   _currentAppView = view === 'bozze' ? 'bozze' : 'catalog';
-  syncNavSearchUi();
   const vc = document.getElementById('view-catalog');
   const vb = document.getElementById('view-bozze');
   const nc = document.getElementById('nav-catalog');
@@ -383,24 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderPage();
 
-  document.getElementById('nav-search-input')?.addEventListener('input', onNavSearchInput);
   document.getElementById('btn-import-json').addEventListener('click', importJson);
   document.getElementById('btn-import-csv').addEventListener('click', importCsv);
 });
 
 /* ── Render ─────────────────────────────────────────────── */
 function renderPage() {
-  const query = _searchBozze.toLowerCase().trim();
-  const forms = getAllForms().filter(f =>
-    !query ||
-    f.name.toLowerCase().includes(query) ||
-    f.id.toLowerCase().includes(query) ||
-    (f.webform_id || '').toLowerCase().includes(query) ||
-    (f.data?.metadata?.nome_ente_titolare || '').toLowerCase().includes(query) ||
-    (f.data?.metadata?.nome_eaa || '').toLowerCase().includes(query)
-  );
-
-  renderList(forms);
+  renderList(getAllForms());
 }
 
 function renderList(forms) {
@@ -409,8 +400,8 @@ function renderList(forms) {
     el.innerHTML = `
       <div class="empty-state">
         <i class="bi bi-inbox d-block"></i>
-        <h5>Nessun form trovato</h5>
-        <p class="text-muted mb-0">Usa la voce <strong>Catalogo webform</strong> nel menu in alto, oppure importa JSON o CSV.</p>
+        <h5>Nessuna bozza trovata</h5>
+        <p class="text-muted mb-0">Usa la voce <strong>Catalogo moduli</strong> nel menu in alto, oppure importa JSON o CSV.</p>
       </div>`;
     return;
   }

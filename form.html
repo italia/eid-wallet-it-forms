@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Compila webform – IT-Wallet Webforms</title>
+  <title>Compila modulo – Moduli IT-Wallet</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon" sizes="any" />
   <!-- Riferimento unico snippet: assets/partials/head-assets.html -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-italia@2.18.0/dist/css/bootstrap-italia.min.css" />
@@ -13,8 +13,49 @@
 <body>
 <a class="visually-hidden-focusable position-absolute top-0 start-0 m-2 btn btn-sm btn-primary" href="#main-content">Vai al contenuto principale</a>
 
-<!-- ── Header (Bootstrap Italia) ───────────────────────────── -->
+<!-- ── Header (Bootstrap Italia: slim + center + navbar) ── -->
 <header class="it-header-wrapper">
+  <div class="it-header-slim-wrapper bg-primary">
+    <div class="container-xxl">
+      <div class="it-header-slim-wrapper-content d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="https://innovazione.gov.it/dipartimento/" target="_blank" rel="noopener noreferrer">
+          Dipartimento per la trasformazione digitale
+        </a>
+        <div class="it-header-slim-right-zone">
+          <div class="nav-item dropdown it-header-lang-dropdown">
+            <button type="button" id="lang-dropdown-form" class="nav-link dropdown-toggle"
+                    aria-controls="language-menu-form"
+                    aria-label="Selezione lingua, Italiano selezionata"
+                    data-bs-toggle="dropdown" aria-haspopup="menu" aria-expanded="false">
+              <span class="visually-hidden">lingua attiva:</span>
+              <span class="it-header-lang-label" aria-hidden="true">ITA</span>
+              <i class="bi bi-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div id="language-menu-form" class="dropdown-menu dropdown-menu-end" aria-labelledby="lang-dropdown-form">
+              <div class="row">
+                <div class="col-12">
+                  <div class="link-list-wrapper">
+                    <ul class="link-list" role="menu" aria-labelledby="lang-dropdown-form">
+                      <li>
+                        <a class="dropdown-item list-item active" href="#" aria-current="true" role="menuitem">
+                          <span>ITA <span class="visually-hidden">selezionata</span></span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item list-item disabled" href="#" tabindex="-1" aria-disabled="true" role="menuitem">
+                          <span>ENG</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="it-nav-wrapper">
     <div class="it-header-center-wrapper it-small-header">
       <div class="container-xxl">
@@ -22,28 +63,18 @@
           <div class="col-12">
             <div class="it-header-center-content-wrapper">
               <div class="it-brand-wrapper d-none d-lg-block">
-                <a class="text-decoration-none app-brand-link" href="index.html#catalog" title="IT-Wallet Webforms">
-                  <svg class="icon app-brand-form-icon" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
-                    <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
-                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
-                  </svg>
+                <a class="text-decoration-none app-brand-link" href="index.html#catalog" title="Moduli IT-Wallet">
                   <div class="it-brand-text">
-                    <div class="it-brand-title">IT-Wallet Webforms</div>
-                    <div class="it-brand-tagline d-none d-md-block">Modifica webform</div>
+                    <div class="it-brand-title">Moduli IT-Wallet</div>
+                    <div class="it-brand-tagline d-none d-md-block">Catalogo moduli e bozze</div>
                   </div>
                 </a>
-              </div>
-              <div class="it-right-zone it-right-zone--form d-flex flex-wrap justify-content-end align-items-center gap-2">
-                <span id="save-status" class="save-status-header small d-none align-self-center me-md-2 text-white fw-medium" role="status" aria-live="polite">
-                  <i class="bi bi-check-circle me-1" aria-hidden="true"></i><span id="save-status-text"></span>
-                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Navbar collassabile (stesso pattern di index.html): su mobile compare l’icona menu -->
     <div class="it-header-navbar-wrapper">
       <div class="container-xxl">
         <div class="row">
@@ -56,12 +87,8 @@
                   <path fill="#fff" d="M22 5v1H2V5h20zM2 12.5h20v-1H2v1zM2 19h20v-1H2v1z"/>
                 </svg>
               </button>
-              <a class="app-form-navbar-mobile-brand d-lg-none" href="index.html#catalog" title="IT-Wallet Webforms">
-                <svg class="icon app-brand-form-icon app-brand-form-icon--navbar" aria-hidden="true" width="36" height="36" viewBox="0 0 16 16" focusable="false">
-                  <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
-                  <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
-                </svg>
-                <span class="app-form-navbar-mobile-brand-title">IT-Wallet Webforms</span>
+              <a class="app-form-navbar-mobile-brand d-lg-none" href="index.html#catalog" title="Moduli IT-Wallet">
+                <span class="app-form-navbar-mobile-brand-title">Moduli IT-Wallet</span>
               </a>
               <div class="navbar-collapsable" id="navMainForm" tabindex="-1">
                 <div class="close-div">
@@ -76,12 +103,12 @@
                   <ul class="navbar-nav">
                     <li class="nav-item">
                       <a class="nav-link" href="index.html#catalog">
-                        <span><i class="bi bi-collection me-2" aria-hidden="true"></i>Catalogo webform</span>
+                        <span>Catalogo moduli</span>
                       </a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link" href="index.html#bozze">
-                        <span><i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Bozze webform salvate</span>
+                        <span>Bozze salvate</span>
                       </a>
                     </li>
                   </ul>
@@ -95,38 +122,39 @@
   </div>
 </header>
 
-<!-- ── Intestazione pagina (Bootstrap Italia, coerente con index) ── -->
+<!-- ── Intestazione pagina ── -->
 <section class="page-hero page-hero--form bg-light border-bottom" aria-labelledby="form-page-title">
   <div class="container-xxl py-3 py-md-4">
-    <h1 class="h3 fw-bold page-hero-title mb-2" id="form-page-title">Compila webform</h1>
-    <p class="mb-0 lead text-secondary page-hero-lead">
-      Modifica i campi generati dallo schema, salva bozze nel browser ed esporta i dati. Torna al
-      <a href="index.html#catalog">catalogo</a> o alle <a href="index.html#bozze">bozze salvate</a>.
+    <h1 class="h3 fw-bold page-hero-title mb-2" id="form-page-title">Progettazione caratteristiche EAA</h1>
+    <p class="mb-0 lead text-secondary page-hero-lead" id="form-page-lead">
+      Questo modulo è dedicato agli Enti pubblici e privati che intendono ricoprire il ruolo di Titolari di Fonte Autentica e che si trovano allo Step 1 del “Manuale operativo Titolari Fonte Autentica”. Tale modulo ha lo scopo di supportare la definizione delle caratteristiche dell’EAA relativo al proprio dataset, dai casi d’uso, al data model, alla gestione degli errori e degli stati, all’assistenza.
+      Consulta le istruzioni di compilazione all’interno del Manuale operativo Titolari di Fonte Autentica.
+      Puoi compilare il modulo attraverso i campi preimpostati oppure interagendo direttamente con il JSON.
     </p>
+    <div id="save-status" class="save-status-page d-none mt-3 mb-0" role="status" aria-live="polite">
+      <i class="bi bi-exclamation-circle-fill save-status-icon" aria-hidden="true"></i>
+      <span id="save-status-text"></span>
+    </div>
   </div>
 </section>
 
-<!-- ── Nome bozza e identificativo ───────────────────────── -->
+<!-- ── Nome modulo ───────────────────────── -->
 <section class="border-bottom bg-white" aria-labelledby="draft-fields-heading">
   <div class="container-xxl py-3 py-md-4">
-    <h2 id="draft-fields-heading" class="h6 fw-bold text-uppercase text-secondary mb-3">
-      Dati della bozza
-    </h2>
-    <div class="card shadow-sm border app-form-draft-card">
-      <div class="card-body">
-        <div class="row g-3 align-items-start">
-          <div class="col-12 col-lg-8 app-form-name-bar">
-            <label for="form-name-input" class="form-label fw-semibold mb-2">Nome della bozza</label>
-            <input id="form-name-input" type="text" class="form-control app-form-name-input"
-                   placeholder="Es. Onboarding fonte autentica – bozza 1" maxlength="128"
-                   autocomplete="off"
-                   aria-describedby="form-id-help" />
-            <p id="form-id-help" class="form-text mb-0 mt-2">
-              <span id="form-id-hint" class="text-muted">Dopo il primo salvataggio viene mostrato un identificativo locale (browser).</span>
-              <span id="form-id-badge" class="badge rounded-pill text-bg-secondary d-none ms-1" title="Identificativo breve della bozza"></span>
-            </p>
-          </div>
-        </div>
+    <h2 id="draft-fields-heading" class="visually-hidden">Nome del modulo</h2>
+    <div class="row g-3 align-items-start">
+      <div class="col-12 col-lg-8 app-form-name-bar">
+        <label for="form-name-input" class="form-label fw-semibold mb-2">
+          Nome modulo (“Progettazione Caratteristiche EAA_[Nome Ente Titolare]_[Nome EAA]”)
+        </label>
+        <input id="form-name-input" type="text" class="form-control app-form-name-input"
+               placeholder="es. Progettazione Caratteristiche EAA_MIM_Titolo di studio" maxlength="128"
+               autocomplete="off"
+               aria-describedby="form-id-help" />
+        <p id="form-id-help" class="form-text mb-0 mt-2">
+          <span id="form-id-hint" class="visually-hidden">Dopo il salvataggio viene mostrato un identificativo locale.</span>
+          <span id="form-id-badge" class="badge rounded-pill text-bg-secondary d-none" title="Identificativo breve della bozza"></span>
+        </p>
       </div>
     </div>
   </div>
@@ -144,13 +172,6 @@
           <i class="bi bi-floppy2" aria-hidden="true"></i><span class="app-toolbar-btn-label">Salva come nuovo</span>
         </button>
       </div>
-
-      <div class="vr mx-1 d-none d-sm-block" aria-hidden="true"></div>
-
-      <button type="button" id="btn-load-example" class="btn btn-outline-secondary btn-sm"
-              title="Ripristina i dati dal JSON di esempio del manifest">
-        <i class="bi bi-lightbulb" aria-hidden="true"></i><span class="app-toolbar-btn-label">Carica esempio</span>
-      </button>
 
       <div class="vr mx-1 d-none d-sm-block" aria-hidden="true"></div>
 
@@ -194,6 +215,12 @@
         </ul>
       </div>
 
+      <button type="button" id="btn-reset-fields" class="btn btn-outline-secondary btn-sm"
+              title="Ripristina i campi ai valori di esempio del modulo"
+              aria-label="Resetta i campi ai valori di esempio">
+        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span class="app-toolbar-btn-label">Resetta i campi</span>
+      </button>
+
       <div class="ms-auto d-flex flex-wrap gap-2 align-items-center toolbar-actions-end">
         <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btn-toggle-all-sections"
                 title="Espandi tutte le sezioni del modulo"
@@ -224,38 +251,10 @@
   </div>
 </section>
 
-<!-- ── Versioni dichiarate in schema / JSON ──────────────── -->
-<section id="versioning-banner" class="d-none border-bottom bg-light" aria-labelledby="versioning-banner-title">
-  <div class="container-xxl py-3 py-md-4">
-    <h2 class="visually-hidden" id="versioning-banner-title">Informazioni sulle versioni dei file caricati</h2>
-    <div id="versioning-banner-box" class="callout callout-highlight note mb-0"></div>
-  </div>
-</section>
-
-<!-- ── Editor + sommario ─────────────────────────────────── -->
+<!-- ── Editor + sommario (indice a sinistra) ─────────────────────────────────── -->
 <main id="main-content" class="container-xxl py-4 py-md-5" tabindex="-1">
-  <!-- Stretch: colonna sommario alta come il modulo; la card usa align-self:start in CSS (vedi style.css) -->
   <div class="row g-4 align-items-stretch">
-    <div id="editor-main-column" class="col-12">
-      <div id="loading-spinner" class="text-center py-5 px-3" role="status" aria-live="polite" aria-busy="true">
-        <div class="spinner-border text-primary mb-3" role="presentation">
-          <span class="visually-hidden">Caricamento in corso</span>
-        </div>
-        <p class="text-secondary mb-0">Caricamento schema e dati dal manifest…</p>
-      </div>
-      <div id="form-editor-shell" class="d-none">
-        <div class="card shadow-sm border">
-          <div class="card-header bg-light border-bottom py-3 px-3 px-md-4">
-            <h2 class="h5 mb-1 fw-bold">Modulo</h2>
-            <p class="small text-muted mb-0">Campi e sezioni sono definiti dallo JSON Schema del webform. Su schermi piccoli e in orizzontale usa il pulsante «Sommario» nella barra azioni; da schermi grandi il sommario è nella colonna a destra.</p>
-          </div>
-          <div class="card-body p-2 p-md-3">
-            <div id="editor-container" class="je-ready d-none"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <aside id="form-toc-sidebar" class="form-toc-sidebar form-toc-sidebar--end d-none" aria-label="Sommario delle sezioni del modulo">
+    <aside id="form-toc-sidebar" class="form-toc-sidebar form-toc-sidebar--start d-none" aria-label="Sommario delle sezioni del modulo">
       <div class="card app-form-toc-card shadow-sm border">
         <div class="card-header bg-light border-bottom py-3">
           <h2 class="h6 mb-0 fw-bold d-flex align-items-center gap-2">
@@ -273,6 +272,17 @@
         </div>
       </div>
     </aside>
+    <div id="editor-main-column" class="col-12">
+      <div id="loading-spinner" class="text-center py-5 px-3" role="status" aria-live="polite" aria-busy="true">
+        <div class="spinner-border text-primary mb-3" role="presentation">
+          <span class="visually-hidden">Caricamento in corso</span>
+        </div>
+        <p class="text-secondary mb-0">Caricamento schema e dati dal manifest…</p>
+      </div>
+      <div id="form-editor-shell" class="d-none">
+        <div id="editor-container" class="je-ready d-none"></div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -300,7 +310,7 @@
 </div>
 
 <!-- ── Footer + overlay condivisi (assets/js/site-chrome.js) ─ -->
-<footer id="site-footer" class="it-footer-service py-4 mt-auto"></footer>
+<footer id="site-footer" class="it-footer mt-auto"></footer>
 <div id="site-shared-overlays"></div>
 
 <!-- Torna su (Bootstrap Italia: data-bs-toggle="backtotop", bundle gestisce scroll e classe .back-to-top-show) -->
@@ -413,11 +423,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Wire up buttons
   document.getElementById('btn-save').addEventListener('click', saveCurrentForm);
   document.getElementById('btn-save-as').addEventListener('click', saveAsNew);
-  document.getElementById('btn-load-example').addEventListener('click', loadExample);
   document.getElementById('btn-export-json').addEventListener('click', exportJson);
   document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
   document.getElementById('btn-import-json').addEventListener('click', importJson);
   document.getElementById('btn-import-csv').addEventListener('click', importCsv);
+  document.getElementById('btn-reset-fields').addEventListener('click', resetFieldsToExample);
   document.getElementById('btn-validate').addEventListener('click', runValidation);
   document.getElementById('btn-download-json-modal').addEventListener('click', exportJson);
   document.getElementById('btn-toggle-all-sections').addEventListener('click', () => {
@@ -475,15 +485,10 @@ function setFormIdBadgeDisplay(savedId) {
   }
 }
 
-/* ── Versioning da contenuto schema/JSON (non dal manifest) ─ */
+/* ── Versioning: solo toast (fascia UI rimossa, issue #2) ─ */
 function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
-  const vBanner = document.getElementById('versioning-banner');
-  const vBox = document.getElementById('versioning-banner-box');
-  if (!vBanner || !vBox) return;
-  const { items, hasAny, missingDeclaredVersion } = extractDocumentVersioning(rawSchema, data, urlHints);
-
+  const { missingDeclaredVersion } = extractDocumentVersioning(rawSchema, data, urlHints);
   if (missingDeclaredVersion) {
-    vBox.className = 'callout callout-highlight warning mb-0';
     if (!_versionMissingToastShown && typeof showToast === 'function') {
       console.warn('[it-wallet-webforms] Mancano $version (schema) e metadata.versione (JSON); compilazione consentita.');
       showToast(
@@ -494,56 +499,8 @@ function renderDocumentVersioningBanner(rawSchema, data, urlHints) {
       _versionMissingToastShown = true;
     }
   } else {
-    vBox.className = 'callout callout-highlight note mb-0';
     _versionMissingToastShown = false;
   }
-
-  const titleIcon = missingDeclaredVersion
-    ? '<i class="bi bi-exclamation-triangle-fill text-warning" aria-hidden="true"></i>'
-    : '<i class="bi bi-git text-primary" aria-hidden="true"></i>';
-  const titleText = missingDeclaredVersion
-    ? 'Versioni: attenzione'
-    : 'Versioni nei file caricati';
-
-  let warnBlock = '';
-  if (missingDeclaredVersion) {
-    warnBlock = `
-      <div class="alert alert-warning py-2 px-3 mb-3 small" role="status">
-        <strong>Attenzione.</strong> Manca <code>$version</code> nello <strong>JSON Schema</strong> e <code>metadata.versione</code> nel <strong>JSON</strong> (esempio o bozza).
-        Non è possibile verificare da interfaccia quale revisione stai usando; puoi comunque <strong>compilare e salvare</strong> il modulo.
-      </div>`;
-  }
-
-  const titleRow = `
-    <div class="callout-title">
-      ${titleIcon}
-      <span>${titleText}</span>
-    </div>`;
-
-  if (!hasAny) {
-    vBox.innerHTML = titleRow + warnBlock +
-      '<p class="mb-0 small text-secondary">Nessun altro campo noto (ad esempio <code>$id</code>, <code>$schema</code>). Consulta i file sorgente tramite i link nel piè di pagina.</p>';
-    vBanner.classList.remove('d-none');
-    return;
-  }
-  const row = it => {
-    const lab = `<code>${escHtml(it.label)}</code>`;
-    const val = it.isUrl
-      ? `<a href="${escHtml(it.value)}" target="_blank" rel="noopener">${escHtml(it.value)}</a>`
-      : `<strong>${escHtml(it.value)}</strong>`;
-    return `<li class="mb-1">${lab}: ${val}</li>`;
-  };
-  const sch = items.filter(i => i.section === 'schema');
-  const dat = items.filter(i => i.section === 'data');
-  let blocks = '';
-  if (sch.length) {
-    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-2 small text-uppercase">JSON Schema</div><ul class="list-unstyled mb-0 small">${sch.map(row).join('')}</ul></div>`;
-  }
-  if (dat.length) {
-    blocks += `<div class="col-12 col-md-6"><div class="fw-semibold text-body-secondary mb-2 small text-uppercase">JSON (esempio / bozza)</div><ul class="list-unstyled mb-0 small">${dat.map(row).join('')}</ul></div>`;
-  }
-  vBox.innerHTML = titleRow + warnBlock + `<div class="row g-3">${blocks}</div>`;
-  vBanner.classList.remove('d-none');
 }
 
 /* ── Sommario laterale: tab di primo livello (JSON Editor) ─── */
@@ -694,7 +651,7 @@ function buildFormToc() {
     if (hintEl) hintEl.classList.add('d-none');
     if (sidebarEmptyEl) sidebarEmptyEl.classList.remove('d-none');
     if (sidebarAside) {
-      sidebarAside.className = 'form-toc-sidebar form-toc-sidebar--end d-none';
+      sidebarAside.className = 'form-toc-sidebar form-toc-sidebar--start d-none';
     }
     if (mainCol) mainCol.className = 'col-12';
     return;
@@ -714,7 +671,7 @@ function buildFormToc() {
   if (sidebarEmptyEl) sidebarEmptyEl.classList.add('d-none');
   if (sidebarAside) {
     sidebarAside.className =
-      'form-toc-sidebar form-toc-sidebar--end col-lg-3 col-xl-3 d-none d-lg-block';
+      'form-toc-sidebar form-toc-sidebar--start col-lg-3 col-xl-3 d-none d-lg-block';
   }
   if (mainCol) {
     mainCol.className = 'col-12 col-lg-9 col-xl-9';
@@ -726,8 +683,8 @@ function buildFormToc() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = compact
-      ? 'form-toc-link form-toc-link--sidebar w-100 text-start btn btn-sm btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom'
-      : 'form-toc-link w-100 text-start btn btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0 border-bottom';
+      ? 'form-toc-link form-toc-link--sidebar w-100 text-start btn btn-sm btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0'
+      : 'form-toc-link w-100 text-start btn btn-link py-2 px-3 rounded-0 text-body text-decoration-none border-0';
     const labNorm = (label || '').replace(/\s+/g, ' ').trim();
     b.textContent = labNorm ? labNorm.charAt(0).toUpperCase() + labNorm.slice(1) : 'Sezione';
     b.addEventListener('click', onClick);
@@ -777,6 +734,28 @@ async function initEditor() {
     _schemaUrl = new URL(entry.schemaUrl, window.location.href).href;
     _dataUrl = new URL(entry.dataUrl, window.location.href).href;
 
+    const titleEl = document.getElementById('form-page-title');
+    if (titleEl && entry.title) titleEl.textContent = entry.title;
+    document.title = (entry.title || 'Compila modulo') + ' – Moduli IT-Wallet';
+    const leadEl = document.getElementById('form-page-lead');
+    if (leadEl && entry.formLead) {
+      let leadHtml = escHtml(entry.formLead);
+      if (entry.docsUrl) {
+        const href = escHtml(entry.docsUrl);
+        const link = label =>
+          `<a href="${href}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
+        leadHtml = leadHtml.replace(
+          'Manuale operativo Titolari Fonte Autentica',
+          link('Manuale operativo Titolari Fonte Autentica')
+        );
+        leadHtml = leadHtml.replace(
+          'Manuale operativo Titolari di Fonte Autentica',
+          link('Manuale operativo Titolari di Fonte Autentica')
+        );
+      }
+      leadEl.innerHTML = leadHtml;
+    }
+
     const foot = document.getElementById('footer-webform-label');
     if (foot) {
       const doc = entry.docsUrl
@@ -802,7 +781,7 @@ async function initEditor() {
     _rawSchema = rawSchema;
 
     let startVal = example;
-    let formName = 'Nuovo Form';
+    let formName = '';
 
     if (_currentId) {
       const saved = loadForm(_currentId);
@@ -914,8 +893,6 @@ async function initEditor() {
 
   } catch (err) {
     console.error(err);
-    const vb = document.getElementById('versioning-banner');
-    if (vb) vb.classList.add('d-none');
     const msg = err && err.message ? err.message : String(err);
     document.getElementById('loading-spinner').innerHTML = `
       <div class="alert alert-danger mx-auto" style="max-width:600px;">
@@ -936,9 +913,11 @@ async function initEditor() {
 function markDirty() {
   _dirty = true;
   const el = document.getElementById('save-status');
-  el.classList.remove('d-none');
+  el.classList.remove('d-none', 'save-status-page--clean');
+  el.classList.add('save-status-page--dirty');
+  const icon = el.querySelector('.save-status-icon');
+  if (icon) icon.className = 'bi bi-exclamation-circle-fill save-status-icon';
   document.getElementById('save-status-text').textContent = 'Modifiche non salvate';
-  el.querySelector('i').className = 'bi bi-circle-fill save-status-icon-dirty me-1';
 }
 
 function markClean(id) {
@@ -946,9 +925,11 @@ function markClean(id) {
   _currentId = id;
   setFormIdBadgeDisplay(id);
   const el = document.getElementById('save-status');
-  el.classList.remove('d-none');
+  el.classList.remove('d-none', 'save-status-page--dirty');
+  el.classList.add('save-status-page--clean');
+  const icon = el.querySelector('.save-status-icon');
+  if (icon) icon.className = 'bi bi-check-circle-fill save-status-icon';
   document.getElementById('save-status-text').textContent = 'Salvato';
-  el.querySelector('i').className = 'bi bi-check-circle-fill save-status-icon-clean me-1';
   // Update URL without reload
   const url = new URL(window.location);
   url.searchParams.set('id', id);
@@ -1110,10 +1091,10 @@ function saveAsNew() {
   }
 }
 
-/* ── Load example ───────────────────────────────────────── */
-function loadExample() {
+/* ── Reset campi ai valori di esempio ───────────────────── */
+function resetFieldsToExample() {
   if (!_editor || !_exampleData) return;
-  if (_dirty && !confirm('Sovrascrivere le modifiche correnti con i dati di esempio?')) return;
+  if (_dirty && !confirm('Resetta i campi ai valori di esempio? Le modifiche non salvate andranno perse.')) return;
   const nextData = typeof sanitizeFormData === 'function' ? sanitizeFormData(_exampleData) : _exampleData;
   loadDataWithLocks(nextData);
   _formExportBaseline = typeof cloneFormData === 'function' ? cloneFormData(nextData) : JSON.parse(JSON.stringify(nextData));
@@ -1122,7 +1103,7 @@ function loadExample() {
   if (_rawSchema) {
     renderDocumentVersioningBanner(_rawSchema, nextData, { dataUrl: _dataUrl, schemaUrl: _schemaUrl });
   }
-  showToast('Dati di esempio caricati.', 'info');
+  showToast('Campi resettati ai valori di esempio.', 'info');
 }
 
 /* ── Export ─────────────────────────────────────────────── */

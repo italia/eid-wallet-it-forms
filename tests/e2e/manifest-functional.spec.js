@@ -730,8 +730,9 @@ async function acceptConfirmIfShown(page) {
 }
 
 async function loadExampleIntoEditor(page) {
-  acceptConfirmIfShown(page);
-  await clickToolbarButton(page, '#btn-load-example');
+  await page.waitForSelector('#btn-reset-fields', { state: 'visible', timeout: 120000 });
+  await acceptConfirmIfShown(page);
+  await page.locator('#btn-reset-fields').click();
   await page.waitForFunction(
     () => !!document.querySelector('[data-schemapath*="assistenza.referenti.0"]'),
     null,
@@ -808,7 +809,7 @@ async function expandAllEditorCollapses(page) {
 }
 
 /**
- * Dopo **Carica esempio**, se il campo ha `select.je-switcher` (oneOf vuoto vs formato), sceglie l’opzione
+ * Dopo **Resetta i campi**, se il campo ha `select.je-switcher` (oneOf vuoto vs formato), sceglie l’opzione
  * «textarea» così il controllo visibile è quello che l’utente usa per testo libero / email non strutturata.
  */
 async function assertTextareaTypingInAssistenzaOneOfField(page, base, field, probe) {

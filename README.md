@@ -10,7 +10,7 @@ Catalogo e editor di webform basati su JSON Schema e JSON di esempio dedicati al
 - **Validazione in-browser** del dato rispetto allo **schema della voce selezionata**, secondo [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core.html) (via [AJV 8](https://github.com/ajv-validator/ajv))
 - **Esportazione** in JSON e CSV (struttura generica ad albero)
 - **Importazione** da JSON e CSV
-- **Carica esempio**: ricarica il JSON da `dataUrl`; la fascia versioni si aggiorna in base al contenuto di quel JSON e allo schema remoto
+- **Resetta i campi**: ripristina i campi del form ai valori del JSON di esempio (`dataUrl`)
 
 ## Esempio
 

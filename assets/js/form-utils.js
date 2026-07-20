@@ -481,6 +481,49 @@ function decorateEditorHeadings(schema) {
 }
 
 /**
+ * Rimuove le keyword `description` dallo schema UI.
+ * json-editor le mostra come testo di aiuto sotto titoli/sezioni; restano nello
+ * schema grezzo usato da AJV (irrilevanti per la validazione).
+ * Non elimina una proprietà di nome `description` in `properties`/`definitions`.
+ * @param {object} schema
+ */
+function stripSchemaDescriptions(schema) {
+  function visit(node) {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (Object.prototype.hasOwnProperty.call(node, 'description')) {
+      delete node.description;
+    }
+    for (const key of ['properties', 'patternProperties', 'definitions', '$defs', 'dependentSchemas']) {
+      if (node[key] && typeof node[key] === 'object' && !Array.isArray(node[key])) {
+        Object.values(node[key]).forEach(visit);
+      }
+    }
+    if (node.additionalProperties && typeof node.additionalProperties === 'object') {
+      visit(node.additionalProperties);
+    }
+    if (node.items) {
+      if (Array.isArray(node.items)) node.items.forEach(visit);
+      else visit(node.items);
+    }
+    if (Array.isArray(node.prefixItems)) node.prefixItems.forEach(visit);
+    for (const k of ['allOf', 'anyOf', 'oneOf']) {
+      if (Array.isArray(node[k])) node[k].forEach(visit);
+    }
+    if (node.if) visit(node.if);
+    if (node.then) visit(node.then);
+    if (node.else) visit(node.else);
+    if (node.not) visit(node.not);
+    if (node.contains) visit(node.contains);
+    if (node.propertyNames) visit(node.propertyNames);
+  }
+  visit(schema);
+}
+
+/**
  * Transform a raw schema to json-editor compatible schema.
  * @param {object} rawSchema
  * @returns {object}
@@ -513,13 +556,16 @@ function transformSchemaForEditor(rawSchema) {
   // 3. Titoli / heading per ogni blocco e prefisso padre sugli item array (json-editor)
   decorateEditorHeadings(schema);
 
-  // 4. Tabs layout for the root object
+  // 4. Non mostrare le description dello schema di validazione nell’UI
+  stripSchemaDescriptions(schema);
+
+  // 5. Tabs layout for the root object
   schema.format = 'tabs';
 
-  // 5. Solo le sezioni di primo livello chiuse all’apertura; i blocchi annidati restano aperti
+  // 6. Solo le sezioni di primo livello chiuse all’apertura; i blocchi annidati restano aperti
   setNestedEditorsCollapsedByDefault(schema);
 
-  // 6. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
+  // 7. Input testo su una riga -> textarea (json-editor) + fit righe in form.html
   normalizeStringFieldsToTextarea(schema);
   return schema;
 }
@@ -585,9 +631,10 @@ function setNestedEditorsCollapsedByDefault(schema) {
  *     blocco; così i $ref verso campo_booleano / campo_risposta usano il nome della proprietà padre).
  *     Item array: `title` + `headerTemplate` con nome array e ` · {{i1}}`. Niente `format: tabs` sulla radice dell’item.
  *     Campi primitivi senza title ricevono etichetta dal nome proprietà.
- *  4. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
- *  5. `options.collapsed: true` solo sulle sezioni di primo livello (annidati aperti).
- *  6. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
+ *  4. Rimuove le keyword `description` (non mostrate nell’UI del form).
+ *  5. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
+ *  6. `options.collapsed: true` solo sulle sezioni di primo livello (annidati aperti).
+ *  7. Stringhe testuali → `format: "textarea"` (con auto-altezza via je-longtext-fit), salvo formati riservati.
  *
  * @param {string} schemaUrl
  * @returns {Promise<{ rawSchema: object, editorSchema: object }>}

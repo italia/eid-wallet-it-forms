@@ -42,8 +42,9 @@ main { flex: 1; }
   line-height: 1.25;
 }
 .page-hero--catalog .page-hero-lead,
-.page-hero--bozze .page-hero-lead {
-  max-width: 65ch;
+.page-hero--bozze .page-hero-lead,
+.page-hero--form .page-hero-lead {
+  max-width: 75ch;
 }
 .page-hero--catalog .page-hero-lead a,
 .page-hero--bozze .page-hero-lead a {
@@ -58,9 +59,6 @@ main { flex: 1; }
 }
 
 /* Form editor: hero coerente con index */
-.page-hero--form .page-hero-lead {
-  max-width: 65ch;
-}
 .page-hero--form .page-hero-lead a {
   color: var(--bs-primary);
   text-decoration: none;
@@ -123,7 +121,7 @@ main { flex: 1; }
  * “spazio di corsa” mentre scorri la pagina. Se l’aside fosse alto solo quanto la card, lo sticky
  * non si attiverebbe mai (genitore ≈ stessa altezza del figlio).
  */
-.form-toc-sidebar.form-toc-sidebar--end {
+.form-toc-sidebar.form-toc-sidebar--start {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -133,8 +131,8 @@ main { flex: 1; }
  * Card: larghezza colonna; sticky sotto la toolbar. Nessun max-height / scroll interno sul body:
  * tutte le voci restano visibili (si scorre la pagina principale).
  */
-.form-toc-sidebar--end .app-form-toc-card {
-  --app-form-toc-sticky-top: 9rem;
+.form-toc-sidebar--start .app-form-toc-card {
+  --app-form-toc-sticky-top: 10.5rem;
   align-self: flex-start;
   width: 100%;
   position: sticky;
@@ -145,20 +143,24 @@ main { flex: 1; }
   min-height: 0;
 }
 
-.form-toc-sidebar--end .app-form-toc-card .card-header {
+.form-toc-sidebar--start .app-form-toc-card .card-header {
   flex-shrink: 0;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
 
-.form-toc-sidebar--end .app-form-toc-card .card-body {
+.form-toc-sidebar--start .app-form-toc-card .card-body {
   flex: 0 0 auto !important;
   min-height: 0;
   overflow: visible;
 }
 
-.form-toc-sidebar--end #form-toc-sidebar-items.nav {
+.form-toc-sidebar--start #form-toc-sidebar-items.nav {
   margin-bottom: 0;
+}
+
+.form-toc-nav .nav-item + .nav-item .form-toc-link {
+  border-top: 1px solid var(--bs-border-color);
 }
 
 .form-toc-link--sidebar {
@@ -170,6 +172,115 @@ main { flex: 1; }
 .it-header-wrapper .it-header-center-wrapper {
   padding-left: 0;
   padding-right: 0;
+}
+
+/*
+ * Slim header + selettore lingua (pattern discovery-page / developers.italia.it).
+ * BI applica align-self:flex-start sulla right-zone e padding 12px sul toggle:
+ * senza override il controllo resta sfalsato rispetto al brand.
+ */
+.it-header-slim-wrapper.bg-primary {
+  background-color: #004d99 !important;
+}
+
+.it-header-slim-wrapper .it-header-slim-wrapper-content {
+  height: 48px;
+  gap: 1rem;
+}
+
+.it-header-slim-wrapper .navbar-brand {
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  color: #fff;
+  text-decoration: none;
+  margin-right: 0;
+  padding: 0 !important;
+  line-height: 1.25;
+  display: inline-flex !important;
+  align-items: center;
+  height: 48px;
+}
+
+.it-header-slim-wrapper .navbar-brand:hover,
+.it-header-slim-wrapper .navbar-brand:focus {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.it-header-slim-wrapper .it-header-slim-right-zone {
+  align-self: center !important;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  margin-left: auto;
+}
+
+.it-header-slim-wrapper .it-header-lang-dropdown {
+  display: flex;
+  align-items: center;
+  height: 48px;
+}
+
+.it-header-slim-wrapper .it-header-lang-dropdown .nav-link.dropdown-toggle,
+.it-header-slim-wrapper .it-header-lang-dropdown button.nav-link.dropdown-toggle {
+  color: #fff !important;
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  white-space: nowrap;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center;
+  gap: 0.15rem;
+  height: 48px;
+  padding: 0 0.25rem !important;
+  line-height: 1;
+  margin: 0;
+}
+
+.it-header-slim-wrapper .it-header-lang-dropdown .nav-link.dropdown-toggle:hover,
+.it-header-slim-wrapper .it-header-lang-dropdown .nav-link.dropdown-toggle:focus,
+.it-header-slim-wrapper .it-header-lang-dropdown button.nav-link.dropdown-toggle:hover,
+.it-header-slim-wrapper .it-header-lang-dropdown button.nav-link.dropdown-toggle:focus {
+  color: #fff !important;
+}
+
+.it-header-slim-wrapper .it-header-lang-dropdown .nav-link.dropdown-toggle::after,
+.it-header-slim-wrapper .it-header-lang-dropdown button.nav-link.dropdown-toggle::after {
+  display: none !important;
+  content: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+
+.it-header-slim-wrapper .it-header-lang-dropdown .it-header-lang-label {
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Chevron come font icon: allineato al testo (l’SVG it-expand resta otticamente alto nel viewBox). */
+.it-header-slim-wrapper .it-header-lang-dropdown .bi-chevron-down {
+  font-size: 0.75rem;
+  line-height: 1;
+  margin: 0;
+  color: inherit;
+  position: relative;
+  top: 1px; /* compensazione ottica rispetto alle maiuscole Titillium */
+  transition: transform 0.3s;
+  transform-origin: center;
+}
+
+.it-header-slim-wrapper .it-header-lang-dropdown .nav-link.dropdown-toggle[aria-expanded="true"] > .bi-chevron-down,
+.it-header-slim-wrapper .it-header-lang-dropdown button.nav-link.dropdown-toggle[aria-expanded="true"] > .bi-chevron-down {
+  transform: scaleY(-1);
+}
+
+.it-header-lang-dropdown .dropdown-menu {
+  z-index: 1050;
 }
 
 .it-brand-wrapper a:focus-visible {
@@ -455,7 +566,80 @@ main { flex: 1; }
   max-width: 18rem;
 }
 
-/* Stato salvataggio in header blu: niente text-muted (illeggibile su #06c) */
+/* Stato salvataggio in pagina modulo: una sola icona BI, niente background SVG dell'.alert */
+.save-status-page {
+  max-width: 40rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--bs-border-color, #5b6f82);
+  border-left-width: 8px;
+  background-color: #fff;
+  color: #1a1a1a;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.save-status-page .save-status-icon {
+  flex-shrink: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+.save-status-page--dirty {
+  border-left-color: hsl(36, 100%, 30%);
+}
+.save-status-page--dirty .save-status-icon {
+  color: hsl(36, 100%, 30%);
+}
+.save-status-page--clean {
+  border-left-color: hsl(160, 100%, 25%);
+}
+.save-status-page--clean .save-status-icon {
+  color: hsl(160, 100%, 25%);
+}
+.save-status-page #save-status-text {
+  display: block;
+}
+
+/* Catalogo: destinatario del modulo */
+.app-card-audience {
+  font-size: 0.95rem;
+}
+
+/* ── Footer DS Italia ─────────────────────────────────────── */
+.it-footer .app-footer-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: #fff;
+}
+.it-footer .app-footer-emblem {
+  width: 3.5rem;
+  height: auto;
+  flex-shrink: 0;
+  /* Versione chiara su fondo blu del footer */
+  filter: brightness(0) invert(1);
+}
+.it-footer .app-footer-dtd-logo {
+  width: min(20rem, 70vw);
+  height: auto;
+  flex-shrink: 0;
+}
+.it-footer .app-footer-form-meta a {
+  color: rgba(255, 255, 255, 0.9);
+}
+.it-footer-small-prints a {
+  text-decoration: none;
+}
+.it-footer-small-prints a:hover,
+.it-footer-small-prints a:focus-visible {
+  text-decoration: underline;
+}
+
+/* Stato salvataggio legacy (header): mantenuto per eventuali residui */
 .save-status-header {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
