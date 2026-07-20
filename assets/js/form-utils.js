@@ -481,6 +481,28 @@ function decorateEditorHeadings(schema) {
 }
 
 /**
+ * Titoli UI diversi da quelli dello schema di validazione (copy prodotto / issue UX).
+ * Chiave = nome proprietà root nello schema; valore = title mostrato in json-editor.
+ */
+const UI_ROOT_TITLE_OVERRIDES = {
+  'denominazioni ufficiali': 'Denominazioni ufficiali'
+};
+
+/**
+ * Applica override di title sulle proprietà di primo livello.
+ * @param {object} schema
+ */
+function applyUiRootTitleOverrides(schema) {
+  if (!schema || !schema.properties || typeof schema.properties !== 'object') return;
+  for (const [key, title] of Object.entries(UI_ROOT_TITLE_OVERRIDES)) {
+    const node = schema.properties[key];
+    if (node && typeof node === 'object') {
+      node.title = title;
+    }
+  }
+}
+
+/**
  * Rimuove le keyword `description` dallo schema UI.
  * json-editor le mostra come testo di aiuto sotto titoli/sezioni; restano nello
  * schema grezzo usato da AJV (irrilevanti per la validazione).
@@ -555,6 +577,9 @@ function transformSchemaForEditor(rawSchema) {
 
   // 3. Titoli / heading per ogni blocco e prefisso padre sugli item array (json-editor)
   decorateEditorHeadings(schema);
+
+  // 3b. Override titoli sezioni root (copy UI vs schema di validazione)
+  applyUiRootTitleOverrides(schema);
 
   // 4. Non mostrare le description dello schema di validazione nell’UI
   stripSchemaDescriptions(schema);
@@ -631,6 +656,7 @@ function setNestedEditorsCollapsedByDefault(schema) {
  *     blocco; così i $ref verso campo_booleano / campo_risposta usano il nome della proprietà padre).
  *     Item array: `title` + `headerTemplate` con nome array e ` · {{i1}}`. Niente `format: tabs` sulla radice dell’item.
  *     Campi primitivi senza title ricevono etichetta dal nome proprietà.
+ *     Override titoli root (es. «Denominazioni ufficiali»).
  *  4. Rimuove le keyword `description` (non mostrate nell’UI del form).
  *  5. Aggiunge "format": "tabs" alla radice per le sezioni principali (json-editor).
  *  6. `options.collapsed: true` solo sulle sezioni di primo livello (annidati aperti).
